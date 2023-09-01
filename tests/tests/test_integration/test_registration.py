@@ -5,9 +5,8 @@ import sys
 import numpy as np
 import pandas as pd
 import pytest
-from imio.load import load_any
-
 from brainglobe_workflows.main import main as cellfinder_run
+from imio.load import load_any
 
 data_dir = os.path.join(
     os.getcwd(),

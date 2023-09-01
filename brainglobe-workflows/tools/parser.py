@@ -16,6 +16,7 @@ from brainglobe_utils.general.numerical import (
     check_positive_float,
     check_positive_int,
 )
+from brainglobe_workflows import __version__
 from brainreg.cli import atlas_parse, geometry_parser, niftyreg_parse
 from brainreg.cli import backend_parse as brainreg_backend_parse
 from cellfinder_core.download.cli import (
@@ -23,8 +24,6 @@ from cellfinder_core.download.cli import (
     model_parser,
 )
 from cellfinder_core.tools.source_files import source_custom_config_cellfinder
-
-from brainglobe_workflows import __version__
 
 # TODO: Gradually move all paths as strings to Path objects
 

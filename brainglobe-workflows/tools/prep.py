@@ -11,16 +11,15 @@ import os
 from argparse import Namespace
 from pathlib import PurePath
 
+import brainglobe_workflows as program_for_log
+import brainglobe_workflows.tools.parser as parser
 from bg_atlasapi import BrainGlobeAtlas
 from brainglobe_utils.general.exceptions import CommandLineInputError
 from brainglobe_utils.general.system import ensure_directory_exists
-from brainreg.paths import Paths as BrainRegPaths
-from fancylog import fancylog
-
-import brainglobe_workflows as program_for_log
-import brainglobe_workflows.tools.parser as parser
 from brainglobe_workflows.tools import system, tools
 from brainglobe_workflows.tools.parser import cellfinder_parser
+from brainreg.paths import Paths as BrainRegPaths
+from fancylog import fancylog
 
 
 def get_arg_groups(args, parser):

@@ -1,7 +1,6 @@
 import random
 
 import numpy as np
-
 from brainglobe_workflows.tools import image_processing as img_tools
 
 

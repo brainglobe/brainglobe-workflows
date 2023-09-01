@@ -2,7 +2,6 @@ import os
 
 import pytest
 from brainglobe_utils.general.exceptions import CommandLineInputError
-
 from brainglobe_workflows.tools import prep
 
 # import shutil

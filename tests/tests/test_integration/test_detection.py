@@ -4,7 +4,6 @@ from math import isclose
 
 import brainglobe_utils.IO.cells as cell_io
 import pytest
-
 from brainglobe_workflows.main import main as cellfinder_run
 
 data_dir = os.path.join(

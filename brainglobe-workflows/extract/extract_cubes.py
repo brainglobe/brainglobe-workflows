@@ -17,13 +17,12 @@ import numpy as np
 from brainglobe_utils.cells.cells import group_cells_by_z
 from brainglobe_utils.general.numerical import is_even
 from brainglobe_utils.general.system import get_num_processes
+from brainglobe_workflows.tools import image_processing as img_tools
+from brainglobe_workflows.tools import system
 from numpy.linalg.linalg import LinAlgError
 from skimage import transform
 from tifffile import tifffile
 from tqdm import tqdm
-
-from brainglobe_workflows.tools import image_processing as img_tools
-from brainglobe_workflows.tools import system
 
 
 class StackSizeError(Exception):

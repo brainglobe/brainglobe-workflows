@@ -2,11 +2,10 @@ import os
 from math import isclose
 from pathlib import Path
 
+import brainglobe_workflows.tools.system as system
 import pytest
 from brainglobe_utils.general.exceptions import CommandLineInputError
 from brainglobe_utils.general.system import ensure_directory_exists
-
-import brainglobe_workflows.tools.system as system
 
 data_dir = Path("tests", "data")
 background_im_dir = os.path.join(data_dir, "background")

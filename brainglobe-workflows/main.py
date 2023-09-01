@@ -42,9 +42,8 @@ def cells_exist(points_file):
 
 def main():
     suppress_tf_logging(tf_suppress_log_messages)
-    from brainreg.main import main as register
-
     from brainglobe_workflows.tools import prep
+    from brainreg.main import main as register
 
     start_time = datetime.now()
     args, arg_groups, what_to_run, atlas = prep.prep_cellfinder_general()
@@ -100,17 +99,16 @@ def main():
 
 
 def run_all(args, what_to_run, atlas):
-    from cellfinder_core.classify import classify
-    from cellfinder_core.detect import detect
-    from cellfinder_core.tools import prep
-    from cellfinder_core.tools.IO import read_with_dask
-
     from brainglobe_workflows.analyse import analyse
     from brainglobe_workflows.figures import figures
     from brainglobe_workflows.tools.prep import (
         prep_candidate_detection,
         prep_channel_specific_general,
     )
+    from cellfinder_core.classify import classify
+    from cellfinder_core.detect import detect
+    from cellfinder_core.tools import prep
+    from cellfinder_core.tools.IO import read_with_dask
 
     points = None
     signal_array = None
