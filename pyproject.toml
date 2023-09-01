@@ -40,7 +40,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.scripts]
-my_workflow = "brainglobe_workflows.main:main"
+cellfinder = "brainglobe_workflows.main:main"
 
 [project.optional-dependencies]
 dev = [
