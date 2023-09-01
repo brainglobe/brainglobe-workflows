@@ -1,7 +1,7 @@
-name: cellfinder
+name: brainglobe-workflows
 dependencies:
   - python=3.10
   - cudatoolkit
   - cudnn
   - pip:
-      - cellfinder
+      - brainglobe-workflows

@@ -5,7 +5,7 @@ from math import isclose
 import brainglobe_utils.IO.cells as cell_io
 import pytest
 
-from cellfinder.main import main as cellfinder_run
+from brainglobe_workflows.main import main as cellfinder_run
 
 data_dir = os.path.join(
     os.getcwd(), "tests", "data", "integration", "detection"
