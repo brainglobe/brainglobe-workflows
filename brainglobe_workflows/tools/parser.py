@@ -24,7 +24,7 @@ from cellfinder_core.download.cli import (
 )
 from cellfinder_core.tools.source_files import source_custom_config_cellfinder
 
-from cellfinder import __version__
+from brainglobe_workflows import __version__
 
 # TODO: Gradually move all paths as strings to Path objects
 

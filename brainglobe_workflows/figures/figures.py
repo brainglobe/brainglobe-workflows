@@ -1,6 +1,6 @@
 import logging
 
-from cellfinder.figures import heatmap
+from brainglobe_workflows.figures import heatmap
 
 
 def run(args, atlas, downsampled_shape):

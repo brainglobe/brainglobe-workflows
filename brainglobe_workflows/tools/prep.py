@@ -17,10 +17,10 @@ from brainglobe_utils.general.system import ensure_directory_exists
 from brainreg.core.paths import Paths as BrainRegPaths
 from fancylog import fancylog
 
-import cellfinder as program_for_log
-import cellfinder.tools.parser as parser
-from cellfinder.tools import system, tools
-from cellfinder.tools.parser import cellfinder_parser
+import brainglobe_workflows as program_for_log
+import brainglobe_workflows.tools.parser as parser
+from brainglobe_workflows.tools import system, tools
+from brainglobe_workflows.tools.parser import cellfinder_parser
 
 
 def get_arg_groups(args, parser):
