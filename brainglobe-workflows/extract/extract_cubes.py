@@ -22,8 +22,8 @@ from skimage import transform
 from tifffile import tifffile
 from tqdm import tqdm
 
-from cellfinder.tools import image_processing as img_tools
-from cellfinder.tools import system
+from brainglobe_workflows.tools import image_processing as img_tools
+from brainglobe_workflows.tools import system
 
 
 class StackSizeError(Exception):

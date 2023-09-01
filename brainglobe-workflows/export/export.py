@@ -1,5 +1,5 @@
-from cellfinder.export.abc4d import export_points as abc4d_export
-from cellfinder.export.brainrender import export_points as brainrender_export
+from brainglobe_workflows.export.abc4d import export_points as abc4d_export
+from brainglobe_workflows.export.brainrender import export_points as brainrender_export
 
 
 def export_points(

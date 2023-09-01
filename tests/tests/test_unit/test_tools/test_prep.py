@@ -3,7 +3,7 @@ import os
 import pytest
 from brainglobe_utils.general.exceptions import CommandLineInputError
 
-from cellfinder.tools import prep
+from brainglobe_workflows.tools import prep
 
 # import shutil
 

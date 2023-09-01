@@ -13,7 +13,8 @@
 [![Website](https://img.shields.io/website?up_message=online&url=https%3A%2F%2Fbrainglobe.info)](https://brainglobe.info/documentation/cellfinder/index.html)
 [![Twitter](https://img.shields.io/twitter/follow/brain_globe?style=social)](https://twitter.com/brain_globe)
 
-# Cellfinder
+# Brainglobe Workflows
+
 Whole-brain cell detection, registration and analysis.
 
 **N.B. If you want to just use the cell detection part of cellfinder, please

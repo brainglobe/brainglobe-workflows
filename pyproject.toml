@@ -1,5 +1,5 @@
 [project]
-name = "cellfinder"
+name = "brainglobe-workflows"
 description = "Automated 3D cell detection and registration of whole-brain images"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -40,7 +40,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.scripts]
-cellfinder = "cellfinder.main:main"
+cellfinder = "brainglobe_workflows.main:main"
 
 [project.optional-dependencies]
 dev = [
@@ -55,8 +55,8 @@ dev = [
 napari = ["napari[pyside2]", "brainglobe-napari-io", "cellfinder-napari"]
 
 [project.urls]
-source = "https://github.com/brainglobe/cellfinder"
-bug_tracker = "https://github.com/brainglobe/cellfinder/issues"
+source = "https://github.com/brainglobe/brainglobe-workflows"
+bug_tracker = "https://github.com/brainglobe/brainglobe-workflows/issues"
 homepage = "https://brainglobe.info"
 documentation = "https://brainglobe.info/documentation/cellfinder"
 [build-system]
@@ -82,7 +82,7 @@ include-package-data = true
 zip-safe = false
 
 [tool.setuptools.packages.find]
-include = ["cellfinder"]
+include = ["brainglobe-workflows"]
 exclude = ["tests", "resources"]
 
 [tool.setuptools_scm]

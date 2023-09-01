@@ -6,8 +6,8 @@ exclude *.yml
 exclude Dockerfile
 exclude *.ini
 
-recursive-include cellfinder *.py
-include cellfinder/config/*
+recursive-include brainglobe-workflows *.py
+include brainglobe-workflows/config/*
 
 global-include *.pxd
 
