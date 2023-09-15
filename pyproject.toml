@@ -1,7 +1,7 @@
 [project]
 name = "brainglobe-workflows"
 authors = [{name = "BrainGlobe developers", email= "a.felder@ucl.ac.uk"}]
-description = "A place to keep scripts to use as benchmarks, user-examples end-to-end tests and for tutorials"
+description = "A place to keep scripts to use as benchmarks, user-facing examples, end-to-end tests and for tutorials"
 readme = "README.md"
 requires-python = ">=3.8.0"
 dynamic = ["version"]
