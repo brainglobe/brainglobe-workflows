@@ -1,1 +1,1 @@
-# brainglobe-scripts
+# brainglobe-workflows
