@@ -22,7 +22,8 @@ from brainreg.cli import prep_registration
 from dataclasses import dataclass, make_dataclass
 
 Pathlike = Union[str, bytes, os.PathLike]
-# TODO: use pydanti`c or attrs, and/or a dataclass, for this?? And grab default test data off pooch!
+
+import pooch
 
 @dataclass
 class BrainregConfig():
@@ -43,26 +44,10 @@ class BrainregConfig():
     niftyreg_backend_options = None
 
 def example_registration_script():
-    input_config_path = Path(os.environ["BRAINGLOBE_REGISTRATION_CONFIG_PATH"])
-    if input_config_path.exists():
-        print(f"Read config from: {input_config_path}")
-        with open(input_config_path) as config_file:
-            config_dict = json.load(config_file)
-        config = BrainregConfig(**config_dict)
-    else:
-        raise NotImplementedError
-        # TODO: define some defaults here? load from local json file or pooch
-        # config = BrainregConfig(**default_dict)
-    
-    with open(Path(__file__).parent / "niftyreg_defaults.json") as niftyreg_defaults_file:
-        niftyreg_defaults_dict = json.load(niftyreg_defaults_file)
-        NiftyregOptions = make_dataclass("NiftyregOptions", niftyreg_defaults_dict.keys())
-        config.niftyreg_backend_options = NiftyregOptions(**niftyreg_defaults_dict)
+    config, additional_images_downsample = setup_workflow()
+    run_workflow(config, additional_images_downsample)
 
-    config.preprocessing = {"preprocessing": "default"}
-    
-    config, additional_images_downsample = prep_registration(config)
-
+def run_workflow(config, additional_images_downsample):
     paths = Paths(config.brainreg_directory)
 
     log_metadata(paths.metadata_path, config)
@@ -95,20 +80,45 @@ def example_registration_script():
         brain_geometry=config.brain_geometry,
     )
 
-    # TODO save(results) # or maybe assert stuff around results???
+def setup_workflow():
+    if "BRAINGLOBE_REGISTRATION_CONFIG_PATH" in os.environ.keys():
+        print(f"Read config from: {input_config_path}")
+        input_config_path = Path(os.environ["BRAINGLOBE_REGISTRATION_CONFIG_PATH"])
+        assert input_config_path.exists()
+        with open(input_config_path) as config_file:
+            config_dict = json.load(config_file)
+        config = BrainregConfig(**config_dict)
+    else:
+        print(f"Using default config and test data")
+        _ = pooch.retrieve(
+          url=f"https://gin.g-node.org/BrainGlobe/test-data/raw/master/brainreg/brainreg-test-data.zip",
+          known_hash="000fc4e040db9d84a0fd0beca96b4870ea33f30008c9ab69883ac46c0b1c3ed6",
+          processor=pooch.Unzip(extract_dir=Path.home()/".brainglobe/workflow-data/brainreg/"),
+        )
+
+        # now input paths and expected outputs exist
+        default_config_dict = {
+            "image_paths": Path.home()/".brainglobe/workflow-data/brainreg/input/brain",
+            "brainreg_directory": Path.home()/".brainglobe/workflow-data/brainreg/actual-output",
+            "voxel_sizes": [
+                50,
+                40,
+                40
+            ],
+            "orientation": "psl",
+            "atlas": "allen_mouse_25um"
+        }
+        config = BrainregConfig(**default_config_dict)
+    
+    # always use defaults for niftyreg and preprocessing
+    with open(Path(__file__).parent / "niftyreg_defaults.json") as niftyreg_defaults_file:
+        niftyreg_defaults_dict = json.load(niftyreg_defaults_file)
+        NiftyregOptions = make_dataclass("NiftyregOptions", niftyreg_defaults_dict.keys())
+        config.niftyreg_backend_options = NiftyregOptions(**niftyreg_defaults_dict)
+
+    config.preprocessing = {"preprocessing": "default"}    
+    config, additional_images_downsample = prep_registration(config)
+    return config,additional_images_downsample
 
 if __name__ == "__main__":
 	example_registration_script()
-
-"""
-To run brainreg, you need to pass:
-    * The path to the sample data
-    * The path to the directory to save the results
-    * The voxel sizes
-    * The orientation
-    * The atlas to use
-
-We put this all together in a single command:
-
-brainreg test_brain brainreg_output -v 50 40 40  --orientation psl --atlas allen_mouse_50um
-"""
