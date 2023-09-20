@@ -19,11 +19,11 @@ OUTPUT_DATA_CACHE_DIR = CELLFINDER_CACHE_DIR / "cellfinder_output"
 
 class Workflow:
     """
-    Defines the cellfinder workflow built around running the 
+    Defines the cellfinder workflow built around running the
     cellfinder_core.main.main() function.
 
-    It includes `setup` methods that encapsulate steps which are required 
-    to run the workflow, but that we don't expect to benchmark 
+    It includes `setup` methods that encapsulate steps which are required
+    to run the workflow, but that we don't expect to benchmark
     (such as defining processing parameters or downloading the test data).
     """
 
@@ -107,6 +107,7 @@ class Workflow:
             if f.startswith(self.background_parent_dir)
         ]
 
+
 def workflow_from_cellfinder_run(cfg):
     """
     Run workflow based on the cellfinder_core.main.main()
@@ -135,9 +136,7 @@ def workflow_from_cellfinder_run(cfg):
 
     # Run main analysis using `cellfinder_run`
     detected_cells = cellfinder_run(
-        signal_array, 
-        background_array, 
-        cfg.voxel_sizes
+        signal_array, background_array, cfg.voxel_sizes
     )
 
     # Save results to xml file
