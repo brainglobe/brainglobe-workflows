@@ -81,6 +81,4 @@ venv/
 
 # written by setuptools_scm
 **/_version.py
-
-brainglobe_workflows/cellfinder/notebooks/
-**/**/.cellfinder_workflows
+benchmarks/results/*
