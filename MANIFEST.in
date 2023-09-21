@@ -9,3 +9,8 @@ recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 recursive-exclude docs *
 recursive-exclude tests *
+
+include *.json
+recursive-include benchmarks *.json
+recursive-include benchmarks *.py
+recursive-exclude benchmarks/results *
