@@ -51,11 +51,11 @@ build-backend = "setuptools.build_meta"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["brainglobe_scripts*"]
+include = ["brainglobe_workflows*"]
 exclude = ["tests*"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=brainglobe_scripts"
+addopts = "--cov=brainglobe_workflows"
 
 [tool.black]
 target-version = ['py38', 'py39', 'py310']
@@ -101,5 +101,5 @@ python =
 extras =
     dev
 commands =
-    pytest -v --color=yes --cov=brainglobe_scripts --cov-report=xml
+    pytest -v --color=yes --cov=brainglobe_workflows --cov-report=xml
 """
