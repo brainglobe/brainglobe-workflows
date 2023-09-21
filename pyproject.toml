@@ -5,6 +5,10 @@ description = "A place to keep scripts to use as benchmarks, user-examples end-t
 readme = "README.md"
 requires-python = ">=3.8.0"
 dynamic = ["version"]
+dependencies = [
+    "pooch",
+]
+
 
 license = {text = "BSD-3-Clause"}
 
