@@ -1,5 +1,4 @@
-# Write the benchmarking functions here.
-# See "Writing benchmarks" in the asv docs for more information.
+import shutil
 
 from brainglobe_utils.IO.cells import save_cells
 from cellfinder_core.main import main as cellfinder_run
@@ -43,72 +42,57 @@ class TimeBenchmark:
 
     timeout = 60  # default: 60
     version = None  # default: None (i.e. hash of source code)
-
-    # time benchmarks
     warmup_time = 0.1  # default:0.1;
     rounds = 2  # default:2
     repeat = 0  # default: 0 samples to collect per round.
     sample_time = 10  # default 10 ms; `
     min_run_count = 2  # default:2
 
+    @classmethod
+    def setup(self):
+        cfg = Workflow()
+        cfg.setup_parameters()
+        cfg.setup_input_data()
+        self.cfg = cfg
 
-# I dont know how to have a common part for the setup fn for all
-# without doing cahce
-def setup_cache():
-    cfg = Workflow()
-    cfg.setup_parameters()
-    cfg.setup_input_data()
-    return cfg
+    def teardown(self):
+        shutil.rmtree(self.cfg.install_path)
 
 
 class TimeFullWorkflow(TimeBenchmark):
-    def time_workflow_from_cellfinder_run(self, cfg):
-        workflow_from_cellfinder_run(cfg)
-
-    #  def teardown(self, model_name): -- after each benchmark or after all?
-    #     # remove .cellfinder-benchmarks dir after benchmarks
-    #     shutil.rmtree(self.install_path)
+    def time_workflow_from_cellfinder_run(self):
+        workflow_from_cellfinder_run(self.cfg)
 
 
 class TimeReadInputDask(TimeBenchmark):
-    def time_read_signal_w_dask(self, cfg):
-        read_with_dask(cfg.signal_parent_dir)
+    def time_read_signal_w_dask(self):
+        read_with_dask(self.cfg.signal_parent_dir)
 
-    def time_read_background_w_dask(self, cfg):
-        read_with_dask(cfg.background_parent_dir)
-
-    #  def teardown(self, model_name): -- after each benchmark or after all?
-    #     # remove .cellfinder-benchmarks dir after benchmarks
-    #     shutil.rmtree(self.install_path)
+    def time_read_background_w_dask(self):
+        read_with_dask(self.cfg.background_parent_dir)
 
 
 class TimeCellfinderRun(TimeBenchmark):
-    def setup(self, cfg):
-        self.signal_array = read_with_dask(cfg.signal_parent_dir)
-        self.background_array = read_with_dask(cfg.background_parent_dir)
+    def setup(self):
+        TimeBenchmark.setup()
+        self.signal_array = read_with_dask(self.cfg.signal_parent_dir)
+        self.background_array = read_with_dask(self.cfg.background_parent_dir)
 
-    def time_cellfinder_run(self, cfg):
+    def time_cellfinder_run(self):
         cellfinder_run(
-            self.signal_array, self.background_array, cfg.voxel_sizes
+            self.signal_array, self.background_array, self.cfg.voxel_sizes
         )
-
-    #  def teardown(self, model_name): -- after each benchmark or after all?
-    #     # remove .cellfinder-benchmarks dir after benchmarks
-    #     shutil.rmtree(self.install_path)
 
 
 class TimeSaveCells(TimeBenchmark):
-    def setup(self, cfg):
-        signal_array = read_with_dask(cfg.signal_parent_dir)
-        background_array = read_with_dask(cfg.background_parent_dir)
+    def setup(self):
+        TimeBenchmark.setup()
+        signal_array = read_with_dask(self.cfg.signal_parent_dir)
+        background_array = read_with_dask(self.cfg.background_parent_dir)
 
         self.detected_cells = cellfinder_run(
-            signal_array, background_array, cfg.voxel_sizes
+            signal_array, background_array, self.cfg.voxel_sizes
         )
 
-    def time_save_cells(self, cfg):
-        save_cells(self.detected_cells, cfg.detected_cells_filepath)
-
-    #  def teardown(self, model_name): -- after each benchmark or after all?
-    #     # remove .cellfinder-benchmarks dir after benchmarks
-    #     shutil.rmtree(self.install_path)
+    def time_save_cells(self):
+        save_cells(self.detected_cells, self.cfg.detected_cells_filepath)
