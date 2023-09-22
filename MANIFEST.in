@@ -3,8 +3,14 @@ include README.md
 exclude .pre-commit-config.yaml
 
 recursive-include brainglobe_workflows *.py
+recursive-exclude brainglobe_workflows/cellfinder/notebooks *.py
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 recursive-exclude docs *
 recursive-exclude tests *
+
+include *.json
+recursive-include benchmarks *.json
+recursive-include benchmarks *.py
+recursive-exclude benchmarks/results *
