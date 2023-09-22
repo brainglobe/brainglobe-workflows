@@ -40,12 +40,12 @@ class TimeBenchmark:
         approx sample_time=10ms
     """
 
-    timeout = 60  # default: 60
+    timeout = 60  # default: 60 s
     version = None  # default: None (i.e. hash of source code)
     warmup_time = 0.1  # default:0.1;
     rounds = 2  # default:2
-    repeat = 0  # default: 0 samples to collect per round.
-    sample_time = 10  # default 10 ms; `
+    repeat = 0  # default: 0
+    sample_time = 10  # default: 10 ms; `
     min_run_count = 2  # default:2
 
     @classmethod
