@@ -36,7 +36,7 @@ class TimeBenchmark:
         - if rounds != 1 the default is
             (min_repeat, max_repeat, max_time) = (1, 5, 10.0)
 
-      - sample: `number` is determined so that each sample takes
+      - sample_time: `number` is determined so that each sample takes
         approx sample_time=10ms
     """
 
