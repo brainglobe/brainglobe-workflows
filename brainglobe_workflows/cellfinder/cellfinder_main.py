@@ -190,10 +190,10 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
 
     else:
         config = CellfinderConfig(**default_config_dict)
-
         logging.info("Using default configuration")
 
-    # Check if input data (signal and background data) exists locally.
+    # --------------
+    # Check if input data (signal and background) exist locally.
     # If both directories exist, get list of signal and background files
     if (
         Path(config.signal_parent_dir).exists()
@@ -208,8 +208,7 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
             if f.is_file()
         ]
 
-    # If only one of the input data directories exists,
-    # print error
+    # If exactly one of the input data directories is missing, print error
     elif (
         Path(config.signal_parent_dir).exists()
         or Path(config.background_parent_dir).exists()
@@ -242,6 +241,9 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
                     extract_dir=config.local_path  # path to unzipped dir
                 ),
             )
+            logging.info(
+                "Fetching input data from the provided GIN repository"
+            )
 
             # check signal and background parent directories exist now
             assert Path(config.signal_parent_dir).exists()
@@ -262,7 +264,7 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
             ]
 
     # ------
-    # create output dir if it doesn't exist
+    # Create output directory if it doesn't exist
     # TODO: should I check if it exists and has data in it?
     # it will be overwritten
     Path(config.output_path).mkdir(parents=True, exist_ok=True)
