@@ -154,7 +154,7 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
     - instantiating the config dictionary,
     - checking if the input data exists locally, and fetching from
       GIN repository otherwise,
-    - creating the directory for the output of the workflow if it doesnt exist
+    - creating the directory for the output of the workflow if it doesn't exist
 
     To instantiate the config dictionary, we first check if an environment
     variable "CELLFINDER_CONFIG_PATH" pointing to a config json file exists.
@@ -183,8 +183,15 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
 
         config = CellfinderConfig(**config_dict)
 
+        logging.info(
+            "Configuration retrieved from "
+            f'{os.environ["CELLFINDER_CONFIG_PATH"]}'
+        )
+
     else:
         config = CellfinderConfig(**default_config_dict)
+
+        logging.info("Using default configuration")
 
     # Check if input data (signal and background data) exists locally.
     # If both directories exist, get list of signal and background files
