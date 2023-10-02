@@ -6,7 +6,8 @@ readme = "README.md"
 requires-python = ">=3.8.0"
 dynamic = ["version"]
 dependencies = [
-    "pooch"
+    "pooch",
+    "cellfinder-core"
 ]
 license = {text = "BSD-3-Clause"}
 
