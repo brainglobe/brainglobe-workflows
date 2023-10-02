@@ -10,6 +10,8 @@ from brainglobe_workflows.cellfinder.cellfinder_main import (
     setup_workflow,
 )
 
+# logger_str = 'brainglobe_workflows.cellfinder.cellfinder_main'
+
 
 @pytest.fixture(autouse=True)
 def cellfinder_cache_dir(tmp_path):
@@ -91,7 +93,9 @@ def config_from_env_var(tmp_path, config_from_dict):
 
 def test_run_with_predefined_default_config(config_from_dict, caplog):
     # run setup and workflow
-    with caplog.at_level(logging.INFO):
+    with caplog.at_level(
+        logging.INFO, logger="brainglobe_workflows.cellfinder.cellfinder_main"
+    ):  # temporarily sets the log level for the given logger
         cfg = setup_workflow(config_from_dict)
         run_workflow_from_cellfinder_run(cfg)
 
@@ -104,7 +108,9 @@ def test_run_with_env_var_defined_config(config_from_env_var, caplog):
     assert "CELLFINDER_CONFIG_PATH" in os.environ.keys()
 
     # run setup and workflow
-    with caplog.at_level(logging.INFO):
+    with caplog.at_level(
+        logging.INFO, logger="brainglobe_workflows.cellfinder.cellfinder_main"
+    ):
         cfg = setup_workflow()
         run_workflow_from_cellfinder_run(cfg)
 
@@ -126,7 +132,10 @@ def test_setup_with_missing_signal_data(config_from_dict, caplog):
     )
 
     # run setup
-    with caplog.at_level(logging.ERROR):
+    # context manager temporarily sets the log level for the given logger
+    with caplog.at_level(
+        logging.ERROR, logger="brainglobe_workflows.cellfinder.cellfinder_main"
+    ):
         cfg = setup_workflow(config_from_dict)
 
     # check log
@@ -147,7 +156,9 @@ def test_setup_with_missing_background_data(config_from_dict, caplog):
     )
 
     # run setup
-    with caplog.at_level(logging.ERROR):
+    with caplog.at_level(
+        logging.ERROR, logger="brainglobe_workflows.cellfinder.cellfinder_main"
+    ):
         cfg = setup_workflow(config_from_dict)
 
     # check log
@@ -163,7 +174,9 @@ def test_setup_fetching_from_GIN(config_from_dict, caplog):
     assert not Path(config_from_dict["background_parent_dir"]).exists()
 
     # run setup
-    with caplog.at_level(logging.INFO):
+    with caplog.at_level(
+        logging.INFO, logger="brainglobe_workflows.cellfinder.cellfinder_main"
+    ):
         setup_workflow(config_from_dict)
 
     # check log

@@ -13,6 +13,10 @@ from cellfinder_core.train.train_yml import depth_type
 
 Pathlike = Union[str, os.PathLike]  # Union[str, bytes, os.PathLike, Path]
 
+# logger
+# if imported as a module, the logger is names after the module
+logger = logging.getLogger(__name__)
+
 # Default config
 DATA_URL = "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip"
 DATA_HASH = "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
@@ -183,14 +187,14 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
 
         config = CellfinderConfig(**config_dict)
 
-        logging.info(
+        logger.info(
             "Configuration retrieved from "
             f'{os.environ["CELLFINDER_CONFIG_PATH"]}'
         )
 
     else:
         config = CellfinderConfig(**default_config_dict)
-        logging.info("Using default configuration")
+        logger.info("Using default configuration")
 
     # Retrieve and add lists of input data to config if neither are defined
     if not (config.list_signal_files and config.list_signal_files):
@@ -249,18 +253,18 @@ def retrieve_input_data(config):
         or Path(config.background_parent_dir).exists()
     ):
         if not Path(config.signal_parent_dir).exists():
-            logging.error(
+            logger.error(
                 f"The directory {config.signal_parent_dir} does not exist"
             )
         else:
-            logging.error(
+            logger.error(
                 f"The directory {config.background_parent_dir} does not exist"
             )
 
     # If neither of them exist, retrieve data from GIN repository
     else:
         if (not config.data_url) or (not config.data_hash):
-            logging.error(
+            logger.error(
                 "Input data not found locally, and URL/hash to "
                 "GIN repository not provided"
             )
@@ -276,9 +280,7 @@ def retrieve_input_data(config):
                     extract_dir=config.local_path  # path to unzipped dir
                 ),
             )
-            logging.info(
-                "Fetching input data from the provided GIN repository"
-            )
+            logger.info("Fetching input data from the provided GIN repository")
 
             # check signal and background parent directories exist now
             assert Path(config.signal_parent_dir).exists()
