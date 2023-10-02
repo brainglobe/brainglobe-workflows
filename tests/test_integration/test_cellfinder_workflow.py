@@ -89,93 +89,90 @@ def config_from_env_var(tmp_path, config_from_dict):
     return os.environ["CELLFINDER_CONFIG_PATH"]
 
 
-class TestsCellfinderWorkflow:
-    def test_run_with_predefined_default_config(
-        self, config_from_dict, caplog
-    ):
-        caplog.set_level(logging.INFO)
+def test_run_with_predefined_default_config(config_from_dict, caplog):
+    caplog.set_level(logging.INFO)
 
-        # run setup and workflow
-        cfg = setup_workflow(config_from_dict)
-        run_workflow_from_cellfinder_run(cfg)
+    # run setup and workflow
+    cfg = setup_workflow(config_from_dict)
+    run_workflow_from_cellfinder_run(cfg)
 
-        # check log
-        assert "Using default configuration" in caplog.text
+    # check log
+    assert "Using default configuration" in caplog.text
 
-    def test_run_with_env_var_defined_config(
-        self, config_from_env_var, caplog
-    ):
-        caplog.set_level(logging.INFO)
 
-        # run setup and workflow
-        cfg = setup_workflow()
-        run_workflow_from_cellfinder_run(cfg)
+def test_run_with_env_var_defined_config(config_from_env_var, caplog):
+    caplog.set_level(logging.INFO)
 
-        # check environment variable exists
-        assert "BRAINGLOBE_REGISTRATION_CONFIG_PATH" in os.environ.keys()
+    # check environment variable exists
+    assert "CELLFINDER_CONFIG_PATH" in os.environ.keys()
 
-        # check log
-        assert (
-            "Configuration retrieved from "
-            f'{os.environ["CELLFINDER_CONFIG_PATH"]}' in caplog.text
-        )
+    # run setup and workflow
+    cfg = setup_workflow()
+    run_workflow_from_cellfinder_run(cfg)
 
-    def test_setup_with_missing_signal_data(self, config_from_dict, caplog):
-        caplog.set_level(logging.ERROR)
+    # check log
+    assert (
+        "Configuration retrieved from "
+        f'{os.environ["CELLFINDER_CONFIG_PATH"]}' in caplog.text
+    )
 
-        # check neither signal or background dataexist locally,
-        assert not Path(config_from_dict["signal_parent_dir"]).exists()
-        assert not Path(config_from_dict["background_parent_dir"]).exists()
 
-        # create a directory for the background only
-        Path(config_from_dict["background_parent_dir"]).mkdir(
-            parents=True, exist_ok=True
-        )
+def test_setup_with_missing_signal_data(config_from_dict, caplog):
+    caplog.set_level(logging.ERROR)
 
-        # run setup
-        cfg = setup_workflow(config_from_dict)
+    # check neither signal or background data exist locally,
+    assert not Path(config_from_dict["signal_parent_dir"]).exists()
+    assert not Path(config_from_dict["background_parent_dir"]).exists()
 
-        # check log
-        assert (
-            f"The directory {cfg.signal_parent_dir} "
-            "does not exist" in caplog.text
-        )
+    # create a directory for the background only
+    Path(config_from_dict["background_parent_dir"]).mkdir(
+        parents=True, exist_ok=True
+    )
 
-    def test_setup_with_missing_background_data(
-        self, config_from_dict, caplog
-    ):
-        caplog.set_level(logging.ERROR)
+    # run setup
+    cfg = setup_workflow(config_from_dict)
 
-        # check neither signal or background dataexist locally,
-        assert not Path(config_from_dict["signal_parent_dir"]).exists()
-        assert not Path(config_from_dict["background_parent_dir"]).exists()
+    # check log
+    assert (
+        f"The directory {cfg.signal_parent_dir} "
+        "does not exist" in caplog.text
+    )
 
-        # create a directory for the signal, but not for the background
-        Path(config_from_dict["signal_parent_dir"]).mkdir(
-            parents=True, exist_ok=True
-        )
 
-        # run setup
-        cfg = setup_workflow(config_from_dict)
+def test_setup_with_missing_background_data(config_from_dict, caplog):
+    caplog.set_level(logging.ERROR)
 
-        # check log
-        assert (
-            f"The directory {cfg.background_parent_dir} "
-            "does not exist" in caplog.text
-        )
+    # check neither signal or background data exist locally,
+    assert not Path(config_from_dict["signal_parent_dir"]).exists()
+    assert not Path(config_from_dict["background_parent_dir"]).exists()
 
-    def test_setup_fetching_from_GIN(self, config_from_dict, caplog):
-        caplog.set_level(logging.INFO)
+    # create a directory for the signal, but not for the background
+    Path(config_from_dict["signal_parent_dir"]).mkdir(
+        parents=True, exist_ok=True
+    )
 
-        # check signal and background don't exist locally before setup
-        assert not Path(config_from_dict["signal_parent_dir"]).exists()
-        assert not Path(config_from_dict["background_parent_dir"]).exists()
+    # run setup
+    cfg = setup_workflow(config_from_dict)
 
-        # run setup
-        setup_workflow(config_from_dict)
+    # check log
+    assert (
+        f"The directory {cfg.background_parent_dir} "
+        "does not exist" in caplog.text
+    )
 
-        # check log
-        assert (
-            "Fetching input data from the "
-            "provided GIN repository" in caplog.text
-        )
+
+def test_setup_fetching_from_GIN(config_from_dict, caplog):
+    caplog.set_level(logging.INFO)
+
+    # check neither signal or background data exist locally before setup
+    assert not Path(config_from_dict["signal_parent_dir"]).exists()
+    assert not Path(config_from_dict["background_parent_dir"]).exists()
+
+    # run setup
+    setup_workflow(config_from_dict)
+
+    # check log
+    assert (
+        "Fetching input data from the "
+        "provided GIN repository" in caplog.text
+    )
