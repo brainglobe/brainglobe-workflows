@@ -23,12 +23,12 @@ default_config_dict = {
     "data_url": DATA_URL,
     "data_hash": DATA_HASH,
     "local_path": CELLFINDER_CACHE_DIR / "cellfinder_test_data",
-    "signal_parent_dir": (
+    "signal_parent_dir": str(
         CELLFINDER_CACHE_DIR / "cellfinder_test_data" / "signal"
-    ),  # str(SIGNAL_DATA_PATH),
-    "background_parent_dir": CELLFINDER_CACHE_DIR
-    / "cellfinder_test_data"
-    / "background",  # str(BACKGROUND_DATA_PATH),
+    ),
+    "background_parent_dir": str(
+        CELLFINDER_CACHE_DIR / "cellfinder_test_data" / "background"
+    ),
     "output_path": CELLFINDER_CACHE_DIR / "cellfinder_output",
     "detected_cells_filepath": (
         CELLFINDER_CACHE_DIR / "cellfinder_output" / "detected_cells.xml"
@@ -73,8 +73,8 @@ class CellfinderConfig:
 
     # cached subdirectory to save data to
     local_path: Pathlike
-    signal_parent_dir: Pathlike
-    background_parent_dir: Pathlike
+    signal_parent_dir: str
+    background_parent_dir: str
     output_path: Pathlike
     detected_cells_filepath: Pathlike
 
@@ -103,8 +103,8 @@ class CellfinderConfig:
     cube_depth: int
     network_depth: depth_type
 
-    list_signal_files: list
-    list_background_files: list
+    list_signal_files: Optional[list] = None
+    list_background_files: Optional[list] = None
 
 
 def example_cellfinder_script():
