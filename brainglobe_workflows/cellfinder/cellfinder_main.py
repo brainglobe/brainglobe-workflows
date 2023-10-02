@@ -192,7 +192,42 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
         config = CellfinderConfig(**default_config_dict)
         logging.info("Using default configuration")
 
-    # --------------
+    # Retrieve and add lists of input data to config if neither are defined
+    if not (config.list_signal_files and config.list_signal_files):
+        config = retrieve_input_data(config)
+
+    # Create output directory if it doesn't exist
+    # TODO: should I check if it exists and has data in it?
+    # it will be overwritten
+    Path(config.output_path).mkdir(parents=True, exist_ok=True)
+
+    return config
+
+
+def retrieve_input_data(config):
+    """
+    Adds the lists of input data files (signal and background) to the config.
+
+    It first checks if the input data exists locally.
+    - If both directories (signal and background) exist, the lists of signal
+      and background files are added to the relevant config attributes
+    - If exactly one of the input data directories is missing, an error
+      message is logged.
+    - If neither of them exist, the data is retrieved from the provided GIN
+      repository. If no URL or hash to GIN is provided, an error is shown.
+
+    Parameters
+    ----------
+    config : CellfinderConfig
+        a dataclass whose attributes are the parameters
+        for running cellfinder.
+
+    Returns
+    -------
+    config : CellfinderConfig
+        a dataclass whose attributes are the parameters
+        for running cellfinder.
+    """
     # Check if input data (signal and background) exist locally.
     # If both directories exist, get list of signal and background files
     if (
@@ -262,12 +297,6 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
                 for f in list_files_archive
                 if f.startswith(config.background_parent_dir)
             ]
-
-    # ------
-    # Create output directory if it doesn't exist
-    # TODO: should I check if it exists and has data in it?
-    # it will be overwritten
-    Path(config.output_path).mkdir(parents=True, exist_ok=True)
 
     return config
 
