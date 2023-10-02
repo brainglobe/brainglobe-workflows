@@ -90,25 +90,23 @@ def config_from_env_var(tmp_path, config_from_dict):
 
 
 def test_run_with_predefined_default_config(config_from_dict, caplog):
-    caplog.set_level(logging.INFO)
-
     # run setup and workflow
-    cfg = setup_workflow(config_from_dict)
-    run_workflow_from_cellfinder_run(cfg)
+    with caplog.at_level(logging.INFO):
+        cfg = setup_workflow(config_from_dict)
+        run_workflow_from_cellfinder_run(cfg)
 
     # check log
     assert "Using default configuration" in caplog.text
 
 
 def test_run_with_env_var_defined_config(config_from_env_var, caplog):
-    caplog.set_level(logging.INFO)
-
     # check environment variable exists
     assert "CELLFINDER_CONFIG_PATH" in os.environ.keys()
 
     # run setup and workflow
-    cfg = setup_workflow()
-    run_workflow_from_cellfinder_run(cfg)
+    with caplog.at_level(logging.INFO):
+        cfg = setup_workflow()
+        run_workflow_from_cellfinder_run(cfg)
 
     # check log
     assert (
@@ -118,8 +116,6 @@ def test_run_with_env_var_defined_config(config_from_env_var, caplog):
 
 
 def test_setup_with_missing_signal_data(config_from_dict, caplog):
-    caplog.set_level(logging.ERROR)
-
     # check neither signal or background data exist locally,
     assert not Path(config_from_dict["signal_parent_dir"]).exists()
     assert not Path(config_from_dict["background_parent_dir"]).exists()
@@ -130,7 +126,8 @@ def test_setup_with_missing_signal_data(config_from_dict, caplog):
     )
 
     # run setup
-    cfg = setup_workflow(config_from_dict)
+    with caplog.at_level(logging.ERROR):
+        cfg = setup_workflow(config_from_dict)
 
     # check log
     assert (
@@ -140,8 +137,6 @@ def test_setup_with_missing_signal_data(config_from_dict, caplog):
 
 
 def test_setup_with_missing_background_data(config_from_dict, caplog):
-    caplog.set_level(logging.ERROR)
-
     # check neither signal or background data exist locally,
     assert not Path(config_from_dict["signal_parent_dir"]).exists()
     assert not Path(config_from_dict["background_parent_dir"]).exists()
@@ -152,7 +147,8 @@ def test_setup_with_missing_background_data(config_from_dict, caplog):
     )
 
     # run setup
-    cfg = setup_workflow(config_from_dict)
+    with caplog.at_level(logging.ERROR):
+        cfg = setup_workflow(config_from_dict)
 
     # check log
     assert (
@@ -162,14 +158,13 @@ def test_setup_with_missing_background_data(config_from_dict, caplog):
 
 
 def test_setup_fetching_from_GIN(config_from_dict, caplog):
-    caplog.set_level(logging.INFO)
-
     # check neither signal or background data exist locally before setup
     assert not Path(config_from_dict["signal_parent_dir"]).exists()
     assert not Path(config_from_dict["background_parent_dir"]).exists()
 
     # run setup
-    setup_workflow(config_from_dict)
+    with caplog.at_level(logging.INFO):
+        setup_workflow(config_from_dict)
 
     # check log
     assert (
