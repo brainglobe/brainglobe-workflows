@@ -1,114 +1,118 @@
+import json
+import logging
+import os
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional, Tuple, Union  # Any, Dict, Tuple,
 
 import pooch
 from brainglobe_utils.IO.cells import save_cells
 from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
+from cellfinder_core.train.train_yml import depth_type
 
-# Input data URL and hash
+Pathlike = Union[str, os.PathLike[str]]  # Union[str, bytes, os.PathLike, Path]
+
+# Default config
 DATA_URL = "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip"
 DATA_HASH = "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
-
-# Local cached directories
 CELLFINDER_CACHE_DIR = Path.home() / ".cellfinder_benchmarks"
-INPUT_DATA_CACHE_DIR = CELLFINDER_CACHE_DIR / "cellfinder_test_data"
-SIGNAL_DATA_PATH = INPUT_DATA_CACHE_DIR / "signal"
-BACKGROUND_DATA_PATH = INPUT_DATA_CACHE_DIR / "background"
-OUTPUT_DATA_CACHE_DIR = CELLFINDER_CACHE_DIR / "cellfinder_output"
+
+default_config_dict = {
+    "install_path": CELLFINDER_CACHE_DIR,
+    "data_url": DATA_URL,
+    "data_hash": DATA_HASH,
+    "local_path": CELLFINDER_CACHE_DIR / "cellfinder_test_data",
+    "signal_parent_dir": (
+        CELLFINDER_CACHE_DIR / "cellfinder_test_data" / "signal"
+    ),  # str(SIGNAL_DATA_PATH),
+    "background_parent_dir": CELLFINDER_CACHE_DIR
+    / "cellfinder_test_data"
+    / "background",  # str(BACKGROUND_DATA_PATH),
+    "output_path": CELLFINDER_CACHE_DIR / "cellfinder_output",
+    "detected_cells_filepath": (
+        CELLFINDER_CACHE_DIR / "cellfinder_output" / "detected_cells.xml"
+    ),
+    "voxel_sizes": [5, 2, 2],  # microns
+    "start_plane": 0,
+    "end_plane": -1,
+    "trained_model": None,  # if None, it will use a default model
+    "model_weights": None,
+    "model": "resnet50_tv",
+    "batch_size": 32,
+    "n_free_cpus": 2,
+    "network_voxel_sizes": [5, 1, 1],
+    "soma_diameter": 16,
+    "ball_xy_size": 6,
+    "ball_z_size": 15,
+    "ball_overlap_fraction": 0.6,
+    "log_sigma_size": 0.2,
+    "n_sds_above_mean_thresh": 10,
+    "soma_spread_factor": 1.4,
+    "max_cluster_size": 100000,
+    "cube_width": 50,
+    "cube_height": 50,
+    "cube_depth": 20,
+    "network_depth": "50",
+}
 
 
-class Workflow:
+@dataclass
+class CellfinderConfig:
     """
-    Defines the cellfinder workflow built around running the
-    cellfinder_core.main.main() function.
-
-    It includes `setup` methods that encapsulate steps which are required
-    to run the workflow, but that we don't expect to benchmark
-    (such as defining processing parameters or downloading the test data).
+    Define input and output data locations, and parameters for
+    preprocessing steps.
     """
 
-    def setup_parameters(self):
-        """
-        Define input and output data locations and parameters for
-        preprocessing steps.
+    # cellfinder benchmarks cache directory
+    install_path: Pathlike
 
-        Methods that start with `setup_` will in principle not be benchmarked.
-        """
+    # origin of data to download (if req)
+    data_url: Optional[str]  # either str or None
+    data_hash: Optional[str]
 
-        # cellfinder benchmarks cache directory
-        self.install_path = CELLFINDER_CACHE_DIR
+    # cached subdirectory to save data to
+    local_path: Pathlike
+    signal_parent_dir: Pathlike
+    background_parent_dir: Pathlike
+    output_path: Pathlike
+    detected_cells_filepath: Pathlike
 
-        # origin of data to download
-        self.data_url = DATA_URL
-        self.data_hash = DATA_HASH
+    # preprocessing parameters
+    voxel_sizes: Tuple[float, float, float]
+    start_plane: int
+    end_plane: int
+    trained_model: Optional[
+        os.PathLike
+    ]  # if None, it will use a default model
+    model_weights: Optional[os.PathLike]
+    model: str
+    batch_size: int
+    n_free_cpus: int
+    network_voxel_sizes: Tuple[int, int, int]
+    soma_diameter: int
+    ball_xy_size: int
+    ball_z_size: int
+    ball_overlap_fraction: float
+    log_sigma_size: float
+    n_sds_above_mean_thresh: int
+    soma_spread_factor: float
+    max_cluster_size: int
+    cube_width: int
+    cube_height: int
+    cube_depth: int
+    network_depth: depth_type
 
-        # cached subdirectory to save data to
-        self.local_path = INPUT_DATA_CACHE_DIR
-        self.output_path = OUTPUT_DATA_CACHE_DIR
-        self.output_path.mkdir(parents=True, exist_ok=True)
-        self.detected_cells_filepath = self.output_path / "detected_cells.xml"
-
-        # preprocessing parameters
-        self.voxel_sizes = [5, 2, 2]  # microns
-        self.start_plane = 0
-        self.end_plane = -1
-        self.trained_model = None  # if None, it will use a default model
-        self.model_weights = None
-        self.model = "resnet50_tv"
-        self.batch_size = 32
-        self.n_free_cpus = 2
-        self.network_voxel_sizes = [5, 1, 1]
-        self.soma_diameter = 16
-        self.ball_xy_size = 6
-        self.ball_z_size = 15
-        self.ball_overlap_fraction = 0.6
-        self.log_sigma_size = 0.2
-        self.n_sds_above_mean_thresh = 10
-        self.soma_spread_factor = 1.4
-        self.max_cluster_size = 100000
-        self.cube_width = 50
-        self.cube_height = 50
-        self.cube_depth = 20
-        self.network_depth = "50"
-
-    def setup_input_data(self):
-        """
-        Retrieve input data from GIN repository, and add relevant
-        parent directories and list of files as attributes of the
-        workflow class.
-
-        Methods that start with `setup_` will in principle not be benchmarked.
-        """
-
-        # retrieve data from GIN repository
-        list_files_archive = pooch.retrieve(
-            url=self.data_url,
-            known_hash=self.data_hash,
-            path=self.install_path,  # path to download zip to
-            progressbar=True,
-            processor=pooch.Unzip(
-                extract_dir=self.local_path  # path to unzipped dir
-            ),
-        )
-
-        # signal data: parent dir and list of files
-        self.signal_parent_dir = str(SIGNAL_DATA_PATH)
-        self.list_signal_files = [
-            f
-            for f in list_files_archive
-            if f.startswith(self.signal_parent_dir)
-        ]
-
-        # background data: parent dir and list of files
-        self.background_parent_dir = str(BACKGROUND_DATA_PATH)
-        self.list_background_files = [
-            f
-            for f in list_files_archive
-            if f.startswith(self.background_parent_dir)
-        ]
+    list_signal_files: list
+    list_background_files: list
 
 
-def workflow_from_cellfinder_run(cfg):
+def example_cellfinder_script():
+    cfg = setup_workflow()  # (this won't be timed)
+    run_workflow_from_cellfinder_run(cfg)  # (this will be timed)
+
+
+def run_workflow_from_cellfinder_run(cfg):
     """
     Run workflow based on the cellfinder_core.main.main()
     function.
@@ -126,7 +130,7 @@ def workflow_from_cellfinder_run(cfg):
 
     Parameters
     ----------
-    cfg : Workflow
+    cfg : CellfinderConfig
         a class with the required setup methods and parameters for
         the cellfinder workflow
     """
@@ -143,11 +147,121 @@ def workflow_from_cellfinder_run(cfg):
     save_cells(detected_cells, cfg.detected_cells_filepath)
 
 
-if __name__ == "__main__":
-    # Run setup steps (these won't be timed)
-    cfg = Workflow()
-    cfg.setup_parameters()
-    cfg.setup_input_data()
+def setup_workflow(default_config_dict: dict = default_config_dict):
+    """Prepare configuration to run workflow
 
-    # Run full workflow (this will be timed)
-    workflow_from_cellfinder_run(cfg)
+    This includes
+    - instantiating the config dictionary,
+    - checking if the input data exists locally, and fetching from
+      GIN repository otherwise,
+    - creating the directory for the output of the workflow if it doesnt exist
+
+    To instantiate the config dictionary, we first check if an environment
+    variable "CELLFINDER_CONFIG_PATH" pointing to a config json file exists.
+    If not, the default config is used.
+
+    Parameters
+    ----------
+    default_config_dict : dict
+        a dictionary with the default config parameters
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+
+    # Define config
+    if "CELLFINDER_CONFIG_PATH" in os.environ.keys():
+        input_config_path = Path(os.environ["CELLFINDER_CONFIG_PATH"])
+        assert input_config_path.exists()
+
+        # read into dict (assuming config is a json dict?)
+        # TODO:add error handling here?
+        with open(input_config_path) as cfg:
+            config_dict = json.load(cfg)
+
+        config = CellfinderConfig(**config_dict)
+
+    else:
+        config = CellfinderConfig(**default_config_dict)
+
+    # Check if input data (signal and background data) exists locally.
+    # If both directories exist, get list of signal and background files
+    if (
+        Path(config.signal_parent_dir).exists()
+        and Path(config.background_parent_dir).exists()
+    ):
+        config.list_signal_files = [
+            f for f in Path(config.signal_parent_dir).iterdir() if f.is_file()
+        ]
+        config.list_background_files = [
+            f
+            for f in Path(config.background_parent_dir).iterdir()
+            if f.is_file()
+        ]
+
+    # If only one of the input data directories exists,
+    # print error
+    elif (
+        Path(config.signal_parent_dir).exists()
+        or Path(config.background_parent_dir).exists()
+    ):
+        if not Path(config.signal_parent_dir).exists():
+            logging.error(
+                f"The directory {config.signal_parent_dir} does not exist"
+            )
+        else:
+            logging.error(
+                f"The directory {config.background_parent_dir} does not exist"
+            )
+
+    # If neither of them exist, retrieve data from GIN repository
+    else:
+        if (not config.data_url) or (not config.data_hash):
+            logging.error(
+                "Input data not found locally, and URL/hash to "
+                "GIN repository not provided"
+            )
+
+        else:
+            # get list of files in GIN archive with retrieve
+            list_files_archive = pooch.retrieve(
+                url=config.data_url,
+                known_hash=config.data_hash,
+                path=config.install_path,  # path to download zip to
+                progressbar=True,
+                processor=pooch.Unzip(
+                    extract_dir=config.local_path  # path to unzipped dir
+                ),
+            )
+
+            # check signal and background parent directories exist now
+            assert Path(config.signal_parent_dir).exists()
+            assert Path(config.background_parent_dir).exists()
+
+            # add signal files to config
+            config.list_signal_files = [
+                f
+                for f in list_files_archive
+                if f.startswith(config.signal_parent_dir)
+            ]
+
+            # add background files to config
+            config.list_background_files = [
+                f
+                for f in list_files_archive
+                if f.startswith(config.background_parent_dir)
+            ]
+
+    # ------
+    # create output dir if it doesn't exist
+    # TODO: should I check if it exists and has data in it?
+    # it will be overwritten
+    Path(config.output_path).mkdir(parents=True, exist_ok=True)
+
+    return config
+
+
+if __name__ == "__main__":
+    example_cellfinder_script()
