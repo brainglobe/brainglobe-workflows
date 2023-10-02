@@ -11,7 +11,7 @@ from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 from cellfinder_core.train.train_yml import depth_type
 
-Pathlike = Union[str, os.PathLike[str]]  # Union[str, bytes, os.PathLike, Path]
+Pathlike = Union[str, os.PathLike]  # Union[str, bytes, os.PathLike, Path]
 
 # Default config
 DATA_URL = "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip"
