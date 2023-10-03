@@ -16,6 +16,7 @@ Pathlike = Union[str, os.PathLike]  # Union[str, bytes, os.PathLike, Path]
 # logger
 # if imported as a module, the logger is names after the module
 logger = logging.getLogger(__name__)
+logger.propagate = True
 
 # Default config
 DATA_URL = "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip"
@@ -238,6 +239,8 @@ def retrieve_input_data(config):
         Path(config.signal_parent_dir).exists()
         and Path(config.background_parent_dir).exists()
     ):
+        logger.info("Fetching input data from the local directories")
+
         config.list_signal_files = [
             f for f in Path(config.signal_parent_dir).iterdir() if f.is_file()
         ]

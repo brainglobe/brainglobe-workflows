@@ -13,7 +13,12 @@ from brainglobe_workflows.cellfinder.cellfinder_main import (
 # logger_str = 'brainglobe_workflows.cellfinder.cellfinder_main'
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="session")
+def logger_setup():
+    logging.root.setLevel(logging.DEBUG)
+
+
+@pytest.fixture(autouse=True, scope="function")
 def cellfinder_cache_dir(tmp_path):
     # use pytest's tmp_path fixture so that all is cleared after the test
     # a new temporary directory is created every function call
@@ -88,19 +93,21 @@ def config_from_env_var(tmp_path, config_from_dict):
     # --- should be cleared after this test!!
     os.environ["CELLFINDER_CONFIG_PATH"] = str(input_config_path)
 
-    return os.environ["CELLFINDER_CONFIG_PATH"]
+    yield os.environ["CELLFINDER_CONFIG_PATH"]
+    # teardown for this fixture
+    del os.environ["CELLFINDER_CONFIG_PATH"]
 
 
 def test_run_with_predefined_default_config(config_from_dict, caplog):
     # run setup and workflow
     with caplog.at_level(
-        logging.INFO, logger="brainglobe_workflows.cellfinder.cellfinder_main"
+        logging.DEBUG, logger="brainglobe_workflows.cellfinder.cellfinder_main"
     ):  # temporarily sets the log level for the given logger
         cfg = setup_workflow(config_from_dict)
         run_workflow_from_cellfinder_run(cfg)
 
     # check log
-    assert "Using default configuration" in caplog.text
+    assert "Using default configuration" in caplog.messages
 
 
 def test_run_with_env_var_defined_config(config_from_env_var, caplog):
@@ -109,7 +116,7 @@ def test_run_with_env_var_defined_config(config_from_env_var, caplog):
 
     # run setup and workflow
     with caplog.at_level(
-        logging.INFO, logger="brainglobe_workflows.cellfinder.cellfinder_main"
+        logging.DEBUG, logger="brainglobe_workflows.cellfinder.cellfinder_main"
     ):
         cfg = setup_workflow()
         run_workflow_from_cellfinder_run(cfg)
@@ -117,7 +124,7 @@ def test_run_with_env_var_defined_config(config_from_env_var, caplog):
     # check log
     assert (
         "Configuration retrieved from "
-        f'{os.environ["CELLFINDER_CONFIG_PATH"]}' in caplog.text
+        f'{os.environ["CELLFINDER_CONFIG_PATH"]}' in caplog.messages
     )
 
 
@@ -134,14 +141,14 @@ def test_setup_with_missing_signal_data(config_from_dict, caplog):
     # run setup
     # context manager temporarily sets the log level for the given logger
     with caplog.at_level(
-        logging.ERROR, logger="brainglobe_workflows.cellfinder.cellfinder_main"
+        logging.DEBUG, logger="brainglobe_workflows.cellfinder.cellfinder_main"
     ):
         cfg = setup_workflow(config_from_dict)
 
-    # check log
+    # check log-- when run as a suite, both directories exist already?
     assert (
         f"The directory {cfg.signal_parent_dir} "
-        "does not exist" in caplog.text
+        "does not exist" in caplog.messages
     )
 
 
@@ -157,14 +164,14 @@ def test_setup_with_missing_background_data(config_from_dict, caplog):
 
     # run setup
     with caplog.at_level(
-        logging.ERROR, logger="brainglobe_workflows.cellfinder.cellfinder_main"
+        logging.DEBUG, logger="brainglobe_workflows.cellfinder.cellfinder_main"
     ):
         cfg = setup_workflow(config_from_dict)
 
     # check log
     assert (
         f"The directory {cfg.background_parent_dir} "
-        "does not exist" in caplog.text
+        "does not exist" in caplog.messages
     )
 
 
@@ -175,12 +182,12 @@ def test_setup_fetching_from_GIN(config_from_dict, caplog):
 
     # run setup
     with caplog.at_level(
-        logging.INFO, logger="brainglobe_workflows.cellfinder.cellfinder_main"
+        logging.DEBUG, logger="brainglobe_workflows.cellfinder.cellfinder_main"
     ):
         setup_workflow(config_from_dict)
 
     # check log
     assert (
         "Fetching input data from the "
-        "provided GIN repository" in caplog.text
+        "provided GIN repository" in caplog.messages
     )
