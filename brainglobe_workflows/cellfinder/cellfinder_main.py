@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import os
@@ -196,10 +197,12 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
     if not (config.list_signal_files and config.list_signal_files):
         config = retrieve_input_data(config)
 
-    # Create output directory if it doesn't exist
-    # TODO: should I check if it exists and has data in it?
-    # it will be overwritten
-    Path(config.output_path).mkdir(parents=True, exist_ok=True)
+    # Create output directory if it doesn't exist, timestamped
+    timestamp = datetime.datetime.now()
+    timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
+    (Path(str(config.output_path) + "_" + timestamp_formatted)).mkdir(
+        parents=True, exist_ok=True
+    )
 
     return config
 
