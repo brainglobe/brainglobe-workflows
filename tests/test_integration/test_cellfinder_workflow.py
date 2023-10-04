@@ -75,6 +75,10 @@ def test_run_with_env_var_config(config_from_env_var, caplog, logger_str):
         "provided GIN repository" in caplog.messages
     )
 
+    # check output directory and output file exist
+    assert Path(cfg.output_path).exists()
+    assert (Path(cfg.output_path) / cfg.detected_cells_filename).is_file()
+
 
 def test_run_with_default_config(cellfinder_cache_dir, caplog, logger_str):
     # check environment var is not defined
@@ -91,6 +95,10 @@ def test_run_with_default_config(cellfinder_cache_dir, caplog, logger_str):
         "Fetching input data from the "
         "provided GIN repository" in caplog.messages
     )
+
+    # check output directory and output file exist
+    assert Path(cfg.output_path).exists()
+    assert (Path(cfg.output_path) / cfg.detected_cells_filename).is_file()
 
 
 # test running on local data?

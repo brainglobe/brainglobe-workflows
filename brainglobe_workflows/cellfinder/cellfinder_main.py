@@ -214,7 +214,7 @@ def setup_workflow(cellfinder_cache_dir=CELLFINDER_CACHE_DIR):
     timestamp = datetime.datetime.now()
     timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
     output_path_timestamped = Path(
-        str(config.output_path) + timestamp_formatted
+        str(config.output_path_basename) + timestamp_formatted
     )
     output_path_timestamped.mkdir(parents=True, exist_ok=True)
     # add to config
