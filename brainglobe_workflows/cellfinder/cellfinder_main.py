@@ -29,47 +29,47 @@ Pathlike = Union[str, os.PathLike]
 logger = logging.getLogger(__name__)
 
 # Default config
-DATA_URL = "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip"
-DATA_HASH = "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
-CELLFINDER_CACHE_DIR = Path.home() / ".cellfinder_benchmarks"
+CELLFINDER_CACHE_DIR = Path.home() / ".cellfinder_workflows"
 
-DEFAULT_CONFIG_DICT = {
-    "install_path": CELLFINDER_CACHE_DIR,
-    "data_url": DATA_URL,
-    "data_hash": DATA_HASH,
-    "local_path": CELLFINDER_CACHE_DIR / "cellfinder_test_data",
-    "signal_parent_dir": str(
-        CELLFINDER_CACHE_DIR / "cellfinder_test_data" / "signal"
-    ),
-    "background_parent_dir": str(
-        CELLFINDER_CACHE_DIR / "cellfinder_test_data" / "background"
-    ),
-    "output_path": CELLFINDER_CACHE_DIR / "cellfinder_output",
-    "detected_cells_filepath": (
-        CELLFINDER_CACHE_DIR / "cellfinder_output" / "detected_cells.xml"
-    ),
-    "voxel_sizes": [5, 2, 2],  # microns
-    "start_plane": 0,
-    "end_plane": -1,
-    "trained_model": None,  # if None, it will use a default model
-    "model_weights": None,
-    "model": "resnet50_tv",
-    "batch_size": 32,
-    "n_free_cpus": 2,
-    "network_voxel_sizes": [5, 1, 1],
-    "soma_diameter": 16,
-    "ball_xy_size": 6,
-    "ball_z_size": 15,
-    "ball_overlap_fraction": 0.6,
-    "log_sigma_size": 0.2,
-    "n_sds_above_mean_thresh": 10,
-    "soma_spread_factor": 1.4,
-    "max_cluster_size": 100000,
-    "cube_width": 50,
-    "cube_height": 50,
-    "cube_depth": 20,
-    "network_depth": "50",
-}
+
+def default_config_dict(CELLFINDER_CACHE_DIR):
+    return {
+        "install_path": CELLFINDER_CACHE_DIR,
+        "data_url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
+        "data_hash": (
+            "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
+        ),
+        "local_path": CELLFINDER_CACHE_DIR / "cellfinder_test_data",
+        "signal_parent_dir": str(
+            CELLFINDER_CACHE_DIR / "cellfinder_test_data" / "signal"
+        ),
+        "background_parent_dir": str(
+            CELLFINDER_CACHE_DIR / "cellfinder_test_data" / "background"
+        ),
+        "output_path_basename": CELLFINDER_CACHE_DIR / "cellfinder_output_",
+        "detected_cells_filename": "detected_cells.xml",
+        "voxel_sizes": [5, 2, 2],  # microns
+        "start_plane": 0,
+        "end_plane": -1,
+        "trained_model": None,  # if None, it will use a default model
+        "model_weights": None,
+        "model": "resnet50_tv",
+        "batch_size": 32,
+        "n_free_cpus": 2,
+        "network_voxel_sizes": [5, 1, 1],
+        "soma_diameter": 16,
+        "ball_xy_size": 6,
+        "ball_z_size": 15,
+        "ball_overlap_fraction": 0.6,
+        "log_sigma_size": 0.2,
+        "n_sds_above_mean_thresh": 10,
+        "soma_spread_factor": 1.4,
+        "max_cluster_size": 100000,
+        "cube_width": 50,
+        "cube_height": 50,
+        "cube_depth": 20,
+        "network_depth": "50",
+    }
 
 
 @dataclass
@@ -90,8 +90,8 @@ class CellfinderConfig:
     local_path: Pathlike
     signal_parent_dir: str
     background_parent_dir: str
-    output_path: Pathlike
-    detected_cells_filepath: Pathlike
+    output_path_basename: Pathlike
+    detected_cells_filename: Pathlike
 
     # preprocessing parameters
     voxel_sizes: Tuple[float, float, float]
@@ -120,6 +120,7 @@ class CellfinderConfig:
 
     list_signal_files: Optional[list] = None
     list_background_files: Optional[list] = None
+    output_path: Optional[Pathlike] = None
 
 
 def example_cellfinder_script():
@@ -159,21 +160,23 @@ def run_workflow_from_cellfinder_run(cfg):
     )
 
     # Save results to xml file
-    save_cells(detected_cells, cfg.detected_cells_filepath)
+    save_cells(detected_cells, cfg.output_path / cfg.detected_cells_filename)
 
 
-def setup_workflow():
+def setup_workflow(cellfinder_cache_dir=CELLFINDER_CACHE_DIR):
     """Prepare configuration to run workflow
 
     This includes
     - instantiating the config dictionary,
     - checking if the input data exists locally, and fetching from
       GIN repository otherwise,
-    - creating the directory for the output of the workflow if it doesn't exist
+    - creating a timestamped directory for the output of the workflow if
+      it doesn't exist and adding it to the config
 
     To instantiate the config dictionary, we first check if an environment
     variable "CELLFINDER_CONFIG_PATH" pointing to a config json file exists.
     If not, the default config (DEFAULT_CONFIG_DICT) is used.
+
     Returns
     -------
     config : CellfinderConfig
@@ -182,7 +185,7 @@ def setup_workflow():
     """
 
     # Define config
-    # if environment variable defined
+    # if environment variable defined, that prevails
     if "CELLFINDER_CONFIG_PATH" in os.environ.keys():
         input_config_path = Path(os.environ["CELLFINDER_CONFIG_PATH"])
         assert input_config_path.exists()
@@ -198,9 +201,9 @@ def setup_workflow():
             "Configuration retrieved from "
             f'{os.environ["CELLFINDER_CONFIG_PATH"]}'
         )
-    # else use the default config
+    # else use the default config, with the cellfinder cache directory provided
     else:
-        config = CellfinderConfig(**DEFAULT_CONFIG_DICT)
+        config = CellfinderConfig(**default_config_dict(cellfinder_cache_dir))
         logger.info("Using default configuration")
 
     # Retrieve and add lists of input data to config if neither are defined
@@ -210,9 +213,12 @@ def setup_workflow():
     # Create output directory if it doesn't exist, timestamped
     timestamp = datetime.datetime.now()
     timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
-    (Path(str(config.output_path) + "_" + timestamp_formatted)).mkdir(
-        parents=True, exist_ok=True
+    output_path_timestamped = Path(
+        str(config.output_path) + timestamp_formatted
     )
+    output_path_timestamped.mkdir(parents=True, exist_ok=True)
+    # add to config
+    config.output_path = output_path_timestamped
 
     return config
 
