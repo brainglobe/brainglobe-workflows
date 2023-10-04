@@ -14,7 +14,7 @@ import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Tuple, Union  # Any, Dict, Tuple,
+from typing import Optional, Tuple, Union
 
 import pooch
 from brainglobe_utils.IO.cells import save_cells
@@ -22,7 +22,7 @@ from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 from cellfinder_core.train.train_yml import depth_type
 
-Pathlike = Union[str, os.PathLike]  # Union[str, bytes, os.PathLike, Path]
+Pathlike = Union[str, os.PathLike]
 
 # Default config
 DATA_URL = "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip"
