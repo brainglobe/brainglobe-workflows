@@ -1,3 +1,14 @@
+"""A script reproducing the main cellfinder workflow
+
+It assumes an environment variable called "CELLFINDER_CONFIG_PATH" exists,
+which points to a json file with the required parameters. If the environment
+variable does not exist, the default configuration parameters (defined in
+DEFAULT_CONFIG_DICT below) are used
+
+"""
+
+
+import datetime
 import json
 import logging
 import os
@@ -22,7 +33,7 @@ DATA_URL = "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/ce
 DATA_HASH = "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
 CELLFINDER_CACHE_DIR = Path.home() / ".cellfinder_benchmarks"
 
-default_config_dict = {
+DEFAULT_CONFIG_DICT = {
     "install_path": CELLFINDER_CACHE_DIR,
     "data_url": DATA_URL,
     "data_hash": DATA_HASH,
@@ -151,7 +162,7 @@ def run_workflow_from_cellfinder_run(cfg):
     save_cells(detected_cells, cfg.detected_cells_filepath)
 
 
-def setup_workflow(default_config_dict: dict = default_config_dict):
+def setup_workflow():
     """Prepare configuration to run workflow
 
     This includes
@@ -162,20 +173,16 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
 
     To instantiate the config dictionary, we first check if an environment
     variable "CELLFINDER_CONFIG_PATH" pointing to a config json file exists.
-    If not, the default config is used.
-
-    Parameters
-    ----------
-    default_config_dict : dict
-        a dictionary with the default config parameters
-
+    If not, the default config (DEFAULT_CONFIG_DICT) is used.
     Returns
     -------
-    _type_
-        _description_
+    config : CellfinderConfig
+        a class with the required setup methods and parameters for
+        the cellfinder workflow
     """
 
     # Define config
+    # if environment variable defined
     if "CELLFINDER_CONFIG_PATH" in os.environ.keys():
         input_config_path = Path(os.environ["CELLFINDER_CONFIG_PATH"])
         assert input_config_path.exists()
@@ -191,19 +198,21 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
             "Configuration retrieved from "
             f'{os.environ["CELLFINDER_CONFIG_PATH"]}'
         )
-
+    # else use the default config
     else:
-        config = CellfinderConfig(**default_config_dict)
+        config = CellfinderConfig(**DEFAULT_CONFIG_DICT)
         logger.info("Using default configuration")
 
     # Retrieve and add lists of input data to config if neither are defined
     if not (config.list_signal_files and config.list_signal_files):
         config = retrieve_input_data(config)
 
-    # Create output directory if it doesn't exist
-    # TODO: should I check if it exists and has data in it?
-    # it will be overwritten
-    Path(config.output_path).mkdir(parents=True, exist_ok=True)
+    # Create output directory if it doesn't exist, timestamped
+    timestamp = datetime.datetime.now()
+    timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
+    (Path(str(config.output_path) + "_" + timestamp_formatted)).mkdir(
+        parents=True, exist_ok=True
+    )
 
     return config
 
