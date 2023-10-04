@@ -19,7 +19,7 @@ DATA_URL = "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/ce
 DATA_HASH = "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
 CELLFINDER_CACHE_DIR = Path.home() / ".cellfinder_benchmarks"
 
-default_config_dict = {
+DEFAULT_CONFIG_DICT = {
     "install_path": CELLFINDER_CACHE_DIR,
     "data_url": DATA_URL,
     "data_hash": DATA_HASH,
@@ -148,7 +148,7 @@ def run_workflow_from_cellfinder_run(cfg):
     save_cells(detected_cells, cfg.detected_cells_filepath)
 
 
-def setup_workflow(default_config_dict: dict = default_config_dict):
+def setup_workflow(input_config_dict: dict = DEFAULT_CONFIG_DICT):
     """Prepare configuration to run workflow
 
     This includes
@@ -163,8 +163,8 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
 
     Parameters
     ----------
-    default_config_dict : dict
-        a dictionary with the default config parameters
+    input_config_dict : dict
+        a dictionary with the input config parameters
 
     Returns
     -------
@@ -190,7 +190,7 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
         )
 
     else:
-        config = CellfinderConfig(**default_config_dict)
+        config = CellfinderConfig(**input_config_dict)
         logging.info("Using default configuration")
 
     # Retrieve and add lists of input data to config if neither are defined
