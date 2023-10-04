@@ -1,3 +1,13 @@
+"""A script reproducing the main cellfinder workflow
+
+It assumes an environment variable called "CELLFINDER_CONFIG_PATH" exists,
+which points to a json file with the required parameters. If the environment
+variable does not exist, the default configuration parameters (defined in
+DEFAULT_CONFIG_DICT below) are used
+
+"""
+
+
 import datetime
 import json
 import logging
@@ -109,8 +119,8 @@ class CellfinderConfig:
 
 
 def example_cellfinder_script():
-    cfg = setup_workflow()  # (this won't be timed)
-    run_workflow_from_cellfinder_run(cfg)  # (this will be timed)
+    cfg = setup_workflow()
+    run_workflow_from_cellfinder_run(cfg)
 
 
 def run_workflow_from_cellfinder_run(cfg):
@@ -168,12 +178,13 @@ def setup_workflow():
     """
 
     # Define config
+    # if environment variable defined
     if "CELLFINDER_CONFIG_PATH" in os.environ.keys():
         input_config_path = Path(os.environ["CELLFINDER_CONFIG_PATH"])
         assert input_config_path.exists()
 
-        # read into dict (assuming config is a json dict?)
-        # TODO:add error handling here?
+        # read into dict
+        # (assuming config is json serializable)
         with open(input_config_path) as cfg:
             config_dict = json.load(cfg)
 
@@ -183,7 +194,7 @@ def setup_workflow():
             "Configuration retrieved from "
             f'{os.environ["CELLFINDER_CONFIG_PATH"]}'
         )
-
+    # else use the default config
     else:
         config = CellfinderConfig(**DEFAULT_CONFIG_DICT)
         logging.info("Using default configuration")
