@@ -14,9 +14,8 @@ from cellfinder_core.train.train_yml import depth_type
 Pathlike = Union[str, os.PathLike]  # Union[str, bytes, os.PathLike, Path]
 
 # logger
-# if imported as a module, the logger is names after the module
+# if imported as a module, the logger is named after the module
 logger = logging.getLogger(__name__)
-logger.propagate = True
 
 # Default config
 DATA_URL = "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip"
