@@ -148,7 +148,7 @@ def run_workflow_from_cellfinder_run(cfg):
     save_cells(detected_cells, cfg.detected_cells_filepath)
 
 
-def setup_workflow(input_config_dict: dict = DEFAULT_CONFIG_DICT):
+def setup_workflow():
     """Prepare configuration to run workflow
 
     This includes
@@ -159,17 +159,12 @@ def setup_workflow(input_config_dict: dict = DEFAULT_CONFIG_DICT):
 
     To instantiate the config dictionary, we first check if an environment
     variable "CELLFINDER_CONFIG_PATH" pointing to a config json file exists.
-    If not, the default config is used.
-
-    Parameters
-    ----------
-    input_config_dict : dict
-        a dictionary with the input config parameters
-
+    If not, the default config (DEFAULT_CONFIG_DICT) is used.
     Returns
     -------
-    _type_
-        _description_
+    config : CellfinderConfig
+        a class with the required setup methods and parameters for
+        the cellfinder workflow
     """
 
     # Define config
@@ -190,7 +185,7 @@ def setup_workflow(input_config_dict: dict = DEFAULT_CONFIG_DICT):
         )
 
     else:
-        config = CellfinderConfig(**input_config_dict)
+        config = CellfinderConfig(**DEFAULT_CONFIG_DICT)
         logging.info("Using default configuration")
 
     # Retrieve and add lists of input data to config if neither are defined
