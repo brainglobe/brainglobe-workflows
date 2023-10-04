@@ -3,7 +3,7 @@ import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Tuple, Union  # Any, Dict, Tuple,
+from typing import Optional, Tuple, Union
 
 import pooch
 from brainglobe_utils.IO.cells import save_cells
@@ -11,7 +11,7 @@ from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 from cellfinder_core.train.train_yml import depth_type
 
-Pathlike = Union[str, os.PathLike]  # Union[str, bytes, os.PathLike, Path]
+Pathlike = Union[str, os.PathLike]
 
 # logger
 # if imported as a module, the logger is named after the module
@@ -71,8 +71,8 @@ class CellfinderConfig:
     # cellfinder benchmarks cache directory
     install_path: Pathlike
 
-    # origin of data to download (if req)
-    data_url: Optional[str]  # either str or None
+    # origin of data to download (if required)
+    data_url: Optional[str]
     data_hash: Optional[str]
 
     # cached subdirectory to save data to
@@ -112,8 +112,8 @@ class CellfinderConfig:
 
 
 def example_cellfinder_script():
-    cfg = setup_workflow()  # (this won't be timed)
-    run_workflow_from_cellfinder_run(cfg)  # (this will be timed)
+    cfg = setup_workflow()
+    run_workflow_from_cellfinder_run(cfg)
 
 
 def run_workflow_from_cellfinder_run(cfg):
@@ -180,8 +180,8 @@ def setup_workflow(default_config_dict: dict = default_config_dict):
         input_config_path = Path(os.environ["CELLFINDER_CONFIG_PATH"])
         assert input_config_path.exists()
 
-        # read into dict (assuming config is a json dict?)
-        # TODO:add error handling here?
+        # read config into dict
+        # (assumes config is json serializable)
         with open(input_config_path) as cfg:
             config_dict = json.load(cfg)
 
