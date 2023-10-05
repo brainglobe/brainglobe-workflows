@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from brainglobe_workflows.cellfinder.cellfinder_main import (
-    default_config_dict,
+    make_default_config_dict,
     run_workflow_from_cellfinder_run,
     setup_workflow,
 )
@@ -42,7 +42,7 @@ def config_from_env_var(tmp_path, cellfinder_cache_dir):
     # alter config if required by the test
     # - missing signal directory
     # - missing background directory
-    config_dict = default_config_dict(cellfinder_cache_dir)
+    config_dict = make_default_config_dict(cellfinder_cache_dir)
 
     # dump config into json
     with open(input_config_path, "w") as js:

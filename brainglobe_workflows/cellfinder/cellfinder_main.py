@@ -32,21 +32,38 @@ logger = logging.getLogger(__name__)
 CELLFINDER_CACHE_DIR = Path.home() / ".cellfinder_workflows"
 
 
-def default_config_dict(CELLFINDER_CACHE_DIR):
+def make_default_config_dict(cellfinder_cache_dir):
+    """Generate a config dictionary with the required parameters
+    for the workflow
+
+    The input data is fetched from GIN and downloaded to
+    the location provided by cellfinder_cache_dir. The results are
+    also saved in a timestamped output subdirectory under cellfinder_cache_dir
+
+    Parameters
+    ----------
+    cellfinder_cache_dir : _type_
+        _description_
+
+    Returns
+    -------
+    dict
+        dictionary with the required parameters for the workflow
+    """
     return {
-        "install_path": CELLFINDER_CACHE_DIR,
+        "install_path": cellfinder_cache_dir,
         "data_url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
         "data_hash": (
             "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
         ),
-        "local_path": CELLFINDER_CACHE_DIR / "cellfinder_test_data",
+        "local_path": cellfinder_cache_dir / "cellfinder_test_data",
         "signal_parent_dir": str(
-            CELLFINDER_CACHE_DIR / "cellfinder_test_data" / "signal"
+            cellfinder_cache_dir / "cellfinder_test_data" / "signal"
         ),
         "background_parent_dir": str(
-            CELLFINDER_CACHE_DIR / "cellfinder_test_data" / "background"
+            cellfinder_cache_dir / "cellfinder_test_data" / "background"
         ),
-        "output_path_basename": CELLFINDER_CACHE_DIR / "cellfinder_output_",
+        "output_path_basename": cellfinder_cache_dir / "cellfinder_output_",
         "detected_cells_filename": "detected_cells.xml",
         "voxel_sizes": [5, 2, 2],  # microns
         "start_plane": 0,
@@ -203,7 +220,9 @@ def setup_workflow(cellfinder_cache_dir=CELLFINDER_CACHE_DIR):
         )
     # else use the default config, with the cellfinder cache directory provided
     else:
-        config = CellfinderConfig(**default_config_dict(cellfinder_cache_dir))
+        config = CellfinderConfig(
+            **make_default_config_dict(cellfinder_cache_dir)
+        )
         logger.info("Using default configuration")
 
     # Retrieve and add lists of input data to config if neither are defined
