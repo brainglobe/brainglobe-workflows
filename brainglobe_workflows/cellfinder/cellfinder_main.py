@@ -8,10 +8,12 @@ DEFAULT_CONFIG_DICT below) are used
 """
 
 
+import argparse
 import datetime
 import json
 import logging
 import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple, Union
@@ -26,67 +28,13 @@ Pathlike = Union[str, os.PathLike]
 
 # logger
 # if imported as a module, the logger is named after the module
+
+console_handler = logging.StreamHandler(sys.stdout)
+console_format = logging.Formatter("%(name)s %(levelname)s: %(message)s")
+console_handler.setFormatter(console_format)
 logger = logging.getLogger(__name__)
-
-# Default config
-CELLFINDER_CACHE_DIR = Path.home() / ".cellfinder_workflows"
-
-
-def make_default_config_dict(cellfinder_cache_dir):
-    """Generate a config dictionary with the required parameters
-    for the workflow
-
-    The input data is fetched from GIN and downloaded to
-    the location provided by cellfinder_cache_dir. The results are
-    also saved in a timestamped output subdirectory under cellfinder_cache_dir
-
-    Parameters
-    ----------
-    cellfinder_cache_dir : _type_
-        _description_
-
-    Returns
-    -------
-    dict
-        dictionary with the required parameters for the workflow
-    """
-    return {
-        "install_path": cellfinder_cache_dir,
-        "data_url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
-        "data_hash": (
-            "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
-        ),
-        "local_path": cellfinder_cache_dir / "cellfinder_test_data",
-        "signal_parent_dir": str(
-            cellfinder_cache_dir / "cellfinder_test_data" / "signal"
-        ),
-        "background_parent_dir": str(
-            cellfinder_cache_dir / "cellfinder_test_data" / "background"
-        ),
-        "output_path_basename": cellfinder_cache_dir / "cellfinder_output_",
-        "detected_cells_filename": "detected_cells.xml",
-        "voxel_sizes": [5, 2, 2],  # microns
-        "start_plane": 0,
-        "end_plane": -1,
-        "trained_model": None,  # if None, it will use a default model
-        "model_weights": None,
-        "model": "resnet50_tv",
-        "batch_size": 32,
-        "n_free_cpus": 2,
-        "network_voxel_sizes": [5, 1, 1],
-        "soma_diameter": 16,
-        "ball_xy_size": 6,
-        "ball_z_size": 15,
-        "ball_overlap_fraction": 0.6,
-        "log_sigma_size": 0.2,
-        "n_sds_above_mean_thresh": 10,
-        "soma_spread_factor": 1.4,
-        "max_cluster_size": 100000,
-        "cube_width": 50,
-        "cube_height": 50,
-        "cube_depth": 20,
-        "network_depth": "50",
-    }
+logger.setLevel(logging.DEBUG)
+logger.addHandler(console_handler)
 
 
 @dataclass
@@ -140,11 +88,6 @@ class CellfinderConfig:
     output_path: Optional[Pathlike] = None
 
 
-def example_cellfinder_script():
-    cfg = setup_workflow()
-    run_workflow_from_cellfinder_run(cfg)
-
-
 def run_workflow_from_cellfinder_run(cfg):
     """
     Run workflow based on the cellfinder_core.main.main()
@@ -180,7 +123,7 @@ def run_workflow_from_cellfinder_run(cfg):
     save_cells(detected_cells, cfg.output_path / cfg.detected_cells_filename)
 
 
-def setup_workflow(cellfinder_cache_dir=CELLFINDER_CACHE_DIR):
+def setup_workflow(input_config_path):
     """Prepare configuration to run workflow
 
     This includes
@@ -190,9 +133,11 @@ def setup_workflow(cellfinder_cache_dir=CELLFINDER_CACHE_DIR):
     - creating a timestamped directory for the output of the workflow if
       it doesn't exist and adding it to the config
 
-    To instantiate the config dictionary, we first check if an environment
-    variable "CELLFINDER_CONFIG_PATH" pointing to a config json file exists.
-    If not, the default config (DEFAULT_CONFIG_DICT) is used.
+
+    Parameters
+    ----------
+    input_config_path : Path
+        _description_
 
     Returns
     -------
@@ -202,28 +147,16 @@ def setup_workflow(cellfinder_cache_dir=CELLFINDER_CACHE_DIR):
     """
 
     # Define config
-    # if environment variable defined, that prevails
-    if "CELLFINDER_CONFIG_PATH" in os.environ.keys():
-        input_config_path = Path(os.environ["CELLFINDER_CONFIG_PATH"])
-        assert input_config_path.exists()
+    assert input_config_path.exists()
 
-        # read config into dict
-        # (assumes config is json serializable)
-        with open(input_config_path) as cfg:
-            config_dict = json.load(cfg)
+    # read config into dict
+    # (assumes config is json serializable)
+    with open(input_config_path) as cfg:
+        config_dict = json.load(cfg)
 
-        config = CellfinderConfig(**config_dict)
+    config = CellfinderConfig(**config_dict)
 
-        logger.info(
-            "Configuration retrieved from "
-            f'{os.environ["CELLFINDER_CONFIG_PATH"]}'
-        )
-    # else use the default config, with the cellfinder cache directory provided
-    else:
-        config = CellfinderConfig(
-            **make_default_config_dict(cellfinder_cache_dir)
-        )
-        logger.info("Using default configuration")
+    logger.info(f"Input config read from {input_config_path}")
 
     # Retrieve and add lists of input data to config if neither are defined
     if not (config.list_signal_files and config.list_signal_files):
@@ -339,5 +272,40 @@ def retrieve_input_data(config):
     return config
 
 
+def parse_cli_arguments():
+    # initialise argument parser
+    parser = argparse.ArgumentParser(
+        description=(
+            "To launch the workflow with "
+            "a desired set of input parameters, run:"
+            " `python cellfinder_main path/to/input/config.json` "
+            " where path/to/input/config.json is the json file "
+            "containing the workflow parameters."
+        )
+    )
+    # add required arguments
+    # add --config?
+    parser.add_argument(
+        "input_config_path",  # required=True,
+        type=str,
+        metavar="INPUT_CONFIG_PATH",  # a name for usage messages
+        help="",
+    )
+    # build parser object
+    args = parser.parse_args()
+
+    # error if required arguments not provided
+    if not args.input_config_path:
+        logger.error("Paths to input config not provided.")
+        parser.print_help()
+
+    return args
+
+
 if __name__ == "__main__":
-    example_cellfinder_script()
+    args = parse_cli_arguments()
+
+    cfg = setup_workflow(
+        Path(args.input_config_path)
+    )  # this won't be benchmarked
+    run_workflow_from_cellfinder_run(cfg)  # this will be benchmarked
