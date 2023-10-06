@@ -42,6 +42,7 @@ def test_run_with_default_config(tmp_path):
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
+        encoding="utf-8",
     )
 
     # check returncode
