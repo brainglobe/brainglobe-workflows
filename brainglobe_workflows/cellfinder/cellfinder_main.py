@@ -40,10 +40,6 @@ class CellfinderConfig:
     # cellfinder benchmarks cache directory
     install_path: Pathlike
 
-    # origin of data to download (if required)
-    data_url: Optional[str]
-    data_hash: Optional[str]
-
     # cached subdirectory to save data to
     extract_dir_relative: Pathlike
     signal_parent_dir: str
@@ -75,6 +71,10 @@ class CellfinderConfig:
     cube_height: int
     cube_depth: int
     network_depth: depth_type
+
+    # origin of data to download (if required)
+    data_url: Optional[str] = None
+    data_hash: Optional[str] = None
 
     list_signal_files: Optional[list] = None
     list_background_files: Optional[list] = None

@@ -6,13 +6,16 @@ import pytest
 
 from brainglobe_workflows.cellfinder.cellfinder_main import CellfinderConfig
 
+DATA_URL = "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip"
+DATA_HASH = "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
 
-def make_config_dict_fetch_from_GIN(cellfinder_cache_dir: Path):
+
+def make_config_dict_local(cellfinder_cache_dir: Path):
     """Generate a config dictionary with the required parameters
     for the workflow
 
-    The input data is fetched from GIN and downloaded to cellfinder_cache_dir.
-    The results are also saved in a timestamped output subdirectory under
+    The input data is assumed to be locally at cellfinder_cache_dir.
+    The results are saved in a timestamped output subdirectory under
     cellfinder_cache_dir
 
     Parameters
@@ -28,10 +31,6 @@ def make_config_dict_fetch_from_GIN(cellfinder_cache_dir: Path):
     """
     return {
         "install_path": cellfinder_cache_dir,
-        "data_url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
-        "data_hash": (
-            "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
-        ),
         "extract_dir_relative": "cellfinder_test_data",  # relative path
         "signal_parent_dir": str(
             cellfinder_cache_dir / "cellfinder_test_data" / "signal"
@@ -63,6 +62,33 @@ def make_config_dict_fetch_from_GIN(cellfinder_cache_dir: Path):
         "cube_depth": 20,
         "network_depth": "50",
     }
+
+
+def make_config_dict_fetch_from_GIN(cellfinder_cache_dir: Path):
+    """Generate a config dictionary with the required parameters
+    for the workflow
+
+    The input data is fetched from GIN and downloaded to cellfinder_cache_dir.
+    The results are also saved in a timestamped output subdirectory under
+    cellfinder_cache_dir
+
+    Parameters
+    ----------
+    cellfinder_cache_dir : Path
+        Path to the directory where the downloaded input data will be unzipped,
+        and the output will be saved
+
+    Returns
+    -------
+    dict
+        dictionary with the required parameters for the workflow
+    """
+
+    config = make_config_dict_local(cellfinder_cache_dir)
+    config["data_url"] = DATA_URL
+    config["data_hash"] = DATA_HASH
+
+    return config
 
 
 def prep_json(obj):
@@ -150,7 +176,7 @@ def path_to_config_fetch_GIN(tmp_path: Path, cellfinder_cache_dir: Path):
 
 
 @pytest.fixture()
-def path_to_config_fetch_local(path_to_config_fetch_GIN: Path):
+def path_to_config_fetch_local(tmp_path: Path, cellfinder_cache_dir: Path):
     """Create an input config that points to local data and
     return its path.
 
@@ -168,18 +194,15 @@ def path_to_config_fetch_local(path_to_config_fetch_GIN: Path):
     path_to_config_fetch_GIN : Path
         path to a config file that fetches data from GIN
     """
-    # create config that fetches data from GIN
-    # via the `path_to_config_fetch_GIN` fixture
 
-    # read config into config class
-    with open(path_to_config_fetch_GIN) as cfg:
-        config_dict = json.load(cfg)
+    # instantiate basic config (assumes data is local)
+    config_dict = make_config_dict_local(cellfinder_cache_dir)
     config = CellfinderConfig(**config_dict)
 
-    # Download GIN data
+    # download GIN data to specified local directory
     pooch.retrieve(
-        url=config.data_url,
-        known_hash=config.data_hash,
+        url=DATA_URL,
+        known_hash=DATA_HASH,
         path=config.install_path,  # path to download zip to
         progressbar=True,
         processor=pooch.Unzip(
@@ -188,5 +211,12 @@ def path_to_config_fetch_local(path_to_config_fetch_GIN: Path):
         ),
     )
 
-    # return path to config json
-    return path_to_config_fetch_GIN
+    # save config to json
+    input_config_path = tmp_path / "input_config.json"
+    with open(input_config_path, "w") as js:
+        json.dump(config_dict, js, default=prep_json)
+
+    # check json file exists
+    assert Path(input_config_path).is_file()
+
+    return input_config_path
