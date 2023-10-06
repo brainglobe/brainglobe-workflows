@@ -81,7 +81,6 @@ class CellfinderConfig:
     output_path: Optional[Pathlike] = None
 
 
-# logger --- make this a function ?
 def setup_logger():
     console_handler = logging.StreamHandler(sys.stdout)
     console_format = logging.Formatter("%(name)s %(levelname)s: %(message)s")
@@ -177,7 +176,8 @@ def setup_workflow(input_config_path):
         str(config.output_path_basename) + timestamp_formatted
     )
     output_path_timestamped.mkdir(parents=True, exist_ok=True)
-    # add to config
+
+    # add output path to config
     config.output_path = output_path_timestamped
 
     return config
@@ -287,13 +287,12 @@ def parse_cli_arguments():
         description=(
             "To launch the workflow with "
             "a desired set of input parameters, run:"
-            " `python cellfinder_main path/to/input/config.json` "
-            " where path/to/input/config.json is the json file "
+            " `python cellfinder_main.py --config path/to/input/config.json` "
+            "where path/to/input/config.json is the json file "
             "containing the workflow parameters."
         )
     )
-    # add required arguments
-    # add --config?
+    # add arguments
     parser.add_argument(
         "-c",
         "--config",
@@ -302,10 +301,11 @@ def parse_cli_arguments():
         metavar="CONFIG",  # a name for usage messages
         help="",
     )
+
     # build parser object
     args = parser.parse_args()
 
-    # error if required arguments not provided
+    # print error if required arguments not provided
     if not args.config:
         logger.error("Paths to input config not provided.")
         parser.print_help()

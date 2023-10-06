@@ -190,8 +190,6 @@ def assert_outputs(path_to_config, parent_dir=""):
     """
 
     # load input config
-    # ATT! config.output_path is only defined after the workflow
-    # setup is run, because its name is timestamped!
     with open(path_to_config) as cfg:
         config_dict = json.load(cfg)
     config = CellfinderConfig(**config_dict)
