@@ -4,9 +4,7 @@ from pathlib import Path
 import pooch
 import pytest
 
-from brainglobe_workflows.cellfinder.cellfinder_main import (
-    CellfinderConfig,
-)
+from brainglobe_workflows.cellfinder.cellfinder_main import CellfinderConfig
 
 
 def make_config_dict_fetch_from_GIN(cellfinder_cache_dir):
@@ -34,7 +32,7 @@ def make_config_dict_fetch_from_GIN(cellfinder_cache_dir):
         "data_hash": (
             "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
         ),
-        "extract_relative_dir": "cellfinder_test_data",  # relative path
+        "extract_dir_relative": "cellfinder_test_data",  # relative path
         "signal_parent_dir": str(
             cellfinder_cache_dir / "cellfinder_test_data" / "signal"
         ),
@@ -185,7 +183,7 @@ def path_to_config_fetch_local(path_to_config_fetch_GIN):
         path=config.install_path,  # path to download zip to
         progressbar=True,
         processor=pooch.Unzip(
-            extract_dir=config.extract_relative_dir
+            extract_dir=config.extract_dir_relative
             # path to unzipped dir, *relative*  to 'path'
         ),
     )

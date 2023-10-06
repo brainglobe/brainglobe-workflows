@@ -45,7 +45,7 @@ class CellfinderConfig:
     data_hash: Optional[str]
 
     # cached subdirectory to save data to
-    extract_relative_dir: Pathlike
+    extract_dir_relative: Pathlike
     signal_parent_dir: str
     background_parent_dir: str
     output_path_basename: Pathlike
@@ -254,7 +254,7 @@ def retrieve_input_data(config):
                 path=config.install_path,  # path to download zip to
                 progressbar=True,
                 processor=pooch.Unzip(
-                    extract_dir=config.extract_relative_dir
+                    extract_dir=config.extract_dir_relative
                     # path to unzipped dir, *relative*  to 'path'
                 ),
             )
