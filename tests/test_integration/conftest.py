@@ -6,9 +6,6 @@ import pytest
 
 from brainglobe_workflows.cellfinder.cellfinder_main import CellfinderConfig
 
-DATA_URL = "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip"
-DATA_HASH = "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
-
 
 def make_config_dict_local(cellfinder_cache_dir: Path):
     """Generate a config dictionary with the required parameters
@@ -64,7 +61,9 @@ def make_config_dict_local(cellfinder_cache_dir: Path):
     }
 
 
-def make_config_dict_fetch_from_GIN(cellfinder_cache_dir: Path):
+def make_config_dict_fetch_from_GIN(
+    cellfinder_cache_dir: Path, data_url, data_hash
+):
     """Generate a config dictionary with the required parameters
     for the workflow
 
@@ -85,8 +84,8 @@ def make_config_dict_fetch_from_GIN(cellfinder_cache_dir: Path):
     """
 
     config = make_config_dict_local(cellfinder_cache_dir)
-    config["data_url"] = DATA_URL
-    config["data_hash"] = DATA_HASH
+    config["data_url"] = data_url
+    config["data_hash"] = data_hash
 
     return config
 
@@ -137,8 +136,20 @@ def cellfinder_cache_dir(tmp_path: Path):
     return Path(tmp_path) / ".cellfinder_workflows"
 
 
+@pytest.fixture(scope="session")
+def data_url():
+    return "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip"
+
+
+@pytest.fixture(scope="session")
+def data_hash():
+    return "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
+
+
 @pytest.fixture()
-def path_to_config_fetch_GIN(tmp_path: Path, cellfinder_cache_dir: Path):
+def path_to_config_fetch_GIN(
+    tmp_path: Path, cellfinder_cache_dir: Path, data_url, data_hash
+):
     """Create an input config that fetches data from GIN and
     return its path
 
@@ -158,7 +169,9 @@ def path_to_config_fetch_GIN(tmp_path: Path, cellfinder_cache_dir: Path):
         path to config file that fetches data from GIN
     """
     # create config dict
-    config_dict = make_config_dict_fetch_from_GIN(cellfinder_cache_dir)
+    config_dict = make_config_dict_fetch_from_GIN(
+        cellfinder_cache_dir, data_url, data_hash
+    )
 
     # create a temp json file to dump config data
     input_config_path = (
@@ -176,7 +189,9 @@ def path_to_config_fetch_GIN(tmp_path: Path, cellfinder_cache_dir: Path):
 
 
 @pytest.fixture()
-def path_to_config_fetch_local(tmp_path: Path, cellfinder_cache_dir: Path):
+def path_to_config_fetch_local(
+    tmp_path: Path, cellfinder_cache_dir: Path, data_url, data_hash
+):
     """Create an input config that points to local data and
     return its path.
 
@@ -201,8 +216,8 @@ def path_to_config_fetch_local(tmp_path: Path, cellfinder_cache_dir: Path):
 
     # download GIN data to specified local directory
     pooch.retrieve(
-        url=DATA_URL,
-        known_hash=DATA_HASH,
+        url=data_url,
+        known_hash=data_hash,
         path=config.install_path,  # path to download zip to
         progressbar=True,
         processor=pooch.Unzip(
