@@ -7,6 +7,7 @@ import pooch
 import pytest
 
 from brainglobe_workflows.cellfinder.cellfinder_main import (
+    DEFAULT_JSON_CONFIG_PATH,
     CellfinderConfig,
 )
 
@@ -77,7 +78,7 @@ def prep_json(obj):
         return json.JSONEncoder.default(obj)
 
 
-def assert_outputs(path_to_config):
+def assert_outputs(path_to_config, parent_dir=""):
     # load input config
     # ATT! config.output_path is only defined after the workflow
     # setup, because its name is timestamped
@@ -89,7 +90,9 @@ def assert_outputs(path_to_config):
     # it has expected output file inside it
     output_path_timestamped = [
         x
-        for x in (Path(config.output_path_basename)).parent.glob("*")
+        for x in (Path(parent_dir) / config.output_path_basename).parent.glob(
+            "*"
+        )
         if x.is_dir()
         and x.name.startswith(Path(config.output_path_basename).name)
     ]
@@ -187,36 +190,32 @@ def path_to_config_fetch_local(path_to_config_fetch_GIN):
 
 
 ### Tests
-# def test_run_with_default_config(tmp_path):
+def test_run_with_default_config(tmp_path):
+    # run workflow with CLI and capture log
+    # with cwd = pytest tmp_path <-------
+    subprocess_output = subprocess.run(
+        [
+            sys.executable,
+            Path(__file__).resolve().parents[2]
+            / "brainglobe_workflows"
+            / "cellfinder"
+            / "cellfinder_main.py",
+        ],
+        cwd=tmp_path,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
 
-#     # run workflow with CLI and capture log
-#     # with cwd = pytest tmp_path
-#     subprocess_output = subprocess.run(
-#         [
-#             sys.executable,
-#             Path(__file__).resolve().parents[2]
-#             / "brainglobe_workflows"
-#             / "cellfinder"
-#             / "cellfinder_main.py",
-#         ],
-#         cwd=tmp_path,
-#         stdout=subprocess.PIPE,
-#         stderr=subprocess.STDOUT,
-#         text=True,
-#     )
+    # check returncode
+    assert subprocess_output.returncode == 0
 
-#     # check returncode
-#     assert subprocess_output.returncode == 0
+    # check logs
+    assert "Using default config file" in subprocess_output.stdout
 
-#     # check logs
-#     assert (
-#         f"Using default config file"
-#         in subprocess_output.stdout
-#     )
-
-#     # Check one output directory exists and has expected
-# output file inside it
-#     assert_outputs(DEFAULT_JSON_CONFIG_PATH, tmp_path)
+    # Check one output directory exists and has expected
+    # output file inside it
+    assert_outputs(DEFAULT_JSON_CONFIG_PATH, tmp_path)
 
 
 def test_run_with_config_GIN(
