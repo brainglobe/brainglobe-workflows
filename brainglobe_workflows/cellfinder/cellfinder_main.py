@@ -7,7 +7,6 @@ DEFAULT_CONFIG_DICT below) are used
 
 """
 
-
 import argparse
 import datetime
 import json
@@ -26,15 +25,9 @@ from cellfinder_core.train.train_yml import depth_type
 
 Pathlike = Union[str, os.PathLike]
 
-# logger
-# if imported as a module, the logger is named after the module
-
-console_handler = logging.StreamHandler(sys.stdout)
-console_format = logging.Formatter("%(name)s %(levelname)s: %(message)s")
-console_handler.setFormatter(console_format)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logger.addHandler(console_handler)
+DEFAULT_JSON_CONFIG_PATH = (
+    Path(__file__).resolve().parent / "default_config.json"
+)
 
 
 @dataclass
@@ -52,7 +45,7 @@ class CellfinderConfig:
     data_hash: Optional[str]
 
     # cached subdirectory to save data to
-    local_path: Pathlike
+    extract_relative_dir: Pathlike
     signal_parent_dir: str
     background_parent_dir: str
     output_path_basename: Pathlike
@@ -86,6 +79,19 @@ class CellfinderConfig:
     list_signal_files: Optional[list] = None
     list_background_files: Optional[list] = None
     output_path: Optional[Pathlike] = None
+
+
+# logger --- make this a function ?
+def setup_logger():
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_format = logging.Formatter("%(name)s %(levelname)s: %(message)s")
+    console_handler.setFormatter(console_format)
+    logger = logging.getLogger(
+        __name__
+    )  # if imported as a module, the logger is named after the module
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(console_handler)
+    return logger
 
 
 def run_workflow_from_cellfinder_run(cfg):
@@ -157,6 +163,8 @@ def setup_workflow(input_config_path):
     config = CellfinderConfig(**config_dict)
 
     logger.info(f"Input config read from {input_config_path}")
+    if input_config_path == DEFAULT_JSON_CONFIG_PATH:
+        logger.info("Using default config file")
 
     # Retrieve and add lists of input data to config if neither are defined
     if not (config.list_signal_files and config.list_signal_files):
@@ -246,7 +254,8 @@ def retrieve_input_data(config):
                 path=config.install_path,  # path to download zip to
                 progressbar=True,
                 processor=pooch.Unzip(
-                    extract_dir=config.local_path  # path to unzipped dir
+                    extract_dir=config.extract_relative_dir
+                    # path to unzipped dir, *relative*  to 'path'
                 ),
             )
             logger.info("Fetching input data from the provided GIN repository")
@@ -286,16 +295,18 @@ def parse_cli_arguments():
     # add required arguments
     # add --config?
     parser.add_argument(
-        "input_config_path",  # required=True,
+        "-c",
+        "--config",
+        default=str(DEFAULT_JSON_CONFIG_PATH),
         type=str,
-        metavar="INPUT_CONFIG_PATH",  # a name for usage messages
+        metavar="CONFIG",  # a name for usage messages
         help="",
     )
     # build parser object
     args = parser.parse_args()
 
     # error if required arguments not provided
-    if not args.input_config_path:
+    if not args.config:
         logger.error("Paths to input config not provided.")
         parser.print_help()
 
@@ -303,9 +314,12 @@ def parse_cli_arguments():
 
 
 if __name__ == "__main__":
+    # setup logger
+    logger = setup_logger()
+
+    # parse command line arguments
     args = parse_cli_arguments()
 
-    cfg = setup_workflow(
-        Path(args.input_config_path)
-    )  # this won't be benchmarked
-    run_workflow_from_cellfinder_run(cfg)  # this will be benchmarked
+    # run workflow
+    cfg = setup_workflow(Path(args.config))
+    run_workflow_from_cellfinder_run(cfg)  # only this will be benchmarked

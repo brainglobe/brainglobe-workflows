@@ -3,6 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pooch
 import pytest
 
 from brainglobe_workflows.cellfinder.cellfinder_main import (
@@ -10,7 +11,7 @@ from brainglobe_workflows.cellfinder.cellfinder_main import (
 )
 
 
-# config factory
+## Utils
 def make_config_dict_fetch_from_GIN(cellfinder_cache_dir):
     """Generate a config dictionary with the required parameters
     for the workflow
@@ -35,7 +36,7 @@ def make_config_dict_fetch_from_GIN(cellfinder_cache_dir):
         "data_hash": (
             "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
         ),
-        "local_path": cellfinder_cache_dir / "cellfinder_test_data",
+        "extract_relative_dir": "cellfinder_test_data",  # relative path
         "signal_parent_dir": str(
             cellfinder_cache_dir / "cellfinder_test_data" / "signal"
         ),
@@ -68,6 +69,39 @@ def make_config_dict_fetch_from_GIN(cellfinder_cache_dir):
     }
 
 
+# ensure all Paths are JSON serializable
+def prep_json(obj):
+    if isinstance(obj, Path):
+        return str(obj)
+    else:
+        return json.JSONEncoder.default(obj)
+
+
+def assert_outputs(path_to_config):
+    # load input config
+    # ATT! config.output_path is only defined after the workflow
+    # setup, because its name is timestamped
+    with open(path_to_config) as cfg:
+        config_dict = json.load(cfg)
+    config = CellfinderConfig(**config_dict)
+
+    # check one output directory exists and
+    # it has expected output file inside it
+    output_path_timestamped = [
+        x
+        for x in (Path(config.output_path_basename)).parent.glob("*")
+        if x.is_dir()
+        and x.name.startswith(Path(config.output_path_basename).name)
+    ]
+
+    assert len(output_path_timestamped) == 1
+    assert (output_path_timestamped[0]).exists()
+    assert (
+        output_path_timestamped[0] / config.detected_cells_filename
+    ).is_file()
+
+
+### Fixtures
 @pytest.fixture(autouse=True)
 def cellfinder_cache_dir(tmp_path):
     """Create a .cellfinder_workflows directory
@@ -89,11 +123,6 @@ def cellfinder_cache_dir(tmp_path):
     """
 
     return Path(tmp_path) / ".cellfinder_workflows"
-
-
-# @pytest.fixture()
-# def config_fetch_from_local():
-#     pass
 
 
 @pytest.fixture()
@@ -121,13 +150,6 @@ def path_to_config_fetch_GIN(tmp_path, cellfinder_cache_dir):
         tmp_path / "input_config.json"
     )  # save it in a temp dir separate from cellfinder_cache_dir
 
-    # ensure all Paths are JSON serializable
-    def prep_json(obj):
-        if isinstance(obj, Path):
-            return str(obj)
-        else:
-            return json.JSONEncoder.default(obj)
-
     # save config data to json file
     with open(input_config_path, "w") as js:
         json.dump(config_dict, js, default=prep_json)
@@ -138,7 +160,66 @@ def path_to_config_fetch_GIN(tmp_path, cellfinder_cache_dir):
     return input_config_path
 
 
-def test_run_with_config_from_GIN(
+@pytest.fixture()
+def path_to_config_fetch_local(path_to_config_fetch_GIN):
+    # create config that fetches data from GIN
+    # path_to_config_fetch_GIN
+
+    # read into config class
+    with open(path_to_config_fetch_GIN) as cfg:
+        config_dict = json.load(cfg)
+    config = CellfinderConfig(**config_dict)
+
+    # Download GIN data
+    pooch.retrieve(
+        url=config.data_url,
+        known_hash=config.data_hash,
+        path=config.install_path,  # path to download zip to
+        progressbar=True,
+        processor=pooch.Unzip(
+            extract_dir=config.extract_relative_dir
+            # path to unzipped dir, *relative*  to 'path'
+        ),
+    )
+
+    # return path to config json
+    return path_to_config_fetch_GIN
+
+
+### Tests
+# def test_run_with_default_config(tmp_path):
+
+#     # run workflow with CLI and capture log
+#     # with cwd = pytest tmp_path
+#     subprocess_output = subprocess.run(
+#         [
+#             sys.executable,
+#             Path(__file__).resolve().parents[2]
+#             / "brainglobe_workflows"
+#             / "cellfinder"
+#             / "cellfinder_main.py",
+#         ],
+#         cwd=tmp_path,
+#         stdout=subprocess.PIPE,
+#         stderr=subprocess.STDOUT,
+#         text=True,
+#     )
+
+#     # check returncode
+#     assert subprocess_output.returncode == 0
+
+#     # check logs
+#     assert (
+#         f"Using default config file"
+#         in subprocess_output.stdout
+#     )
+
+#     # Check one output directory exists and has expected
+# output file inside it
+#     assert_outputs(DEFAULT_JSON_CONFIG_PATH, tmp_path)
+
+
+def test_run_with_config_GIN(
     path_to_config_fetch_GIN,
 ):
     # run workflow with CLI and capture log
@@ -149,11 +230,13 @@ def test_run_with_config_from_GIN(
             / "brainglobe_workflows"
             / "cellfinder"
             / "cellfinder_main.py",
+            "--config",
             str(path_to_config_fetch_GIN),
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
+        encoding="utf-8",
     )
 
     # check returncode
@@ -170,20 +253,43 @@ def test_run_with_config_from_GIN(
     )
 
     # check output directory
-    # load config used
-    with open(path_to_config_fetch_GIN) as cfg:
-        config_dict = json.load(cfg)
-    config = CellfinderConfig(**config_dict)
-
     # check one output directory exists and has expected output file inside it
-    output_path_timestamped = [
-        x
-        for x in Path(config.output_path_basename).parent.glob("*")
-        if x.is_dir()
-        and x.name.startswith(Path(config.output_path_basename).name)
-    ]
-    assert len(output_path_timestamped) == 1
-    assert (output_path_timestamped[0]).exists()
+    assert_outputs(path_to_config_fetch_GIN)
+
+
+def test_run_with_config_local(
+    path_to_config_fetch_local,
+):
+    # run workflow with CLI and capture log
+    subprocess_output = subprocess.run(
+        [
+            sys.executable,
+            Path(__file__).resolve().parents[2]
+            / "brainglobe_workflows"
+            / "cellfinder"
+            / "cellfinder_main.py",
+            "--config",
+            str(path_to_config_fetch_local),
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        encoding="utf-8",
+    )
+
+    # check returncode
+    assert subprocess_output.returncode == 0
+
+    # check logs
     assert (
-        output_path_timestamped[0] / config.detected_cells_filename
-    ).is_file()
+        f"Input config read from {str(path_to_config_fetch_local)}"
+        in subprocess_output.stdout
+    )
+    assert (
+        "Fetching input data from the local directories"
+        in subprocess_output.stdout
+    )
+
+    # check output directory
+    # check one output directory exists and has expected output file inside it
+    assert_outputs(path_to_config_fetch_local)
