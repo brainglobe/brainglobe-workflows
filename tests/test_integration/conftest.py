@@ -7,7 +7,7 @@ import pytest
 from brainglobe_workflows.cellfinder.cellfinder_main import CellfinderConfig
 
 
-def make_config_dict_fetch_from_GIN(cellfinder_cache_dir):
+def make_config_dict_fetch_from_GIN(cellfinder_cache_dir: Path):
     """Generate a config dictionary with the required parameters
     for the workflow
 
@@ -89,7 +89,7 @@ def prep_json(obj):
 
 
 @pytest.fixture(autouse=True)
-def cellfinder_cache_dir(tmp_path):
+def cellfinder_cache_dir(tmp_path: Path):
     """Create a .cellfinder_workflows directory
     under a temporary pytest directory and return
     its path.
@@ -112,7 +112,7 @@ def cellfinder_cache_dir(tmp_path):
 
 
 @pytest.fixture()
-def path_to_config_fetch_GIN(tmp_path, cellfinder_cache_dir):
+def path_to_config_fetch_GIN(tmp_path: Path, cellfinder_cache_dir: Path):
     """Create an input config that fetches data from GIN and
     return its path
 
@@ -150,7 +150,7 @@ def path_to_config_fetch_GIN(tmp_path, cellfinder_cache_dir):
 
 
 @pytest.fixture()
-def path_to_config_fetch_local(path_to_config_fetch_GIN):
+def path_to_config_fetch_local(path_to_config_fetch_GIN: Path):
     """Create an input config that points to local data and
     return its path.
 
@@ -169,9 +169,9 @@ def path_to_config_fetch_local(path_to_config_fetch_GIN):
         path to a config file that fetches data from GIN
     """
     # create config that fetches data from GIN
-    # path_to_config_fetch_GIN
+    # via the `path_to_config_fetch_GIN` fixture
 
-    # read into config class
+    # read config into config class
     with open(path_to_config_fetch_GIN) as cfg:
         config_dict = json.load(cfg)
     config = CellfinderConfig(**config_dict)
