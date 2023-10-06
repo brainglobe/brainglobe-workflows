@@ -45,7 +45,7 @@ class CellfinderConfig:
     data_hash: Optional[str]
 
     # cached subdirectory to save data to
-    extract_dir_relative: Pathlike
+    extract_relative_dir: Pathlike
     signal_parent_dir: str
     background_parent_dir: str
     output_path_basename: Pathlike
