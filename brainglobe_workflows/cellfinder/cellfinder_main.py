@@ -334,7 +334,7 @@ def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
     return config
 
 
-def parse_cli_arguments() -> argparse.Namespace:
+def parse_cli_arguments(argv=None) -> argparse.Namespace:
     """Define argument parser for cellfinder
     workflow script.
 
@@ -347,6 +347,11 @@ def parse_cli_arguments() -> argparse.Namespace:
     args : argparse.Namespace
         command line input arguments parsed
     """
+
+    # command line input arguments: sys.argv in most cases except for testing
+    # see https://paiml.com/docs/home/books/testing-in-python/chapter08-monkeypatching/#the-simplest-monkeypatching
+    argv = argv or sys.argv
+
     # initialise argument parser
     parser = argparse.ArgumentParser(
         description=(
@@ -368,7 +373,7 @@ def parse_cli_arguments() -> argparse.Namespace:
     )
 
     # build parser object
-    args = parser.parse_args()
+    args = parser.parse_args(argv[1:])
 
     # print error if required arguments not provided
     if not args.config:
