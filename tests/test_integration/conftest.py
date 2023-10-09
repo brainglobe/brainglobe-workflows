@@ -146,6 +146,15 @@ def data_hash():
     return "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
 
 
+@pytest.fixture(scope="session")
+def default_json_config_path():
+    from brainglobe_workflows.cellfinder.cellfinder_main import (
+        DEFAULT_JSON_CONFIG_PATH,
+    )
+
+    return DEFAULT_JSON_CONFIG_PATH
+
+
 @pytest.fixture()
 def path_to_config_fetch_GIN(
     tmp_path: Path, cellfinder_cache_dir: Path, data_url, data_hash

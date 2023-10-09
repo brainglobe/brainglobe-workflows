@@ -4,12 +4,11 @@ import sys
 from pathlib import Path
 
 from brainglobe_workflows.cellfinder.cellfinder_main import (
-    DEFAULT_JSON_CONFIG_PATH,
     CellfinderConfig,
 )
 
 
-def test_run_with_default_config(tmp_path):
+def test_run_with_default_config(tmp_path, default_json_config_path):
     """Test workflow run with no command line arguments
 
     If no command line arguments are provided, the default
@@ -53,7 +52,7 @@ def test_run_with_default_config(tmp_path):
 
     # Check one output directory exists and has expected
     # output file inside it
-    assert_outputs(DEFAULT_JSON_CONFIG_PATH, tmp_path)
+    assert_outputs(default_json_config_path, tmp_path)
 
 
 def test_run_with_GIN_data(
