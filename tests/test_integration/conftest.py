@@ -30,13 +30,9 @@ def make_config_dict_fetch_from_local(cellfinder_cache_dir: Path) -> dict:
     return {
         "install_path": cellfinder_cache_dir,
         "extract_dir_relative": "cellfinder_test_data",  # relative path
-        "signal_parent_dir": str(
-            cellfinder_cache_dir / "cellfinder_test_data" / "signal"
-        ),
-        "background_parent_dir": str(
-            cellfinder_cache_dir / "cellfinder_test_data" / "background"
-        ),
-        "output_path_basename": cellfinder_cache_dir / "cellfinder_output_",
+        "signal_subdir": "signal",
+        "background_subdir": "background",
+        "output_path_basename_relative": "cellfinder_output_",
         "detected_cells_filename": "detected_cells.xml",
         "voxel_sizes": [5, 2, 2],  # microns
         "start_plane": 0,

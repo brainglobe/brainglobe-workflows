@@ -52,9 +52,9 @@ class CellfinderConfig:
 
     # cached subdirectory to save data to
     extract_dir_relative: Pathlike
-    signal_parent_dir: str
-    background_parent_dir: str
-    output_path_basename: Pathlike
+    signal_subdir: str
+    background_subdir: str
+    output_path_basename_relative: Pathlike
     detected_cells_filename: Pathlike
 
     # preprocessing parameters
@@ -86,11 +86,14 @@ class CellfinderConfig:
     data_url: Optional[str] = None
     data_hash: Optional[str] = None
 
-    # the following attributes are added
+    # The following attributes are added
     # during the setup phase of the workflow
     list_signal_files: Optional[list] = None
     list_background_files: Optional[list] = None
     output_path: Pathlike = ""
+    signal_dir_path: Pathlike = ""
+    background_dir_path: Pathlike = ""
+    detected_cells_path: Pathlike = ""
 
 
 def setup_logger() -> logging.Logger:
@@ -139,8 +142,8 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
         the cellfinder workflow
     """
     # Read input data as Dask arrays
-    signal_array = read_with_dask(cfg.signal_parent_dir)
-    background_array = read_with_dask(cfg.background_parent_dir)
+    signal_array = read_with_dask(cfg.signal_dir_path)
+    background_array = read_with_dask(cfg.background_dir_path)
 
     # Run main analysis using `cellfinder_run`
     detected_cells = cellfinder_run(
@@ -150,7 +153,7 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
     # Save results to xml file
     save_cells(
         detected_cells,
-        Path(cfg.output_path) / cfg.detected_cells_filename,
+        cfg.detected_cells_path,
     )
 
 
@@ -194,18 +197,33 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
     # Retrieve and add lists of input data to the config,
     # if these are defined yet
     if not (config.list_signal_files and config.list_signal_files):
+        # build fullpaths to inputs
+        config.signal_dir_path = str(
+            Path(config.install_path)
+            / config.extract_dir_relative
+            / config.signal_subdir
+        )
+        config.background_dir_path = str(
+            Path(config.install_path)
+            / config.extract_dir_relative
+            / config.background_subdir
+        )
+        # retrieve data
         config = retrieve_input_data(config)
 
     # Create timestamped output directory if it doesn't exist
     timestamp = datetime.datetime.now()
     timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
-    output_path_timestamped = Path(
-        str(config.output_path_basename) + timestamp_formatted
+    output_path_timestamped = Path(config.install_path) / (
+        str(config.output_path_basename_relative) + timestamp_formatted
     )
     output_path_timestamped.mkdir(parents=True, exist_ok=True)
 
-    # Overwrite normally output path to config
+    # Add output path and output file path to config
     config.output_path = output_path_timestamped
+    config.detected_cells_path = (
+        config.output_path / config.detected_cells_filename
+    )
 
     return config
 
@@ -237,32 +255,34 @@ def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
     # Check if input data (signal and background) exist locally.
     # If both directories exist, get list of signal and background files
     if (
-        Path(config.signal_parent_dir).exists()
-        and Path(config.background_parent_dir).exists()
+        Path(config.signal_dir_path).exists()
+        and Path(config.background_dir_path).exists()
     ):
         logger.info("Fetching input data from the local directories")
 
         config.list_signal_files = [
-            f for f in Path(config.signal_parent_dir).iterdir() if f.is_file()
+            f
+            for f in Path(config.signal_dir_path).resolve().iterdir()
+            if f.is_file()
         ]
         config.list_background_files = [
             f
-            for f in Path(config.background_parent_dir).iterdir()
+            for f in Path(config.background_dir_path).resolve().iterdir()
             if f.is_file()
         ]
 
     # If exactly one of the input data directories is missing, print error
     elif (
-        Path(config.signal_parent_dir).exists()
-        or Path(config.background_parent_dir).exists()
+        Path(config.signal_dir_path).resolve().exists()
+        or Path(config.background_dir_path).resolve().exists()
     ):
-        if not Path(config.signal_parent_dir).exists():
+        if not Path(config.signal_dir_path).resolve().exists():
             logger.error(
-                f"The directory {config.signal_parent_dir} does not exist"
+                f"The directory {config.signal_dir_path} does not exist"
             )
         else:
             logger.error(
-                f"The directory {config.background_parent_dir} does not exist"
+                f"The directory {config.background_dir_path} does not exist"
             )
 
     # If neither of them exist, retrieve data from GIN repository
@@ -290,21 +310,25 @@ def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
             logger.info("Fetching input data from the provided GIN repository")
 
             # Check signal and background parent directories exist now
-            assert Path(config.signal_parent_dir).exists()
-            assert Path(config.background_parent_dir).exists()
+            assert Path(config.signal_dir_path).resolve().exists()
+            assert Path(config.background_dir_path).resolve().exists()
 
             # Add signal files to config
             config.list_signal_files = [
                 f
                 for f in list_files_archive
-                if f.startswith(config.signal_parent_dir)
+                if f.startswith(
+                    str(Path(config.signal_dir_path).resolve())
+                )  # if str(config.signal_dir_path) in f
             ]
 
             # Add background files to config
             config.list_background_files = [
                 f
                 for f in list_files_archive
-                if f.startswith(config.background_parent_dir)
+                if f.startswith(
+                    str(Path(config.background_dir_path).resolve())
+                )  # if str(config.background_dir_path) in f
             ]
 
     return config

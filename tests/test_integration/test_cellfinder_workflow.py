@@ -3,9 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from brainglobe_workflows.cellfinder.cellfinder_main import (
-    CellfinderConfig,
-)
+from brainglobe_workflows.cellfinder.cellfinder_main import CellfinderConfig
 
 
 def test_run_with_default_config(tmp_path, default_json_config_path):
@@ -162,7 +160,7 @@ def test_run_with_local_data(
     assert_outputs(path_to_config_fetch_local)
 
 
-def assert_outputs(path_to_config, parent_dir=""):
+def assert_outputs(path_to_config, parent_dir_of_install_path=""):
     """Helper function to determine whether the output is
     as expected.
 
@@ -180,12 +178,12 @@ def assert_outputs(path_to_config, parent_dir=""):
         path to the input config used to generate the
         output.
 
-    parent_dir : str, optional
-        If the paths in the input config are expressed as
-        relative, the absolute path to their parent_dir
-        must be specified here. If the paths in the input
-        config are absolute, this input is not required.
-        By default "".
+    parent_dir_of_install_path : str, optional
+        If the install_path in the input config is relative to the
+        directory the script is launched from (as is the case in the
+        default_config.json file), the absolute path to its parent_dir
+        must be specified here. If the paths to install_path is
+        absolute, this input is not required. By default "".
     """
 
     # load input config
@@ -195,13 +193,15 @@ def assert_outputs(path_to_config, parent_dir=""):
 
     # check one output directory exists and
     # it has expected output file inside it
+    output_path_without_timestamp = (
+        Path(parent_dir_of_install_path)
+        / config.install_path
+        / config.output_path_basename_relative
+    )
     output_path_timestamped = [
         x
-        for x in (Path(parent_dir) / config.output_path_basename).parent.glob(
-            "*"
-        )
-        if x.is_dir()
-        and x.name.startswith(Path(config.output_path_basename).name)
+        for x in output_path_without_timestamp.parent.glob("*")
+        if x.is_dir() and x.name.startswith(output_path_without_timestamp.name)
     ]
 
     assert len(output_path_timestamped) == 1
