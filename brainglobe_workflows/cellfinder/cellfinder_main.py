@@ -350,7 +350,7 @@ def parse_cli_arguments(argv=None) -> argparse.Namespace:
 
     # command line input arguments: sys.argv in most cases except for testing
     # see https://paiml.com/docs/home/books/testing-in-python/chapter08-monkeypatching/#the-simplest-monkeypatching
-    argv = argv or sys.argv
+    argv = argv or sys.argv[1:]
 
     # initialise argument parser
     parser = argparse.ArgumentParser(
@@ -373,7 +373,7 @@ def parse_cli_arguments(argv=None) -> argparse.Namespace:
     )
 
     # build parser object
-    args = parser.parse_args(argv[1:])
+    args = parser.parse_args(argv)
 
     # print error if required arguments not provided
     if not args.config:
