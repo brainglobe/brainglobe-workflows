@@ -46,8 +46,8 @@ class TimeBenchmark:
     sample_time = 0.01  # default: 10 ms = 0.01 s;
     min_run_count = 2  # default:2
 
-    # @classmethod ---> this was to reuse this setup fn for other benchmarls
-    def setup_cache(
+    @classmethod  # ---> this was to reuse this setup fn for other benchmarks
+    def setup(
         self,
     ):  # ---> cache so that we dont download data several times?
         # monkeypatch command line arguments
