@@ -1,9 +1,19 @@
-"""A script reproducing the main cellfinder workflow
+"""This script reproduces the most common cellfinder workflow
 
-It assumes an environment variable called "CELLFINDER_CONFIG_PATH" exists,
-which points to a json file with the required parameters. If the environment
-variable does not exist, the default configuration parameters (defined in
-DEFAULT_CONFIG_DICT below) are used
+It receives as a command line input the path to a configuration
+json file, that holds the values of the required parameters for the workflow.
+
+If no input json file is passed as a configuration, the default
+configuration defined at brainglobe_workflows/cellfinder/default_config.json
+is used.
+
+Example usage:
+ - to pass a custom configuration, run (from the cellfinder_main.py
+   parent directory):
+    python cellfinder_main.py --config path/to/input/config.json
+ - to use the default configuration, run
+    python cellfinder_main.py
+
 
 """
 
@@ -33,11 +43,11 @@ DEFAULT_JSON_CONFIG_PATH = (
 @dataclass
 class CellfinderConfig:
     """
-    Define input and output data locations, and parameters for
-    preprocessing steps.
+    Define input and output data locations, and the parameters for
+    the cellfinder preprocessing steps.
     """
 
-    # cellfinder benchmarks cache directory
+    # cellfinder workflows cache directory
     install_path: Pathlike
 
     # cached subdirectory to save data to
@@ -76,15 +86,31 @@ class CellfinderConfig:
     data_url: Optional[str] = None
     data_hash: Optional[str] = None
 
+    # the following attributes are added
+    # during the setup phase of the workflow
     list_signal_files: Optional[list] = None
     list_background_files: Optional[list] = None
-    output_path: Optional[Pathlike] = None
+    output_path: Pathlike = ""
 
 
-def setup_logger():
+def setup_logger() -> logging.Logger:
+    """Setup a logger for this script
+
+    The logger's level is set to DEBUG, and it
+    is linked to a handler that writes to the
+    console and whose level is
+
+    Returns
+    -------
+    logging.Logger
+        a logger object
+    """
+    # define handler that writes to stdout
     console_handler = logging.StreamHandler(sys.stdout)
     console_format = logging.Formatter("%(name)s %(levelname)s: %(message)s")
     console_handler.setFormatter(console_format)
+
+    # define logger and link to handler
     logger = logging.getLogger(
         __name__
     )  # if imported as a module, the logger is named after the module
@@ -93,7 +119,7 @@ def setup_logger():
     return logger
 
 
-def run_workflow_from_cellfinder_run(cfg):
+def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
     """
     Run workflow based on the cellfinder_core.main.main()
     function.
@@ -105,9 +131,6 @@ def run_workflow_from_cellfinder_run(cfg):
        with the parameters defined in the input configuration (cfg).
     3. Save the detected cells as an xml file to the location specified in
        the input configuration (cfg).
-
-    We plan to time each of the steps in the workflow individually,
-    as well as the full workflow.
 
     Parameters
     ----------
@@ -125,51 +148,55 @@ def run_workflow_from_cellfinder_run(cfg):
     )
 
     # Save results to xml file
-    save_cells(detected_cells, cfg.output_path / cfg.detected_cells_filename)
+    save_cells(
+        detected_cells,
+        Path(cfg.output_path) / cfg.detected_cells_filename,
+    )
 
 
-def setup_workflow(input_config_path):
-    """Prepare configuration to run workflow
+def setup_workflow(input_config_path: Path) -> CellfinderConfig:
+    """Run setup steps prior to executing the workflow
 
-    This includes
-    - instantiating the config dictionary,
+    These setup steps include:
+    - instantiating a CellfinderConfig object with the required parameters,
     - checking if the input data exists locally, and fetching from
       GIN repository otherwise,
+    - adding the path to the input data files to the config, and
     - creating a timestamped directory for the output of the workflow if
-      it doesn't exist and adding it to the config
-
+      it doesn't exist and adding its path to the config
 
     Parameters
     ----------
     input_config_path : Path
-        _description_
+        path to the input config file
 
     Returns
     -------
     config : CellfinderConfig
-        a class with the required setup methods and parameters for
-        the cellfinder workflow
+        a dataclass whose attributes are the parameters
+        for running cellfinder.
     """
 
-    # Define config
+    # Check config file exists
     assert input_config_path.exists()
 
-    # read config into dict
+    # Instantiate a CellfinderConfig from the input json file
     # (assumes config is json serializable)
     with open(input_config_path) as cfg:
         config_dict = json.load(cfg)
-
     config = CellfinderConfig(**config_dict)
 
+    # Print info logs for status
     logger.info(f"Input config read from {input_config_path}")
     if input_config_path == DEFAULT_JSON_CONFIG_PATH:
         logger.info("Using default config file")
 
-    # Retrieve and add lists of input data to config if neither are defined
+    # Retrieve and add lists of input data to the config,
+    # if these are defined yet
     if not (config.list_signal_files and config.list_signal_files):
         config = retrieve_input_data(config)
 
-    # Create output directory if it doesn't exist, timestamped
+    # Create timestamped output directory if it doesn't exist
     timestamp = datetime.datetime.now()
     timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
     output_path_timestamped = Path(
@@ -177,19 +204,19 @@ def setup_workflow(input_config_path):
     )
     output_path_timestamped.mkdir(parents=True, exist_ok=True)
 
-    # add output path to config
+    # Overwrite normally output path to config
     config.output_path = output_path_timestamped
 
     return config
 
 
-def retrieve_input_data(config):
+def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
     """
     Adds the lists of input data files (signal and background) to the config.
 
     It first checks if the input data exists locally.
     - If both directories (signal and background) exist, the lists of signal
-      and background files are added to the relevant config attributes
+      and background files are added to the config.
     - If exactly one of the input data directories is missing, an error
       message is logged.
     - If neither of them exist, the data is retrieved from the provided GIN
@@ -240,6 +267,7 @@ def retrieve_input_data(config):
 
     # If neither of them exist, retrieve data from GIN repository
     else:
+        # check if GIN URL and hash are defined (log error otherwise)
         if (not config.data_url) or (not config.data_hash):
             logger.error(
                 "Input data not found locally, and URL/hash to "
@@ -247,31 +275,32 @@ def retrieve_input_data(config):
             )
 
         else:
-            # get list of files in GIN archive with retrieve
+            # get list of files in GIN archive with pooch.retrieve
             list_files_archive = pooch.retrieve(
                 url=config.data_url,
                 known_hash=config.data_hash,
-                path=config.install_path,  # path to download zip to
+                path=config.install_path,  # zip will be downloaded here
                 progressbar=True,
                 processor=pooch.Unzip(
                     extract_dir=config.extract_dir_relative
-                    # path to unzipped dir, *relative*  to 'path'
+                    # path to unzipped dir,
+                    # *relative* to the path set in 'path'
                 ),
             )
             logger.info("Fetching input data from the provided GIN repository")
 
-            # check signal and background parent directories exist now
+            # Check signal and background parent directories exist now
             assert Path(config.signal_parent_dir).exists()
             assert Path(config.background_parent_dir).exists()
 
-            # add signal files to config
+            # Add signal files to config
             config.list_signal_files = [
                 f
                 for f in list_files_archive
                 if f.startswith(config.signal_parent_dir)
             ]
 
-            # add background files to config
+            # Add background files to config
             config.list_background_files = [
                 f
                 for f in list_files_archive
@@ -281,7 +310,19 @@ def retrieve_input_data(config):
     return config
 
 
-def parse_cli_arguments():
+def parse_cli_arguments() -> argparse.Namespace:
+    """Define argument parser for cellfinder
+    workflow script.
+
+    It expects a path to a json file with the
+    parameters required to run the workflow.
+    If none is provided, the default
+
+    Returns
+    -------
+    args : argparse.Namespace
+        command line input arguments parsed
+    """
     # initialise argument parser
     parser = argparse.ArgumentParser(
         description=(
