@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Any
 
 import pooch
 import pytest
@@ -7,7 +8,7 @@ import pytest
 from brainglobe_workflows.cellfinder.cellfinder_main import CellfinderConfig
 
 
-def make_config_dict_local(cellfinder_cache_dir: Path):
+def make_config_dict_fetch_from_local(cellfinder_cache_dir: Path) -> dict:
     """Generate a config dictionary with the required parameters
     for the workflow
 
@@ -62,8 +63,10 @@ def make_config_dict_local(cellfinder_cache_dir: Path):
 
 
 def make_config_dict_fetch_from_GIN(
-    cellfinder_cache_dir: Path, data_url, data_hash
-):
+    cellfinder_cache_dir: Path,
+    data_url: str,
+    data_hash: str,
+) -> dict:
     """Generate a config dictionary with the required parameters
     for the workflow
 
@@ -76,6 +79,10 @@ def make_config_dict_fetch_from_GIN(
     cellfinder_cache_dir : Path
         Path to the directory where the downloaded input data will be unzipped,
         and the output will be saved
+    data_url: str
+        URL to the GIN repository with the data to download
+    data_hash: str
+        Hash of the data to download
 
     Returns
     -------
@@ -83,44 +90,47 @@ def make_config_dict_fetch_from_GIN(
         dictionary with the required parameters for the workflow
     """
 
-    config = make_config_dict_local(cellfinder_cache_dir)
+    config = make_config_dict_fetch_from_local(cellfinder_cache_dir)
     config["data_url"] = data_url
     config["data_hash"] = data_hash
 
     return config
 
 
-def prep_json(obj):
+def prep_json(obj: Any) -> Any:
     """
-    Returns a JSON encodable version of the object.
+    Returns a JSON encodable version of the input object.
 
     It uses the JSON default encoder for all objects
-    except those of type Path.
+    except those of type `Path`.
+
 
     Parameters
     ----------
-    obj : _type_
+    obj : Any
         _description_
 
     Returns
     -------
-    _type_
+    Any
         JSON serializable version of input object
     """
     if isinstance(obj, Path):
         return str(obj)
     else:
-        return json.JSONEncoder.default(obj)
+        json_decoder = json.JSONEncoder()
+        return json_decoder.default(obj)
 
 
 @pytest.fixture(autouse=True)
-def cellfinder_cache_dir(tmp_path: Path):
+def cellfinder_cache_dir(tmp_path: Path) -> Path:
     """Create a .cellfinder_workflows directory
     under a temporary pytest directory and return
     its path.
 
     The temporary directory is available via pytest's tmp_path
     fixture. A new temporary directory is created every function call
+    (i.e., scope="function")
 
     Parameters
     ----------
@@ -137,17 +147,39 @@ def cellfinder_cache_dir(tmp_path: Path):
 
 
 @pytest.fixture(scope="session")
-def data_url():
+def data_url() -> str:
+    """Return the URL to the GIN repository with the input data
+
+    Returns
+    -------
+    str
+        URL to the GIN repository with the input data
+    """
     return "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip"
 
 
 @pytest.fixture(scope="session")
-def data_hash():
+def data_hash() -> str:
+    """Return the hash of the GIN input data
+
+    Returns
+    -------
+    str
+        Hash to the GIN input data
+    """
     return "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914"
 
 
 @pytest.fixture(scope="session")
-def default_json_config_path():
+def default_json_config_path() -> Path:
+    """Return the path to the json file
+    with the default config parameters
+
+    Returns
+    -------
+    Path
+        path to the json file with the default config parameters
+    """
     from brainglobe_workflows.cellfinder.cellfinder_main import (
         DEFAULT_JSON_CONFIG_PATH,
     )
@@ -157,8 +189,8 @@ def default_json_config_path():
 
 @pytest.fixture()
 def path_to_config_fetch_GIN(
-    tmp_path: Path, cellfinder_cache_dir: Path, data_url, data_hash
-):
+    tmp_path: Path, cellfinder_cache_dir: Path, data_url: str, data_hash: str
+) -> Path:
     """Create an input config that fetches data from GIN and
     return its path
 
@@ -171,6 +203,12 @@ def path_to_config_fetch_GIN(
     cellfinder_cache_dir : Path
         path to the cellfinder cache directory, where the paths
         in the config should point to.
+
+    data_url: str
+        URL to the GIN repository with the input data
+
+    data_hash: str
+        hash to the GIN input data
 
     Returns
     -------
@@ -199,19 +237,29 @@ def path_to_config_fetch_GIN(
 
 @pytest.fixture()
 def path_to_config_fetch_local(
-    tmp_path: Path, cellfinder_cache_dir: Path, data_url, data_hash
-):
+    tmp_path: Path, cellfinder_cache_dir: Path, data_url: str, data_hash: str
+) -> Path:
     """Create an input config that points to local data and
     return its path.
 
-    The process is analogous to creating a config that
-    fetches data from GIN, except that here we download the data
-    from GIN prior to running the workflow.
+    The local data is downloaded from GIN, but no reference
+    to the GIN repository is included in the config.
 
     Parameters
     ----------
-    path_to_config_fetch_GIN : Path
-        path to a config file that fetches data from GIN
+    tmp_path : Path
+        path to a fresh pytest-generated temporary directory. The
+        generated config is saved here.
+
+    cellfinder_cache_dir : Path
+        path to the cellfinder cache directory, where the paths
+        in the config should point to.
+
+    data_url: str
+        URL to the GIN repository with the input data
+
+    data_hash: str
+        hash to the GIN input data
 
     Returns
     -------
@@ -220,7 +268,7 @@ def path_to_config_fetch_local(
     """
 
     # instantiate basic config (assumes data is local)
-    config_dict = make_config_dict_local(cellfinder_cache_dir)
+    config_dict = make_config_dict_fetch_from_local(cellfinder_cache_dir)
     config = CellfinderConfig(**config_dict)
 
     # download GIN data to specified local directory
