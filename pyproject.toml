@@ -9,6 +9,8 @@ dependencies = [
     "pooch",
     "cellfinder-core"
 ]
+
+
 license = {text = "BSD-3-Clause"}
 
 classifiers = [

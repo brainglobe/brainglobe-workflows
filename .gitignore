@@ -84,3 +84,4 @@ venv/
 
 brainglobe_workflows/cellfinder/notebooks/
 **/**/.cellfinder_workflows
+benchmarks/results/*
