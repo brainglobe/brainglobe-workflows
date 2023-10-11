@@ -15,62 +15,89 @@ from brainglobe_workflows.cellfinder.cellfinder_main import (
 
 class TimeBenchmarkPrepGIN:
     """
-    Setup_cache function downloads the data from GIN
 
-    Base class with sensible options
-    See https://asv.readthedocs.io/en/stable/benchmarks.html#benchmark-attributes
+    A base class with sensible options for timing the cellfinder workflow.
 
-    The sample_time, number, repeat, and timer attributes can be adjusted in
-    the setup() routine, which can be useful for parameterized benchmarks
+    It includes:
+     - a setup_cache function that downloads the GIN data specified in the
+       default_config.json to a local directory (created by asv). This function
+       runs only once before all repeats of the benchmark.
+    -  a setup function, that runs the setup steps for the workflow.
+    - a teardown function, that removes the output directory.
 
-    Other attributes for time benchmarks not specified in this class:
-    - number: the number of iterations in each sample. If number is specified,
-    sample_time is ignored. Note that setup and teardown are not run between
-    iterations: setup runs first, then the timed benchmark routine is called
-    number times, and after that teardown runs.
-    - timer: timeit.default_timer by default
+    Notes
+    -----
+    The class includes some predefined attributes for timing benchmarks. For
+    the full list see
+    https://asv.readthedocs.io/en/stable/benchmarks.html#benchmark-attributes
 
-    Notes about some of the default attributes for time benchmarks:
-      - warmup_time: asv will spend this time (in seconds) in calling the
-        benchmarked function repeatedly, before starting to run the
-        actual benchmark
-
-      - repeat: when not provided (repeat set to 0):
+    Some asv benchmarking nomenclature:
+    - repeat: a benchmark repeat is made up of the following steps:
+      1- the `setup` is run,
+      2- then the timed benchmark routine is called for `n` iterations, and
+      3- finally that teardown function is run.
+      Each repeat generates a sample, which is the average time that the
+      routine took across all iterations. A new process is started for each
+      repeat of each benchmark. A calibration phase before running the repeat
+      computes the number of iterations that will be executed. Each benchmark
+      is run for a number of repeats. The setup_cache function is run only once
+      for all repeats of a benchmark (but it is discarded before the next
+      benchmark). By default `repeat` is set to 0, which means:
         - if rounds==1 the default is
             (min_repeat, max_repeat, max_time) = (1, 10, 20.0),
         - if rounds != 1 the default is
             (min_repeat, max_repeat, max_time) = (1, 5, 10.0)
 
-      - sample_time: `number` is determined so that each sample takes
-        approx sample_time=10ms
+    - iterations (`number`): the number of iterations in each sample. Note that
+      `setup` and `teardown` are not run between iterations. asv will
+      automatically select the number of iterations so that each sample takes
+      approximately `sample_time` seconds.
+
+    - round: at each round, each benchmark is run for the specified number of
+      repeats. The idea is that we sample each benchmark over longer periods of
+      background performance variations.
+
+    - warmup time: asv will spend this time (in seconds) in calling the
+      benchmarked function repeatedly, before starting to run the actual
+      benchmark. If not specified, warmup_time defaults to 0.1 seconds
+
     """
 
+    # Timing attributes
     timeout = 600  # default: 60 s
-    version = None  # default: None (i.e. hash of source code)
-    warmup_time = 0.1  # default:0.1;
-    rounds = 2  # default:2
-    repeat = 0  # default: 0
+    version = (
+        None  # benchmark version. Default:None (i.e. hash of source code)
+    )
+    warmup_time = 0.1  # seconds
+    rounds = 2
+    repeat = 0
     sample_time = 0.01  # default: 10 ms = 0.01 s;
     min_run_count = 2  # default:2
 
+    # Custom attributes
     input_config_path = (
-        "/Users/sofia/Documents_local/project_BrainGlobe_workflows/"
-        "brainglobe-workflows/brainglobe_workflows/cellfinder/default_config.json"
+        Path(__file__).parents[1]
+        / "brainglobe_workflows/cellfinder/default_config.json"
     )
 
     def setup_cache(
         self,
-    ):  # ---> cache so that we dont download data several times?
+    ):
         """
-        We force a download of the data here
+        Download the input data from the GIN repository to the local
+        directory specified in the default_config.json
 
-        setup_cache method only performs the setup calculation once and
-        then caches the result to disk.
+        Notes
+        -----
+        The `setup_cache` method only performs the computations once
+        per benchmark round and then caches the result to disk [1]_. It cannot
+        be parametrised [2]_.
 
-        It is run only once also for repeated benchmarks and profiling.
+
+        [1] https://asv.readthedocs.io/en/latest/writing_benchmarks.html#setup-and-teardown-functions
+        [2] https://asv.readthedocs.io/en/latest/writing_benchmarks.html#parameterized-benchmarks
         """
-        print("RUN SETUP CACHE")
-        # download the data here?
+
         # Check config file exists
         assert Path(self.input_config_path).exists()
 
@@ -80,8 +107,7 @@ class TimeBenchmarkPrepGIN:
             config_dict = json.load(cfg)
         config = CellfinderConfig(**config_dict)
 
-        # download data
-        # get list of files in GIN archive with pooch.retrieve
+        # Download data with pooch
         _ = pooch.retrieve(
             url=config.data_url,
             known_hash=config.data_hash,
@@ -90,34 +116,36 @@ class TimeBenchmarkPrepGIN:
             processor=pooch.Unzip(extract_dir=config.extract_dir_relative),
         )
 
-        # paths to input data should now exist in config
+        # Check paths to input data should now exist in config
         assert Path(config.signal_dir_path).exists()
         assert Path(config.background_dir_path).exists()
 
-        return
-
     def setup(self):
-        """ """
-        # monkeypatch command line arguments
-        # run setup
-        print("RUN SETUP")
+        """
+        Run the cellfinder workflow setup steps.
+
+        The command line input arguments are injected as dependencies.
+        """
+
+        # Run setup
         cfg = setup_cellfinder_workflow(
             [
                 "--config",
-                self.input_config_path,  # ----should work without path too!
+                self.input_config_path,
             ]
         )
+
+        # Save configuration as attribute
         self.cfg = cfg
 
     def teardown(self):
         """
-        Remove the cellfinder benchmarks cache directory
-        (typically .cellfinder_benchmarks)
+        Remove the cellfinder output directory.
+
+        The input data is kept for all repeats of the same benchmark,
+        to avoid repeated downloads from GIN.
         """
-        print("RUN TEARDOWN")
-        shutil.rmtree(
-            Path(self.cfg.output_path).resolve()
-        )  # ---- remove all but input data? i.e., remove output only
+        shutil.rmtree(Path(self.cfg.output_path).resolve())
 
 
 class TimeFullWorkflow(TimeBenchmarkPrepGIN):
