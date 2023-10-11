@@ -75,7 +75,7 @@ class TimeBenchmarkPrepGIN:
     min_run_count = 2  # default:2
 
     # Custom attributes
-    input_config_path = (
+    input_config_path = str(
         Path(__file__).parents[1]
         / "brainglobe_workflows/cellfinder/default_config.json"
     )
