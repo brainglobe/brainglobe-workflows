@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 
 import pooch
+from cellfinder_core.tools.IO import read_with_dask
 
 from brainglobe_workflows.cellfinder.cellfinder_main import (
     CellfinderConfig,
@@ -16,7 +17,7 @@ from brainglobe_workflows.cellfinder.cellfinder_main import (
 class TimeBenchmarkPrepGIN:
     """
 
-    A base class with sensible options for timing the cellfinder workflow.
+    A base class for timing benchmarks for the cellfinder workflow.
 
     It includes:
      - a setup_cache function that downloads the GIN data specified in the
@@ -149,16 +150,27 @@ class TimeBenchmarkPrepGIN:
 
 
 class TimeFullWorkflow(TimeBenchmarkPrepGIN):
+    """Time the full cellfinder workflow.
+
+    It includes reading the signal and background arrays with dask,
+    detecting the cells and saving the results to an XML file
+
+    Parameters
+    ----------
+    TimeBenchmarkPrepGIN : _type_
+        A base class for timing benchmarks for the cellfinder workflow.
+    """
+
     def time_workflow_from_cellfinder_run(self):
         run_workflow_from_cellfinder_run(self.cfg)
 
 
-# class TimeReadInputDask(TimeBenchmark):
-#     def time_read_signal_w_dask(self):
-#         read_with_dask(self.cfg.signal_parent_dir)
+class TimeReadInputDask(TimeBenchmarkPrepGIN):
+    def time_read_signal_w_dask(self):
+        read_with_dask(self.cfg.signal_dir_path)
 
-#     def time_read_background_w_dask(self):
-#         read_with_dask(self.cfg.background_parent_dir)
+    def time_read_background_w_dask(self):
+        read_with_dask(self.cfg.background_dir_path)
 
 
 # class TimeCellfinderRun(TimeBenchmark):
