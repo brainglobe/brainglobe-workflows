@@ -3,6 +3,8 @@ import shutil
 from pathlib import Path
 
 import pooch
+from brainglobe_utils.IO.cells import save_cells
+from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 
 from brainglobe_workflows.cellfinder.cellfinder_main import (
@@ -121,6 +123,7 @@ class TimeBenchmarkPrepGIN:
         assert Path(config.signal_dir_path).exists()
         assert Path(config.background_dir_path).exists()
 
+    # @classmethod
     def setup(self):
         """
         Run the cellfinder workflow setup steps.
@@ -150,7 +153,8 @@ class TimeBenchmarkPrepGIN:
 
 
 class TimeFullWorkflow(TimeBenchmarkPrepGIN):
-    """Time the full cellfinder workflow.
+    """
+    Time the full cellfinder workflow.
 
     It includes reading the signal and background arrays with dask,
     detecting the cells and saving the results to an XML file
@@ -166,36 +170,61 @@ class TimeFullWorkflow(TimeBenchmarkPrepGIN):
 
 
 class TimeReadInputDask(TimeBenchmarkPrepGIN):
-    def time_read_signal_w_dask(self):
+    """
+    Time the reading input data operations with dask
+
+    Parameters
+    ----------
+    TimeBenchmarkPrepGIN : _type_
+        A base class for timing benchmarks for the cellfinder workflow.
+    """
+
+    def time_read_signal_with_dask(self):
         read_with_dask(self.cfg.signal_dir_path)
 
-    def time_read_background_w_dask(self):
+    def time_read_background_with_dask(self):
         read_with_dask(self.cfg.background_dir_path)
 
 
-# class TimeCellfinderRun(TimeBenchmark):
-#     def setup(self):
-#         TimeBenchmark.setup()
-#         self.signal_array = read_with_dask(self.cfg.signal_parent_dir)
-#         self.background_array = read_with_dask(
-#           self.cfg.background_parent_dir
-#         )
+class TimeDetectCells(TimeBenchmarkPrepGIN):
+    """
+    Time the cell detection main pipeline (`cellfinder_run`)
 
-#     def time_cellfinder_run(self):
-#         cellfinder_run(
-#             self.signal_array, self.background_array, self.cfg.voxel_sizes
-#         )
+    Parameters
+    ----------
+    TimeBenchmarkPrepGIN : _type_
+        A base class for timing benchmarks for the cellfinder workflow.
+    """
+
+    # extend basic setup function
+    def setup(self):
+        # basic setup
+        TimeBenchmarkPrepGIN.setup(self)
+
+        # add input data as arrays to config
+        self.signal_array = read_with_dask(self.cfg.signal_dir_path)
+        self.background_array = read_with_dask(self.cfg.background_dir_path)
+
+    def time_cellfinder_run(self):
+        cellfinder_run(
+            self.signal_array, self.background_array, self.cfg.voxel_sizes
+        )
 
 
-# class TimeSaveCells(TimeBenchmark):
-#     def setup(self):
-#         TimeBenchmark.setup()
-#         signal_array = read_with_dask(self.cfg.signal_parent_dir)
-#         background_array = read_with_dask(self.cfg.background_parent_dir)
+class TimeSaveCells(TimeBenchmarkPrepGIN):
+    # extend basic setup function
+    def setup(self):
+        # basic setup
+        TimeBenchmarkPrepGIN.setup(self)
 
-#         self.detected_cells = cellfinder_run(
-#             signal_array, background_array, self.cfg.voxel_sizes
-#         )
+        # add input data as arrays to config
+        self.signal_array = read_with_dask(self.cfg.signal_dir_path)
+        self.background_array = read_with_dask(self.cfg.background_dir_path)
 
-#     def time_save_cells(self):
-#         save_cells(self.detected_cells, self.cfg.detected_cells_filepath)
+        # detect cells
+        self.detected_cells = cellfinder_run(
+            self.signal_array, self.background_array, self.cfg.voxel_sizes
+        )
+
+    def time_save_cells(self):
+        save_cells(self.detected_cells, self.cfg.detected_cells_path)
