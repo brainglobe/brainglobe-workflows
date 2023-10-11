@@ -1,15 +1,22 @@
+import json
 import shutil
+from pathlib import Path
+
+import pooch
 
 from brainglobe_workflows.cellfinder.cellfinder_main import (
+    CellfinderConfig,
     run_workflow_from_cellfinder_run,
 )
 from brainglobe_workflows.cellfinder.cellfinder_main import (
-    setup as setup_workflow,
+    setup as setup_cellfinder_workflow,
 )
 
 
-class TimeBenchmark:
+class TimeBenchmarkPrepGIN:
     """
+    Setup_cache function downloads the data from GIN
+
     Base class with sensible options
     See https://asv.readthedocs.io/en/stable/benchmarks.html#benchmark-attributes
 
@@ -46,26 +53,74 @@ class TimeBenchmark:
     sample_time = 0.01  # default: 10 ms = 0.01 s;
     min_run_count = 2  # default:2
 
-    @classmethod  # ---> this was to reuse this setup fn for other benchmarks
-    def setup(
+    input_config_path = (
+        "/Users/sofia/Documents_local/project_BrainGlobe_workflows/"
+        "brainglobe-workflows/brainglobe_workflows/cellfinder/default_config.json"
+    )
+
+    def setup_cache(
         self,
     ):  # ---> cache so that we dont download data several times?
+        """
+        We force a download of the data here
+
+        setup_cache method only performs the setup calculation once and
+        then caches the result to disk.
+
+        It is run only once also for repeated benchmarks and profiling.
+        """
+        print("RUN SETUP CACHE")
+        # download the data here?
+        # Check config file exists
+        assert Path(self.input_config_path).exists()
+
+        # Instantiate a CellfinderConfig from the input json file
+        # (assumes config is json serializable)
+        with open(self.input_config_path) as cfg:
+            config_dict = json.load(cfg)
+        config = CellfinderConfig(**config_dict)
+
+        # download data
+        # get list of files in GIN archive with pooch.retrieve
+        _ = pooch.retrieve(
+            url=config.data_url,
+            known_hash=config.data_hash,
+            path=config.install_path,
+            progressbar=True,
+            processor=pooch.Unzip(extract_dir=config.extract_dir_relative),
+        )
+
+        # paths to input data should now exist in config
+        assert Path(config.signal_dir_path).exists()
+        assert Path(config.background_dir_path).exists()
+
+        return
+
+    def setup(self):
+        """ """
         # monkeypatch command line arguments
         # run setup
-        cfg = setup_workflow(
+        print("RUN SETUP")
+        cfg = setup_cellfinder_workflow(
             [
                 "--config",
-                "/Users/sofia/Documents_local/project_BrainGlobe_workflows/"
-                "brainglobe-workflows/brainglobe_workflows/cellfinder/default_config.json",
+                self.input_config_path,  # ----should work without path too!
             ]
         )
         self.cfg = cfg
 
     def teardown(self):
-        shutil.rmtree(self.cfg.install_path)
+        """
+        Remove the cellfinder benchmarks cache directory
+        (typically .cellfinder_benchmarks)
+        """
+        print("RUN TEARDOWN")
+        shutil.rmtree(
+            Path(self.cfg.output_path).resolve()
+        )  # ---- remove all but input data? i.e., remove output only
 
 
-class TimeFullWorkflow(TimeBenchmark):
+class TimeFullWorkflow(TimeBenchmarkPrepGIN):
     def time_workflow_from_cellfinder_run(self):
         run_workflow_from_cellfinder_run(self.cfg)
 
