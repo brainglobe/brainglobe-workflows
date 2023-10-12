@@ -2,8 +2,14 @@
 # See for reference:
 # https://github.com/scikit-image/scikit-image/blob/main/.github/workflows/benchmarks.yml#L77
 
+###############################
+# Metadata for this workflow
+###############################
 name: benchmarks
 
+###############################
+# Triggers
+###############################
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
@@ -19,10 +25,16 @@ on:
   workflow_dispatch:
 
 
+###############################
+# Permissions
+###############################
 # permissions:
 #     contents: read
       
 
+###############################
+# Jobs
+###############################
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "benchmark"
@@ -37,7 +49,7 @@ jobs:
 
       # Create virtual environment?
       - name: Create virtual environment
-        run: echo "$GITHUB_WORKSPACE ${{ github.repository }}""
+        run: echo "$GITHUB_WORKSPACE ${{ github.repository }}"
 
       # Run `asv run` ?
       - name: Run asv benchmarks from root
