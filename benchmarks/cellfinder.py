@@ -8,6 +8,7 @@ from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 
 from brainglobe_workflows.cellfinder.cellfinder_main import (
+    DEFAULT_JSON_CONFIG_PATH,
     CellfinderConfig,
     run_workflow_from_cellfinder_run,
 )
@@ -78,10 +79,7 @@ class TimeBenchmarkPrepGIN:
     min_run_count = 2  # default:2
 
     # Custom attributes
-    input_config_path = str(
-        Path(__file__).parents[1]
-        / "brainglobe_workflows/cellfinder/default_config.json"
-    )
+    input_config_path = str(DEFAULT_JSON_CONFIG_PATH)
 
     def setup_cache(
         self,
@@ -123,7 +121,6 @@ class TimeBenchmarkPrepGIN:
         assert Path(config.signal_dir_path).exists()
         assert Path(config.background_dir_path).exists()
 
-    # @classmethod
     def setup(self):
         """
         Run the cellfinder workflow setup steps.
