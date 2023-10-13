@@ -196,7 +196,7 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
 
     # Retrieve and add lists of input data to the config,
     # if these are defined yet
-    if not (config.list_signal_files and config.list_signal_files):
+    if not (config.list_signal_files and config.list_background_files):
         # build fullpaths to inputs
         config.signal_dir_path = str(
             Path(config.install_path)
