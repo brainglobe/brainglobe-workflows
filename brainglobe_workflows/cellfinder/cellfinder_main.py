@@ -185,8 +185,8 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
 
     # Instantiate a CellfinderConfig from the input json file
     # (assumes config is json serializable)
-    with open(input_config_path) as config:
-        config_dict = json.load(config)
+    with open(input_config_path) as c:
+        config_dict = json.load(c)
     config = CellfinderConfig(**config_dict)
 
     # Print info logs for status
