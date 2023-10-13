@@ -122,7 +122,7 @@ def setup_logger() -> logging.Logger:
     return logger
 
 
-def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
+def run_workflow_from_cellfinder_run(config: CellfinderConfig):
     """
     Run workflow based on the cellfinder_core.main.main()
     function.
@@ -131,29 +131,29 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
     1. Read the input signal and background data as two separate
        Dask arrays.
     2. Run the main cellfinder pipeline on the input Dask arrays,
-       with the parameters defined in the input configuration (cfg).
+       with the parameters defined in the input configuration (config).
     3. Save the detected cells as an xml file to the location specified in
-       the input configuration (cfg).
+       the input configuration (config).
 
     Parameters
     ----------
-    cfg : CellfinderConfig
+    config : CellfinderConfig
         a class with the required setup methods and parameters for
         the cellfinder workflow
     """
     # Read input data as Dask arrays
-    signal_array = read_with_dask(cfg.signal_dir_path)
-    background_array = read_with_dask(cfg.background_dir_path)
+    signal_array = read_with_dask(config.signal_dir_path)
+    background_array = read_with_dask(config.background_dir_path)
 
     # Run main analysis using `cellfinder_run`
     detected_cells = cellfinder_run(
-        signal_array, background_array, cfg.voxel_sizes
+        signal_array, background_array, config.voxel_sizes
     )
 
     # Save results to xml file
     save_cells(
         detected_cells,
-        cfg.detected_cells_path,
+        config.detected_cells_path,
     )
 
 
@@ -185,8 +185,8 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
 
     # Instantiate a CellfinderConfig from the input json file
     # (assumes config is json serializable)
-    with open(input_config_path) as cfg:
-        config_dict = json.load(cfg)
+    with open(input_config_path) as config:
+        config_dict = json.load(config)
     config = CellfinderConfig(**config_dict)
 
     # Print info logs for status
@@ -386,5 +386,5 @@ if __name__ == "__main__":
     args = parse_cli_arguments()
 
     # run workflow
-    cfg = setup_workflow(Path(args.config))
-    run_workflow_from_cellfinder_run(cfg)  # only this will be benchmarked
+    config = setup_workflow(Path(args.config))
+    run_workflow_from_cellfinder_run(config)  # only this will be benchmarked

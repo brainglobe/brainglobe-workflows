@@ -187,8 +187,8 @@ def assert_outputs(path_to_config, parent_dir_of_install_path=""):
     """
 
     # load input config
-    with open(path_to_config) as cfg:
-        config_dict = json.load(cfg)
+    with open(path_to_config) as config:
+        config_dict = json.load(config)
     config = CellfinderConfig(**config_dict)
 
     # check one output directory exists and
