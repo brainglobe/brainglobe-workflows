@@ -1,6 +1,6 @@
 """This script reproduces the most common cellfinder workflow
 
-It receives as a command line input the path to a configuration
+It receives as an (optional) command line input the path to a configuration
 json file, that holds the values of the required parameters for the workflow.
 
 If no input json file is passed as a configuration, the default
