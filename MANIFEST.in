@@ -5,8 +5,6 @@ exclude .pre-commit-config.yaml
 recursive-include brainglobe_workflows *.py
 include brainglobe_workflows/cellfinder/default_config.json
 
-recursive-exclude brainglobe_workflows/cellfinder/notebooks *.py
-
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 recursive-exclude docs *
