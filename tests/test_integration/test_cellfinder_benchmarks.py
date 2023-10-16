@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from asv import util
 
 
 @pytest.fixture()
@@ -23,14 +24,25 @@ def asv_config_monkeypatched_path(tmp_path):
     """
     # read reference asv config
     asv_original_path = Path(__file__).resolve().parents[2] / "asv.conf.json"
-    with open(asv_original_path) as asv_config:
-        asv_monkeypatched_dict = json.load(asv_config)
+    asv_monkeypatched_dict = util.load_json(
+        asv_original_path, js_comments=True
+    )
+    # with open(asv_original_path) as asv_config:
+    #     asv_monkeypatched_dict = json.load(asv_config)
 
     # change directories
     for ky in ["env_dir", "results_dir", "html_dir"]:
         asv_monkeypatched_dict[ky] = str(
             Path(tmp_path) / asv_monkeypatched_dict[ky]
         )
+
+    # change repo to URL rather than local
+    asv_monkeypatched_dict[
+        "repo"
+    ] = "https://github.com/brainglobe/brainglobe-workflows/"
+    asv_monkeypatched_dict[
+        "dvcs"
+    ] = "git"  # not sure why I need this with the URL?
 
     # define path to a temp json file to dump config data
     asv_monkeypatched_path = tmp_path / "asv.conf.json"
@@ -49,26 +61,39 @@ def test_run_benchmarks(asv_config_monkeypatched_path):
     # --- ideally monkeypatch an asv config so that results are in tmp_dir?
 
     # set up machine (env_dir, results_dir, html_dir)
-    subprocess.run(["asv", "machine", "--yes"])
+    asv_machine_output = subprocess.run(
+        [
+            "asv",
+            "machine",
+            "--yes",
+            "--config",
+            asv_config_monkeypatched_path,
+        ]
+    )
+    assert asv_machine_output.returncode == 0
 
     # run benchmarks
-    subprocess_output = subprocess.run(
+    asv_benchmark_output = subprocess.run(
         [
             "asv",
             "run",
-            "--config",  # --- can I pass a dict?
+            "--config",
             asv_config_monkeypatched_path,
-            # "--dry-run" # Do not save any results to disk. for now!
+            # "--dry-run"
+            # # Do not save any results to disk? not truly testing then
         ],
-        # cwd=tmp_path, ---> from where asv config is
+        cwd=str(
+            Path(asv_config_monkeypatched_path).parent
+        ),  # ---> from where asv config is
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
         encoding="utf-8",
-    )
+    )  # STDOUT: "· Cloning project\n· Fetching recent changes\n·
+    # Creating environments\n· No __init__.py file in 'benchmarks'\n"?
 
     # check returncode
-    assert subprocess_output.returncode == 0
+    assert asv_benchmark_output.returncode == 0
 
     # check logs?
 
