@@ -32,20 +32,22 @@ jobs:
       - uses: neuroinformatics-unit/actions/check_manifest@v2
 
   test:
-    needs: [linting,manifest]
+    needs: [linting, manifest]
+    name: ${{ matrix.os }} py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     env:
       INPUT_COREDEV: ${{ github.event.inputs.coredev }}
     strategy:
       fail-fast: false
       matrix:
-        # Run across a mixture of Python versions and operating systems
+        # Run tests on ubuntu across all supported versions
+        python-version: ["3.9", "3.10"]
+        os: [ubuntu-latest]
+        # Include at least one MacOS and Windows test
         include:
         - os: macos-latest
           python-version: "3.10"
         - os: windows-latest
-          python-version: "3.9"
-        - os: ubuntu-latest
           python-version: "3.10"
     steps:
       - uses: neuroinformatics-unit/actions/test@v2
@@ -60,7 +62,8 @@ jobs:
     steps:
       - uses: neuroinformatics-unit/actions/build_sdist_wheels@v2
 
-  deploy:
+  upload_all:
+    name: Publish build distributions
     needs: [build_sdist_wheels]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref_type == 'tag'
@@ -75,7 +78,7 @@ jobs:
           password: ${{ secrets.TWINE_API_KEY }}
 
   build-and-push-docker:
-    needs: deploy
+    needs: [upload_all]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -83,7 +86,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9

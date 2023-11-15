@@ -1,29 +1,29 @@
 [project]
 name = "brainglobe-workflows"
-description = "Automated 3D cell detection and registration of whole-brain images"
-readme = "README.md"
-license = { file = "LICENSE" }
-requires-python = ">=3.9"
 authors = [
     { name = "Adam Tyson", email = "code@adamltyson.com" },
+    { name = "BrainGlobe developers", email = "code@adamltyson.com" },
     { name = "Christian Niedworok" },
     { name = "Charly Rousseau" },
 ]
+description = "A collection of end-to-end data analysis workflows executed using BrainGlobe tools."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
 classifiers = [
     "Development Status :: 3 - Alpha",
-    "Operating System :: POSIX :: Linux",
-    "Operating System :: Microsoft :: Windows :: Windows 10",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Topic :: Scientific/Engineering :: Image Recognition",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 dependencies = [
     "brainreg>=1.0.0",
-    "cellfinder-core>=0.2.4",
+    "cellfinder-core>=0.2.4,<1.0.0",
     "configobj",
     "fancylog>=0.0.7",
     "imio",
@@ -43,6 +43,9 @@ dynamic = ["version"]
 cellfinder = "brainglobe_workflows.main:main"
 
 [project.optional-dependencies]
+benchmark = [
+    "pooch",
+] # Depending on how asv builds wheels, we may need to play with asv.config.json to force it to include this optional dependency.
 dev = [
     "black",
     "pytest-cov",
@@ -52,24 +55,34 @@ dev = [
     "pre-commit",
     "setuptools_scm",
 ]
-napari = ["napari[pyside2]", "brainglobe-napari-io", "cellfinder-napari"]
+napari = ["napari[pyside2]", "brainglobe-napari-io", "cellfinder-napari<1.0.0"]
 
 [project.urls]
-source = "https://github.com/brainglobe/brainglobe-workflows"
-bug_tracker = "https://github.com/brainglobe/brainglobe-workflows/issues"
-homepage = "https://brainglobe.info"
-documentation = "https://brainglobe.info/documentation/brainglobe-workflows"
+"Bug Tracker" = "https://github.com/brainglobe/brainglobe-workflows/issues"
+"Documentation" = "https://brainglobe.info/documentation/brainglobe-workflows"
+"Homepage" = "https://brainglobe.info"
+"Source Code" = "https://github.com/brainglobe/brainglobe-workflows"
+
 [build-system]
 requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-target-version = ['py38', 'py39', 'py310']
+target-version = ["py39", "py310"]
 skip-string-normalization = false
 line-length = 79
+ignore = ["*.yaml"]
+
+[tool.cibuildwheel]
+build = "cp39-* cp310-*"
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]
 
 [tool.check-manifest]
-ignore = ["*.yaml"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=brainglobe_workflows"
 
 [tool.ruff]
 line-length = 79
@@ -83,6 +96,25 @@ zip-safe = false
 
 [tool.setuptools.packages.find]
 include = ["brainglobe_workflows"]
-exclude = ["tests", "resources"]
+exclude = ["benchmarks", "tests", "resources"]
 
 [tool.setuptools_scm]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py{38,39,310}
+isolated_build = True
+
+[gh-actions]
+python =
+    3.8: py38
+    3.9: py39
+    3.10: py310
+
+[testenv]
+extras =
+    dev
+commands =
+    pytest -v --color=yes --cov=brainglobe_workflows --cov-report=xml
+"""

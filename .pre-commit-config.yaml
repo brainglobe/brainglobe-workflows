@@ -30,3 +30,9 @@ repos:
             additional_dependencies:
                 - types-setuptools
                 - types-requests
+    - repo: https://github.com/mgedmin/check-manifest
+      rev: "0.49"
+      hooks:
+          - id: check-manifest
+            args: [--no-build-isolation]
+            additional_dependencies: [setuptools-scm]

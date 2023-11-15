@@ -77,10 +77,17 @@ doc/build/
 _build/
 mkdocs.yml
 
+# MkDocs documentation
+site/
+
 # PyBuilder
 target/
 
-# Jupyter Notebook
+# Pycharm and VSCode
+.idea/
+.vscode/
+
+# IPython Notebook
 .ipynb_checkpoints
 
 # pyenv
@@ -109,18 +116,16 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
-
 # mypy
 .mypy_cache/
-
-.idea/
 
 *.~lock.*
 
 pip-wheel-metadata/
 
-*.DS_Store
+# OS
+.DS_Store
 
-*.vscode/
+# written by setuptools_scm
+**/_version.py
+benchmarks/results/*

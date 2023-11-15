@@ -1,16 +1,23 @@
 include README.md
 include LICENSE
+include brainglobe_workflows/cellfinder/default_config.json
 
+exclude .pre-commit-config.yaml
 exclude *.yaml
 exclude *.yml
 exclude Dockerfile
 exclude *.ini
+exclude asv.conf.json
 
 recursive-include brainglobe_workflows *.py
-include brainglobe_workflows/config/*
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
 
 global-include *.pxd
 
+prune benchmarks
+prune docs
 prune tests
 prune resources
 
