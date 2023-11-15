@@ -33,6 +33,7 @@ dependencies = [
     "numpy",
     "pandas",
     "packaging",
+    "pooch",
     "scikit-image",
     "tifffile",
     "tqdm",
@@ -43,9 +44,6 @@ dynamic = ["version"]
 cellfinder = "brainglobe_workflows.main:main"
 
 [project.optional-dependencies]
-benchmark = [
-    "pooch",
-] # Depending on how asv builds wheels, we may need to play with asv.config.json to force it to include this optional dependency.
 dev = [
     "black",
     "pytest-cov",
