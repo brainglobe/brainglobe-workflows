@@ -3,7 +3,8 @@ import os
 from pathlib import Path
 
 import pytest
-from cellfinder.analyse.analyse import Point, get_region_totals
+
+from brainglobe_workflows.analyse.analyse import Point, get_region_totals
 
 
 @pytest.fixture
