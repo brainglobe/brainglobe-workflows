@@ -23,13 +23,14 @@ At present, the package currently offers the following workflows:
 
 ## Installation
 
-`brainglobe-workflows` comes packaged with version 1 of BrainGlobe, so the easiest way to make sure you get the latest release and stay up to date is to install that package - [follow this link to see the install instructions](TODO: link me!).
-
 If you want to install BrainGlobe workflows as a standalone tool, you can run `pip install` in your desired environment:
 
 ```bash
 pip install brainglobe-workflows
 ```
+
+`brainglobe-workflows` is built using BrainGlobe tools, and it will automatically fetch the tools that it needs and install them into your environment.
+Once BrainGlobe version 1 is available, this package will fetch all BrainGlobe tools and handle their install into your environment, to prevent potential conflicts from partial-installs.
 
 ## Contributing
 
