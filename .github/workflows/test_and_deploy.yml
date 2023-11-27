@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       coredev:
-        description: 'Tests with development version of cellfinder-core?'
+        description: 'Tests with development version of cellfinder-core'
         required: true
         default: 'false'
 

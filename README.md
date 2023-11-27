@@ -18,7 +18,7 @@
 `brainglobe-workflows` is a package that provides users with a number of out-of-the-box data analysis workflows employed in neuroscience, implemented using BrainGlobe tools.
 You can find the [full documentation](https://brainglobe.info/documentation/brainglobe-workflows/index.html), including that for the workflow tools provided, [on our website](https://brainglobe.info/documentation/brainglobe-workflows/index.html).
 
-At present, the package currently offers the following workflows:
+At present, the package offers the following workflows:
 
 - [cellfinder](#cellfinder): Whole-brain detection, registration, and analysis.
 
