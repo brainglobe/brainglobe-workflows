@@ -16,6 +16,7 @@
 # BrainGlobe Workflows
 
 `brainglobe-workflows` is a package that provides users with a number of out-of-the-box data analysis workflows employed in neuroscience, implemented using BrainGlobe tools.
+You can find the [full documentation](https://brainglobe.info/documentation/brainglobe-workflows/index.html), including that for the workflow tools provided, [on our website](https://brainglobe.info/documentation/brainglobe-workflows/index.html).
 
 At present, the package currently offers the following workflows:
 
@@ -49,13 +50,11 @@ If you use any of the image registration functions in `cellfinder`, please also 
 
 ---
 
-# Cellfinder
-
-**TODO: move this information to an appropriate place on the website**
+## Cellfinder
 
 Whole-brain cell detection, registration and analysis.
 
-**N.B. If you want to just use the cell detection part of cellfinder, please see the standalone [cellfinder-core](https://github.com/brainglobe/cellfinder-core) package, or the [cellfinder plugin](https://github.com/brainglobe/cellfinder-napari) for [napari](https://napari.org/).**
+If you want to just use the cell detection part of `cellfinder`, please see the standalone [cellfinder-core](https://github.com/brainglobe/cellfinder-core) package, or the [cellfinder plugin](https://github.com/brainglobe/cellfinder-napari) for [napari](https://napari.org/).
 
 `cellfinder` is a collection of tools developed by [Adam Tyson](https://github.com/adamltyson), [Charly Rousseau](https://github.com/crousseau) and [Christian Niedworok](https://github.com/cniedwor) in the [Margrie Lab](https://www.sainsburywellcome.org/web/groups/margrie-lab), generously supported by the [Sainsbury Wellcome Centre](https://www.sainsburywellcome.org/web/).
 
@@ -73,68 +72,3 @@ cellfinder -s signal_images -b background_images -o output_dir --metadata metada
 ```
 
 Full documentation can be found [here](https://brainglobe.info/documentation/cellfinder/index.html).
-
-This software is at a very early stage, and was written with our data in mind.
-Over time we hope to support other data types/formats.
-If you have any issues, please get in touch [on the forum](https://forum.image.sc/tag/brainglobe) or by [raising an issue](https://github.com/brainglobe/cellfinder/issues/new/choose).
-
-## Illustration
-
-### Introduction
-
-cellfinder takes a stitched, but otherwise raw whole-brain dataset with at least two channels:
-
-- Background channel (i.e. autofluorescence),
-- Signal channel, the one with the cells to be detected:
-
-![Raw coronal serial two-photon mouse brain image showing labelled cells](https://raw.githubusercontent.com/brainglobe/cellfinder/master/resources/raw.png)
-
-### Cell candidate detection
-
-Classical image analysis (e.g. filters, thresholding) is used to find cell-like objects (with false positives):
-
-![Candidate cells (including many artefacts)](https://raw.githubusercontent.com/brainglobe/cellfinder/master/resources/detect.png)
-
-### Cell candidate classification
-
-A deep-learning network (ResNet) is used to classify cell candidates as true cells (yellow) or artefacts (blue):
-
-![Cassified cell candidates. Yellow - cells, Blue - artefacts](https://raw.githubusercontent.com/brainglobe/cellfinder/master/resources/classify.png)
-
-### Registration and segmentation (`brainreg`)
-
-Using [`brainreg`](https://github.com/brainglobe/brainreg), `cellfinder` aligns a template brain and atlas annotations (e.g. the Allen Reference Atlas, ARA) to the sample allowing detected cells to be assigned a brain region.
-
-This transformation can be inverted, allowing detected cells to be transformed to a standard anatomical space.
-
-![ARA overlaid on sample image](https://raw.githubusercontent.com/brainglobe/cellfinder/master/resources/register.png)
-
-### Analysis of cell positions in a common anatomical space
-
-Registration to a template allows for powerful group-level analysis of cellular distributions.
-*(Example to come)*
-
-## Examples
-
-*(more to come)*
-
-### Tracing of inputs to retrosplenial cortex (RSP)
-
-Input cell somas detected by cellfinder, aligned to the Allen Reference Atlas, and visualised in [brainrender](https://github.com/brainglobe/brainrender) along
-with RSP.
-
-![brainrender](https://raw.githubusercontent.com/brainglobe/cellfinder/master/resources/brainrender.png)
-
-Data courtesy of Sepiedeh Keshavarzi and Chryssanthi Tsitoura.
-[Details here](https://www.youtube.com/watch?v=pMHP0o-KsoQ)
-
-## Visualisation
-
-You can view your data using the [brainglobe-napari-io](https://github.com/brainglobe/brainglobe-napari-io) plugin for [napari](https://github.com/napari/napari).
-
-- Open napari (however you normally do it, but typically just type `napari` into your terminal, or click on your desktop icon).
-- Load your raw data (drag and drop the data directories into napari, one at a time). ![Loading raw data](https://raw.githubusercontent.com/brainglobe/brainglobe-napari-io/master/resources/load_data.gif)
-- Drag and drop your cellfinder XML file (e.g. `cell_classification.xml`) and/or cellfinder output directory into napari. ![Loading cellfinder results](https://raw.githubusercontent.com/brainglobe/brainglobe-napari-io/master/resources/load_results.gif)
-
-The plugin will then load your detected cells (in yellow) and the rejected cell candidates (in blue).
-If you carried out registration, then these results will be overlaid (similarly to the loading `brainreg` data, but transformed to the coordinate space of your raw data).
