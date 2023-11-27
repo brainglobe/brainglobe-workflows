@@ -19,7 +19,7 @@
 
 At present, the package currently offers the following workflows:
 
-- [cellfinder](#cellfinder): Whole-brain detection, registration, and analysis. The successor to the old [cellfinder CLI](TODO:permalnk to deprecated cellfinder tag on repo) TODO: rename tool appropriately and give flavour text
+- [cellfinder](#cellfinder): Whole-brain detection, registration, and analysis.
 
 ## Installation
 
