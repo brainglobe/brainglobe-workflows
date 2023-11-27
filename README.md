@@ -16,7 +16,8 @@
 # BrainGlobe Workflows
 
 `brainglobe-workflows` is a package that provides users with a number of out-of-the-box data analysis workflows employed in neuroscience, implemented using BrainGlobe tools.
-You can find the [full documentation](https://brainglobe.info/documentation/brainglobe-workflows/index.html), including that for the workflow tools provided, [on our website](https://brainglobe.info/documentation/brainglobe-workflows/index.html).
+You can view the [full documentation for each workflow](https://brainglobe.info/documentation/brainglobe-workflows/index.html) online.
+You can also find the documentation for the backend BrainGlobe tools these workflows use [on our website](https://brainglobe.info/).
 
 At present, the package offers the following workflows:
 
