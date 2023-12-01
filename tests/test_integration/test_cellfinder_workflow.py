@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from brainglobe_workflows.cellfinder.cellfinder_main import CellfinderConfig
+from workflows.cellfinder import CellfinderConfig
 
 
 def test_run_with_default_config(tmp_path, default_json_config_path):
@@ -31,9 +31,8 @@ def test_run_with_default_config(tmp_path, default_json_config_path):
         [
             sys.executable,
             Path(__file__).resolve().parents[2]
-            / "brainglobe_workflows"
-            / "cellfinder"
-            / "cellfinder_main.py",
+            / "workflows"
+            / "cellfinder.py",
         ],
         cwd=tmp_path,
         stdout=subprocess.PIPE,
@@ -76,9 +75,8 @@ def test_run_with_GIN_data(
         [
             sys.executable,
             Path(__file__).resolve().parents[2]
-            / "brainglobe_workflows"
-            / "cellfinder"
-            / "cellfinder_main.py",
+            / "workflows"
+            / "cellfinder.py",
             "--config",
             str(path_to_config_fetch_GIN),
         ],
@@ -130,9 +128,8 @@ def test_run_with_local_data(
         [
             sys.executable,
             Path(__file__).resolve().parents[2]
-            / "brainglobe_workflows"
-            / "cellfinder"
-            / "cellfinder_main.py",
+            / "workflows"
+            / "cellfinder.py",
             "--config",
             str(path_to_config_fetch_local),
         ],
