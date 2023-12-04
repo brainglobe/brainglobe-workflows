@@ -20,6 +20,7 @@ Example usage:
 
 import datetime
 import json
+import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,7 +32,8 @@ from brainglobe_utils.IO.cells import save_cells
 from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 from cellfinder_core.train.train_yml import depth_type
-from utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER, setup_logger
+
+from workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER, setup_logger
 
 Pathlike = Union[str, os.PathLike]
 
@@ -92,188 +94,213 @@ class CellfinderConfig:
     detected_cells_path: Pathlike = ""
 
 
-def setup(input_config_path) -> CellfinderConfig:
-    def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
-        """
-        Adds the lists of input data files (signal and background)
-        to the config.
+def read_cellfinder_config(input_config_path):
+    """Instantiate a CellfinderConfig from the input json file
+    (assumes config is json serializable)
 
-        It first checks if the input data exists locally.
-        - If both directories (signal and background) exist, the lists of
-        signal and background files are added to the config.
-        - If exactly one of the input data directories is missing, an error
-        message is logged.
-        - If neither of them exist, the data is retrieved from the provided GIN
-        repository. If no URL or hash to GIN is provided, an error is shown.
+    Parameters
+    ----------
+    input_config_path : _type_
+        _description_
 
-        Parameters
-        ----------
-        config : CellfinderConfig
-            a dataclass whose attributes are the parameters
-            for running cellfinder.
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    # read input config
+    with open(input_config_path) as cfg:
+        config_dict = json.load(cfg)
+    config = CellfinderConfig(**config_dict)
 
-        Returns
-        -------
-        config : CellfinderConfig
-            a dataclass whose attributes are the parameters
-            for running cellfinder.
-        """
-        # Check if input data (signal and background) exist locally.
-        # If both directories exist, get list of signal and background files
-        if (
-            Path(config.signal_dir_path).exists()
-            and Path(config.background_dir_path).exists()
-        ):
-            logger.info("Fetching input data from the local directories")
+    return config
 
+
+def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
+    """
+    Adds the lists of input data files (signal and background)
+    to the config.
+
+    It first checks if the input data exists locally.
+    - If both directories (signal and background) exist, the lists of
+    signal and background files are added to the config.
+    - If exactly one of the input data directories is missing, an error
+    message is logged.
+    - If neither of them exist, the data is retrieved from the provided GIN
+    repository. If no URL or hash to GIN is provided, an error is shown.
+
+    Parameters
+    ----------
+    config : CellfinderConfig
+        a dataclass whose attributes are the parameters
+        for running cellfinder.
+
+    Returns
+    -------
+    config : CellfinderConfig
+        a dataclass whose attributes are the parameters
+        for running cellfinder.
+    """
+    # Fetch logger
+    logger = logging.getLogger("root")
+
+    # Check if input data (signal and background) exist locally.
+    # If both directories exist, get list of signal and background files
+    if (
+        Path(config.signal_dir_path).exists()
+        and Path(config.background_dir_path).exists()
+    ):
+        logger.info("Fetching input data from the local directories")
+
+        config.list_signal_files = [
+            f
+            for f in Path(config.signal_dir_path).resolve().iterdir()
+            if f.is_file()
+        ]
+        config.list_background_files = [
+            f
+            for f in Path(config.background_dir_path).resolve().iterdir()
+            if f.is_file()
+        ]
+
+    # If exactly one of the input data directories is missing, print error
+    elif (
+        Path(config.signal_dir_path).resolve().exists()
+        or Path(config.background_dir_path).resolve().exists()
+    ):
+        if not Path(config.signal_dir_path).resolve().exists():
+            logger.error(
+                f"The directory {config.signal_dir_path} does not exist"
+            )
+        else:
+            logger.error(
+                f"The directory {config.background_dir_path} " "does not exist"
+            )
+
+    # If neither of them exist, retrieve data from GIN repository
+    else:
+        # check if GIN URL and hash are defined (log error otherwise)
+        if (not config.data_url) or (not config.data_hash):
+            logger.error(
+                "Input data not found locally, and URL/hash to "
+                "GIN repository not provided"
+            )
+
+        else:
+            # get list of files in GIN archive with pooch.retrieve
+            list_files_archive = pooch.retrieve(
+                url=config.data_url,
+                known_hash=config.data_hash,
+                path=config.install_path,  # zip will be downloaded here
+                progressbar=True,
+                processor=pooch.Unzip(
+                    extract_dir=config.extract_dir_relative
+                    # path to unzipped dir,
+                    # *relative* to the path set in 'path'
+                ),
+            )
+            logger.info("Fetching input data from the provided GIN repository")
+
+            # Check signal and background parent directories exist now
+            assert Path(config.signal_dir_path).resolve().exists()
+            assert Path(config.background_dir_path).resolve().exists()
+
+            # Add signal files to config
             config.list_signal_files = [
                 f
-                for f in Path(config.signal_dir_path).resolve().iterdir()
-                if f.is_file()
+                for f in list_files_archive
+                if f.startswith(
+                    str(Path(config.signal_dir_path).resolve())
+                )  # if str(config.signal_dir_path) in f
             ]
+
+            # Add background files to config
             config.list_background_files = [
                 f
-                for f in Path(config.background_dir_path).resolve().iterdir()
-                if f.is_file()
+                for f in list_files_archive
+                if f.startswith(
+                    str(Path(config.background_dir_path).resolve())
+                )  # if str(config.background_dir_path) in f
             ]
 
-        # If exactly one of the input data directories is missing, print error
-        elif (
-            Path(config.signal_dir_path).resolve().exists()
-            or Path(config.background_dir_path).resolve().exists()
-        ):
-            if not Path(config.signal_dir_path).resolve().exists():
-                logger.error(
-                    f"The directory {config.signal_dir_path} does not exist"
-                )
-            else:
-                logger.error(
-                    f"The directory {config.background_dir_path} "
-                    "does not exist"
-                )
+    return config
 
-        # If neither of them exist, retrieve data from GIN repository
-        else:
-            # check if GIN URL and hash are defined (log error otherwise)
-            if (not config.data_url) or (not config.data_hash):
-                logger.error(
-                    "Input data not found locally, and URL/hash to "
-                    "GIN repository not provided"
-                )
 
-            else:
-                # get list of files in GIN archive with pooch.retrieve
-                list_files_archive = pooch.retrieve(
-                    url=config.data_url,
-                    known_hash=config.data_hash,
-                    path=config.install_path,  # zip will be downloaded here
-                    progressbar=True,
-                    processor=pooch.Unzip(
-                        extract_dir=config.extract_dir_relative
-                        # path to unzipped dir,
-                        # *relative* to the path set in 'path'
-                    ),
-                )
-                logger.info(
-                    "Fetching input data from the provided GIN repository"
-                )
+def setup_workflow(input_config_path: Path) -> CellfinderConfig:
+    """Run setup steps prior to executing the workflow
 
-                # Check signal and background parent directories exist now
-                assert Path(config.signal_dir_path).resolve().exists()
-                assert Path(config.background_dir_path).resolve().exists()
+    These setup steps include:
+    - instantiating a CellfinderConfig object with the required parameters,
+    - checking if the input data exists locally, and fetching from
+    GIN repository otherwise,
+    - adding the path to the input data files to the config, and
+    - creating a timestamped directory for the output of the workflow if
+    it doesn't exist and adding its path to the config
 
-                # Add signal files to config
-                config.list_signal_files = [
-                    f
-                    for f in list_files_archive
-                    if f.startswith(
-                        str(Path(config.signal_dir_path).resolve())
-                    )  # if str(config.signal_dir_path) in f
-                ]
+    Parameters
+    ----------
+    input_config_path : Path
+        path to the input config file
 
-                # Add background files to config
-                config.list_background_files = [
-                    f
-                    for f in list_files_archive
-                    if f.startswith(
-                        str(Path(config.background_dir_path).resolve())
-                    )  # if str(config.background_dir_path) in f
-                ]
+    Returns
+    -------
+    config : CellfinderConfig
+        a dataclass whose attributes are the parameters
+        for running cellfinder.
+    """
 
-        return config
+    # Fetch logger
+    logger = logging.getLogger("root")
 
-    def setup_workflow(input_config_path: Path) -> CellfinderConfig:
-        """Run setup steps prior to executing the workflow
+    # Check config file exists
+    assert input_config_path.exists()
 
-        These setup steps include:
-        - instantiating a CellfinderConfig object with the required parameters,
-        - checking if the input data exists locally, and fetching from
-        GIN repository otherwise,
-        - adding the path to the input data files to the config, and
-        - creating a timestamped directory for the output of the workflow if
-        it doesn't exist and adding its path to the config
+    # Instantiate a CellfinderConfig from the input json file
+    # (assumes config is json serializable)
+    config = read_cellfinder_config(input_config_path)
 
-        Parameters
-        ----------
-        input_config_path : Path
-            path to the input config file
+    # Print info logs for status
+    logger.info(f"Input config read from {input_config_path}")
+    if input_config_path == DEFAULT_JSON_CONFIG_PATH_CELLFINDER:
+        logger.info("Using default config file")
 
-        Returns
-        -------
-        config : CellfinderConfig
-            a dataclass whose attributes are the parameters
-            for running cellfinder.
-        """
-
-        # Check config file exists
-        assert input_config_path.exists()
-
-        # Instantiate a CellfinderConfig from the input json file
-        # (assumes config is json serializable)
-        with open(input_config_path) as cfg:
-            config_dict = json.load(cfg)
-        config = CellfinderConfig(**config_dict)
-
-        # Print info logs for status
-        logger.info(f"Input config read from {input_config_path}")
-        if input_config_path == DEFAULT_JSON_CONFIG_PATH_CELLFINDER:
-            logger.info("Using default config file")
-
-        # Retrieve and add lists of input data to the config,
-        # if these are defined yet
-        if not (config.list_signal_files and config.list_signal_files):
-            # build fullpaths to inputs
-            config.signal_dir_path = str(
-                Path(config.install_path)
-                / config.extract_dir_relative
-                / config.signal_subdir
-            )
-            config.background_dir_path = str(
-                Path(config.install_path)
-                / config.extract_dir_relative
-                / config.background_subdir
-            )
-            # retrieve data
-            config = retrieve_input_data(config)
-
-        # Create timestamped output directory if it doesn't exist
-        timestamp = datetime.datetime.now()
-        timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
-        output_path_timestamped = Path(config.install_path) / (
-            str(config.output_path_basename_relative) + timestamp_formatted
+    # Retrieve and add lists of input data to the config,
+    # if these are defined yet
+    if not (config.list_signal_files and config.list_signal_files):
+        # build fullpaths to inputs
+        config.signal_dir_path = str(
+            Path(config.install_path)
+            / config.extract_dir_relative
+            / config.signal_subdir
         )
-        output_path_timestamped.mkdir(parents=True, exist_ok=True)
-
-        # Add output path and output file path to config
-        config.output_path = output_path_timestamped
-        config.detected_cells_path = (
-            config.output_path / config.detected_cells_filename
+        config.background_dir_path = str(
+            Path(config.install_path)
+            / config.extract_dir_relative
+            / config.background_subdir
         )
+        # retrieve data
+        config = retrieve_input_data(config)
 
-        return config
+    # Create timestamped output directory if it doesn't exist
+    timestamp = datetime.datetime.now()
+    timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
+    output_path_timestamped = Path(config.install_path) / (
+        str(config.output_path_basename_relative) + timestamp_formatted
+    )
+    output_path_timestamped.mkdir(parents=True, exist_ok=True)
 
+    # Add output path and output file path to config
+    config.output_path = output_path_timestamped
+    config.detected_cells_path = (
+        config.output_path / config.detected_cells_filename
+    )
+
+    return config
+
+
+def setup(input_config_path) -> CellfinderConfig:
     # setup logger
-    logger = setup_logger()
+    _ = setup_logger()
 
     # run setup steps and return config
     cfg = setup_workflow(Path(input_config_path))

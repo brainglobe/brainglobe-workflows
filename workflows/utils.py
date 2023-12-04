@@ -26,6 +26,7 @@ def setup_logger() -> logging.Logger:
     console_handler = logging.StreamHandler(sys.stdout)
     console_format = logging.Formatter("%(name)s %(levelname)s: %(message)s")
     console_handler.setFormatter(console_format)
+    console_handler.set_name("console_handler")
 
     # define logger and link to handler
     logger = logging.getLogger(
