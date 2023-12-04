@@ -21,16 +21,17 @@ Example usage:
 import datetime
 import json
 import os
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
 import pooch
+import typer
 from brainglobe_utils.IO.cells import save_cells
 from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 from cellfinder_core.train.train_yml import depth_type
+from utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER, setup_logger
 
 Pathlike = Union[str, os.PathLike]
 
@@ -91,7 +92,7 @@ class CellfinderConfig:
     detected_cells_path: Pathlike = ""
 
 
-def setup(argv=None) -> CellfinderConfig:
+def setup(input_config_path) -> CellfinderConfig:
     def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
         """
         Adds the lists of input data files (signal and background)
@@ -271,14 +272,11 @@ def setup(argv=None) -> CellfinderConfig:
 
         return config
 
-    # setup logger and parse command line arguments
-    argv = (
-        argv or sys.argv[1:]
-    )  # sys.argv in most cases except for testing when we monkeypatch it
-    args, logger = setup_logger_and_parse_cli_arguments(argv)
+    # setup logger
+    logger = setup_logger()
 
     # run setup steps and return config
-    cfg = setup_workflow(Path(args.config))
+    cfg = setup_workflow(Path(input_config_path))
 
     return cfg
 
@@ -318,14 +316,14 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
     )
 
 
-if __name__ == "__main__":
-    from utils import (
-        DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
-        setup_logger_and_parse_cli_arguments,
-    )
-
+def main(input_config_path=DEFAULT_JSON_CONFIG_PATH_CELLFINDER):
     # run setup
-    cfg = setup()
+    cfg = setup(input_config_path)
 
     # run workflow
     run_workflow_from_cellfinder_run(cfg)  # only this will be benchmarked
+
+
+if __name__ == "__main__":
+    # run setup and workflow
+    typer.run(main)
