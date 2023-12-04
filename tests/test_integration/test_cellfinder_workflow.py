@@ -34,7 +34,7 @@ def test_run_with_default_config(tmp_path, default_json_config_path):
             / "workflows"
             / "cellfinder.py",
         ],
-        cwd=tmp_path,
+        cwd=tmp_path,  # -------------------
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
