@@ -1,5 +1,4 @@
 import json
-import logging
 import re
 from pathlib import Path
 
@@ -10,6 +9,7 @@ from workflows.cellfinder import (
     add_signal_and_background_files,
     read_cellfinder_config,
 )
+from workflows.utils import setup_logger
 
 
 @pytest.fixture()
@@ -107,7 +107,20 @@ def test_add_signal_and_background_files(
     """
     # set logger to capture
     # TODO: --- why root? :( "workflows.utils")
-    caplog.set_level(logging.DEBUG, logger="root")
+    # logging.getLogger("workflows.utils")
+    # By default, the root log level is WARN,
+    # so every log with lower level (for example INFO or DEBUG) will be ignored
+    # I need to create the logger here because if it doesnt exist,
+    # it creates one from root
+    # whose default level is WARN, and so DEBUG and INFO levels are ignored
+    # (By default, a new logger has the NOTSET level, and as the root logger
+    # has a WARN level, the logger’s effective level will be WARN.)
+    # One option is to set the root logger level here to DEBUG -- then its
+    # "children" will have DEBUG level too
+    # caplog.set_level(logging.DEBUG, logger="workflows.utils") #"root")
+    # A better option is to create our logger here before anything else
+    logger = setup_logger()
+    assert logger.name == "workflows.utils"
 
     # read json as Cellfinder config
     config = read_cellfinder_config(input_configs_dir / input_config)
@@ -156,7 +169,8 @@ def test_add_signal_and_background_files(
     # retrieve data
     add_signal_and_background_files(config)
 
-    # match
+    # check log messages
+    assert len(caplog.messages) > 0
     out = re.fullmatch(message_pattern, caplog.messages[-1])
     assert out.group() is not None
 

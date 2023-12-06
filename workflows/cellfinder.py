@@ -149,7 +149,7 @@ def add_signal_and_background_files(
         for running cellfinder.
     """
     # Fetch logger
-    logger = logging.getLogger("workflow.utils")
+    logger = logging.getLogger("workflows.utils")
 
     # Check if input data directories (signal and background) exist locally.
     # If both directories exist, get list of signal and background files
@@ -258,7 +258,7 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
     """
 
     # Fetch logger
-    logger = logging.getLogger("workflow.utils")
+    logger = logging.getLogger("workflows.utils")
 
     # Check config file exists
     assert input_config_path.exists()
