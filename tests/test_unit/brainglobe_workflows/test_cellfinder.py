@@ -34,13 +34,6 @@ def cellfinder_GIN_data() -> dict:
 
 
 @pytest.fixture()
-def input_config_default():
-    from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
-
-    return DEFAULT_JSON_CONFIG_PATH_CELLFINDER
-
-
-@pytest.fixture()
 def input_config_fetch_GIN(input_configs_dir):
     return input_configs_dir / "input_data_GIN.json"
 
@@ -175,7 +168,7 @@ def test_add_signal_and_background_files(
 @pytest.mark.parametrize(
     "input_config, message",
     [
-        ("input_config_default", "Using default config file"),
+        ("default_input_config_cellfinder", "Using default config file"),
         ("input_config_fetch_GIN", "Input config read from"),
     ],
 )
