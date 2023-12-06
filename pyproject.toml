@@ -57,7 +57,6 @@ napari = [
     "napari[pyqt5]",
     "brainglobe-napari-io",
     "cellfinder-napari<1.0.0",
-    "qtpy",
 ]
 
 [project.urls]
