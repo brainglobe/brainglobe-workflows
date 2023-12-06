@@ -29,7 +29,7 @@ def make_config_dict_fetch_from_local(cellfinder_cache_dir: Path) -> dict:
     """
     return {
         "install_path": cellfinder_cache_dir,
-        "extract_dir_relative": "cellfinder_test_data",  # relative path
+        "data_dir_relative": "cellfinder_test_data",  # relative path
         "signal_subdir": "signal",
         "background_subdir": "background",
         "output_path_basename_relative": "cellfinder_output_",
@@ -176,9 +176,7 @@ def default_json_config_path() -> Path:
     Path
         path to the json file with the default config parameters
     """
-    from workflows.utils import (
-        DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
-    )
+    from workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
     return DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
@@ -274,7 +272,7 @@ def path_to_config_fetch_local(
         path=config.install_path,  # path to download zip to
         progressbar=True,
         processor=pooch.Unzip(
-            extract_dir=config.extract_dir_relative
+            extract_dir=config.data_dir_relative
             # path to unzipped dir, *relative*  to 'path'
         ),
     )

@@ -1,8 +1,6 @@
 {
   "install_path": ".cellfinder_workflows",
-  "data_url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
-  "data_hash": "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914",
-  "extract_dir_relative": "cellfinder_test_data",
+  "data_dir_relative": "cellfinder_test_data",
   "signal_subdir": "__",
   "background_subdir": "background",
   "output_path_basename_relative": "cellfinder_output_",

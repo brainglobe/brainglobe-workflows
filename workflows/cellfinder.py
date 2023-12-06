@@ -45,13 +45,14 @@ class CellfinderConfig:
     the cellfinder preprocessing steps.
     """
 
-    # cellfinder workflows cache directory
-    install_path: Pathlike
-
-    # cached subdirectory to save data to
-    extract_dir_relative: Pathlike
+    # input data
+    # data_dir_relative: parent directory to signal and background,
+    # relative to install path
+    data_dir_relative: Pathlike
     signal_subdir: str
     background_subdir: str
+
+    # output
     output_path_basename_relative: Pathlike
     detected_cells_filename: Pathlike
 
@@ -80,6 +81,9 @@ class CellfinderConfig:
     cube_depth: int
     network_depth: depth_type
 
+    # install path (root for all inputs and outputs)
+    install_path: Pathlike = ".cellfinder_workflows"
+
     # origin of data to download (if required)
     data_url: Optional[str] = None
     data_hash: Optional[str] = None
@@ -89,9 +93,9 @@ class CellfinderConfig:
     list_signal_files: Optional[list] = None
     list_background_files: Optional[list] = None
     output_path: Pathlike = ""
+    detected_cells_path: Pathlike = ""
     signal_dir_path: Pathlike = ""
     background_dir_path: Pathlike = ""
-    detected_cells_path: Pathlike = ""
 
 
 def read_cellfinder_config(input_config_path):
@@ -117,10 +121,12 @@ def read_cellfinder_config(input_config_path):
     return config
 
 
-def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
+def add_signal_and_background_files(
+    config: CellfinderConfig,
+) -> CellfinderConfig:
     """
     Adds the lists of input data files (signal and background)
-    to the config.
+    to the config, when these are not defined.
 
     It first checks if the input data exists locally.
     - If both directories (signal and background) exist, the lists of
@@ -145,7 +151,7 @@ def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
     # Fetch logger
     logger = logging.getLogger("workflow.utils")
 
-    # Check if input data (signal and background) exist locally.
+    # Check if input data directories (signal and background) exist locally.
     # If both directories exist, get list of signal and background files
     if (
         Path(config.signal_dir_path).exists()
@@ -178,7 +184,8 @@ def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
                 f"The directory {config.background_dir_path} " "does not exist"
             )
 
-    # If neither of them exist, retrieve data from GIN repository
+    # If neither of the input data directories exist,
+    # retrieve data from GIN repository and add list of files to config
     else:
         # check if GIN URL and hash are defined (log error otherwise)
         if (not config.data_url) or (not config.data_hash):
@@ -195,7 +202,7 @@ def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
                 path=config.install_path,  # zip will be downloaded here
                 progressbar=True,
                 processor=pooch.Unzip(
-                    extract_dir=config.extract_dir_relative
+                    extract_dir=config.data_dir_relative
                     # path to unzipped dir,
                     # *relative* to the path set in 'path'
                 ),
@@ -221,7 +228,7 @@ def retrieve_input_data(config: CellfinderConfig) -> CellfinderConfig:
                 for f in list_files_archive
                 if f.startswith(
                     str(Path(config.background_dir_path).resolve())
-                )  # if str(config.background_dir_path) in f
+                )
             ]
 
     return config
@@ -265,22 +272,23 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
     if input_config_path == DEFAULT_JSON_CONFIG_PATH_CELLFINDER:
         logger.info("Using default config file")
 
-    # Retrieve and add lists of input data to the config,
+    # Add lists of input data files to the config,
     # if these are defined yet
-    if not (config.list_signal_files and config.list_signal_files):
-        # build fullpaths to inputs
+    if not (config.list_signal_files and config.list_background_files):
+        # build fullpaths to input directories
         config.signal_dir_path = str(
             Path(config.install_path)
-            / config.extract_dir_relative
+            / config.data_dir_relative
             / config.signal_subdir
         )
         config.background_dir_path = str(
             Path(config.install_path)
-            / config.extract_dir_relative
+            / config.data_dir_relative
             / config.background_subdir
         )
-        # retrieve data
-        config = retrieve_input_data(config)
+
+        # add signal and background files to config
+        config = add_signal_and_background_files(config)
 
     # Create timestamped output directory if it doesn't exist
     timestamp = datetime.datetime.now()

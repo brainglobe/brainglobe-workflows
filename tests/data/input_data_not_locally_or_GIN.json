@@ -1,6 +1,6 @@
 {
   "install_path": ".cellfinder_workflows",
-  "extract_dir_relative": "cellfinder_test_data",
+  "data_dir_relative": "cellfinder_test_data",
   "signal_subdir": "signal",
   "background_subdir": "background",
   "output_path_basename_relative": "cellfinder_output_",

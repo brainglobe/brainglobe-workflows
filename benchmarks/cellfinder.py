@@ -11,9 +11,7 @@ from workflows.cellfinder import (
     CellfinderConfig,
     run_workflow_from_cellfinder_run,
 )
-from workflows.cellfinder import (
-    setup as setup_cellfinder_workflow,
-)
+from workflows.cellfinder import setup as setup_cellfinder_workflow
 from workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
 
@@ -114,7 +112,7 @@ class TimeBenchmarkPrepGIN:
             known_hash=config.data_hash,
             path=config.install_path,
             progressbar=True,
-            processor=pooch.Unzip(extract_dir=config.extract_dir_relative),
+            processor=pooch.Unzip(extract_dir=config.data_dir_relative),
         )
 
         # Check paths to input data should now exist in config
