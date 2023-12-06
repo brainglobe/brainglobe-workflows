@@ -105,20 +105,7 @@ def test_add_signal_and_background_files(
     message : _type_
         _description_
     """
-    # set logger to capture
-    # TODO: --- why root? :( "workflows.utils")
-    # logging.getLogger("workflows.utils")
-    # By default, the root log level is WARN,
-    # so every log with lower level (for example INFO or DEBUG) will be ignored
-    # I need to create the logger here because if it doesnt exist,
-    # it creates one from root
-    # whose default level is WARN, and so DEBUG and INFO levels are ignored
-    # (By default, a new logger has the NOTSET level, and as the root logger
-    # has a WARN level, the logger’s effective level will be WARN.)
-    # One option is to set the root logger level here to DEBUG -- then its
-    # "children" will have DEBUG level too
-    # caplog.set_level(logging.DEBUG, logger="workflows.utils") #"root")
-    # A better option is to create our logger here before anything else
+    # instantiate our custom logger
     logger = setup_logger()
     assert logger.name == "workflows.utils"
 
