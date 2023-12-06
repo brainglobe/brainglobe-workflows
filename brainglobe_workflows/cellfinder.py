@@ -37,6 +37,7 @@ from brainglobe_workflows.utils import (
     DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
     setup_logger,
 )
+from brainglobe_workflows.utils import __name__ as LOGGER_NAME
 
 Pathlike = Union[str, os.PathLike]
 
@@ -101,7 +102,7 @@ class CellfinderConfig:
     background_dir_path: Pathlike = ""
 
 
-def read_cellfinder_config(input_config_path):
+def read_cellfinder_config(input_config_path: Path):
     """Instantiate a CellfinderConfig from the input json file
     (assumes config is json serializable)
 
@@ -152,7 +153,7 @@ def add_signal_and_background_files(
         for running cellfinder.
     """
     # Fetch logger
-    logger = logging.getLogger("brainglobe_workflows.utils")
+    logger = logging.getLogger(LOGGER_NAME)
 
     # Check if input data directories (signal and background) exist locally.
     # If both directories exist, get list of signal and background files
@@ -261,7 +262,7 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
     """
 
     # Fetch logger
-    logger = logging.getLogger("brainglobe_workflows.utils")
+    logger = logging.getLogger(LOGGER_NAME)
 
     # Check config file exists
     assert input_config_path.exists()
@@ -310,7 +311,7 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
     return config
 
 
-def setup(input_config_path) -> CellfinderConfig:
+def setup(input_config_path: str) -> CellfinderConfig:
     # setup logger
     _ = setup_logger()
 
