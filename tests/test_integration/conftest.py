@@ -5,7 +5,7 @@ from typing import Any
 import pooch
 import pytest
 
-from workflows.cellfinder import CellfinderConfig
+from brainglobe_workflows.cellfinder import CellfinderConfig
 
 
 def make_config_dict_fetch_from_local(cellfinder_cache_dir: Path) -> dict:
@@ -176,7 +176,7 @@ def default_json_config_path() -> Path:
     Path
         path to the json file with the default config parameters
     """
-    from workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+    from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
     return DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 

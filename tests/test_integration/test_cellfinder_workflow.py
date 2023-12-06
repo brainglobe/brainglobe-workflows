@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from workflows.cellfinder import CellfinderConfig
+from brainglobe_workflows.cellfinder import CellfinderConfig
 
 
 def test_run_with_default_config(tmp_path, default_json_config_path):

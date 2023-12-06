@@ -1,6 +1,6 @@
 import logging
 
-from workflows.utils import setup_logger
+from brainglobe_workflows.utils import setup_logger
 
 
 def test_setup_logger():

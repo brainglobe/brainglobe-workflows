@@ -7,12 +7,12 @@ from brainglobe_utils.IO.cells import save_cells
 from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 
-from workflows.cellfinder import (
+from brainglobe_workflows.cellfinder import (
     CellfinderConfig,
     run_workflow_from_cellfinder_run,
 )
-from workflows.cellfinder import setup as setup_cellfinder_workflow
-from workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+from brainglobe_workflows.cellfinder import setup as setup_cellfinder_workflow
+from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
 
 class TimeBenchmarkPrepGIN:

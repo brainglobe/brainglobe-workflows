@@ -2,8 +2,8 @@ include LICENSE
 include README.md
 exclude .pre-commit-config.yaml
 
-recursive-include workflows *.py
-recursive-include workflows *.json
+recursive-include brainglobe_workflows *.py
+recursive-include brainglobe_workflows *.json
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
@@ -11,6 +11,6 @@ recursive-exclude docs *
 recursive-exclude tests *
 
 include asv.conf.json
-recursive-include benchmarks *.py
-recursive-include benchmarks *.json
-recursive-exclude benchmarks/results *
+recursive-include brainglobe_benchmarks *.py
+recursive-include brainglobe_benchmarks *.json
+recursive-exclude brainglobe_benchmarks/results *

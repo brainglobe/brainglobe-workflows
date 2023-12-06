@@ -5,16 +5,17 @@ from pathlib import Path
 import pooch
 import pytest
 
-from workflows.cellfinder import (
+from brainglobe_workflows.cellfinder import (
     add_signal_and_background_files,
     read_cellfinder_config,
+    setup_workflow,
 )
-from workflows.utils import setup_logger
+from brainglobe_workflows.utils import setup_logger
 
 
 @pytest.fixture()
 def input_configs_dir():
-    return Path(__file__).parents[1] / "data"
+    return Path(__file__).parents[2] / "data"
 
 
 @pytest.fixture(scope="session")
@@ -30,6 +31,18 @@ def cellfinder_GIN_data() -> dict:
         "url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
         "hash": "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914",  # noqa
     }
+
+
+@pytest.fixture()
+def input_config_default():
+    from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+
+    return DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+
+
+@pytest.fixture()
+def input_config_fetch_GIN(input_configs_dir):
+    return input_configs_dir / "input_data_GIN.json"
 
 
 @pytest.mark.parametrize(
@@ -106,8 +119,7 @@ def test_add_signal_and_background_files(
         _description_
     """
     # instantiate our custom logger
-    logger = setup_logger()
-    assert logger.name == "workflows.utils"
+    _ = setup_logger()
 
     # read json as Cellfinder config
     config = read_cellfinder_config(input_configs_dir / input_config)
@@ -160,25 +172,57 @@ def test_add_signal_and_background_files(
     assert out.group() is not None
 
 
-# def test_setup_workflow(input_config_path):
-#     """Test setup steps for the cellfinder workflow are completed
+@pytest.mark.parametrize(
+    "input_config, message",
+    [
+        ("input_config_default", "Using default config file"),
+        ("input_config_fetch_GIN", "Input config read from"),
+    ],
+)
+def test_setup_workflow(
+    input_config, message, monkeypatch, tmp_path, caplog, request
+):
+    """Test setup steps for the cellfinder workflow are completed
 
-#     These setup steps include:
-#     - instantiating a CellfinderConfig object with the required parameters,
-#     - add signal and background files to config if these do not exist
-#     - creating a timestamped directory for the output of the workflow if
-#     it doesn't exist and adding its path to the config
-#     """
+    These setup steps include:
+    - instantiating a CellfinderConfig object with the required parameters,
+    - add signal and background files to config if these do not exist
+    - creating a timestamped directory for the output of the workflow if
+    it doesn't exist and adding its path to the config
+    """
 
+    # setup logger
+    _ = setup_logger()
 
-#     config = setup_workflow(input_config_path)
+    # monkeypatch to change current directory to
+    # pytest temporary directory
+    # (cellfinder cache directory is created in cwd)
+    monkeypatch.chdir(tmp_path)
 
-#     assert config.list_signal_files # check all files exist
-#     assert config.list_background_files  # check all files exist
-#     assert config.output_path # check path exists
-#     assert config.output_path # check timestamped format:
-# install_path /  str(config.output_path_basename_relative)
-# + timestamp_formatted
-# #---should be timestamped with this format strftime("%Y%m%d_%H%M%S")
-#     assert config.detected_cells_path # check this field is defined
-# # should be config.output_path / config.detected_cells_filename
+    # setup workflow
+    config = setup_workflow(request.getfixturevalue(input_config))
+
+    # check logs
+    assert message in caplog.text
+
+    # check all signal files exist
+    assert all([Path(f).is_file() for f in config.list_signal_files])
+
+    # check all background files exist
+    assert all([Path(f).is_file() for f in config.list_background_files])
+
+    # check output directory exists
+    assert Path(config.output_path).resolve().is_dir()
+
+    # check output directory name has correct format
+    out = re.fullmatch(
+        config.output_path_basename_relative + "\\d{8}_\\d{6}$",
+        Path(config.output_path).stem,
+    )
+    assert out.group() is not None
+
+    # check output file path
+    assert (
+        config.detected_cells_path
+        == config.output_path / config.detected_cells_filename
+    )

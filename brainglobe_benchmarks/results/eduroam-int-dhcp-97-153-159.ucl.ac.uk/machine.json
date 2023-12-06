@@ -1,0 +1,9 @@
+{
+    "arch": "arm64",
+    "cpu": "Apple M1 Pro",
+    "machine": "eduroam-int-dhcp-97-153-159.ucl.ac.uk",
+    "num_cpu": "10",
+    "os": "Darwin 23.0.0",
+    "ram": "34359738368",
+    "version": 1
+}
