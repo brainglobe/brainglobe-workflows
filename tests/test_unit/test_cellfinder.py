@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from pathlib import Path
 
 import pooch
@@ -59,7 +60,7 @@ def test_read_cellfinder_config(input_config, input_configs_dir):
 
 
 @pytest.mark.parametrize(
-    "input_config, message",
+    "input_config, message_pattern",
     [
         (
             "input_data_GIN.json",
@@ -69,11 +70,14 @@ def test_read_cellfinder_config(input_config, input_configs_dir):
             "input_data_locally.json",
             "Fetching input data from the local directories",
         ),
-        ("input_data_missing_background.json", "The directory does not exist"),
-        ("input_data_missing_signal.json", "The directory does not exist"),
+        (
+            "input_data_missing_background.json",
+            "The directory .+ does not exist$",
+        ),
+        ("input_data_missing_signal.json", "The directory .+ does not exist$"),
         (
             "input_data_not_locally_or_GIN.json",
-            "Input data not found locally, and URL/hash to"
+            "Input data not found locally, and URL/hash to "
             "GIN repository not provided",
         ),
     ],
@@ -84,7 +88,7 @@ def test_add_signal_and_background_files(
     cellfinder_GIN_data,
     input_configs_dir,
     input_config,
-    message,
+    message_pattern,
 ):
     """_summary_
 
@@ -130,9 +134,10 @@ def test_add_signal_and_background_files(
     # monkeypatch cellfinder config:
     # - if config is "local" or "signal/background missing":
     #    ensure signal and background data from GIN are downloaded locally
-    if message in [
-        "Fetching input data from the local directories",
-        "The directory does not exist",
+    if input_config in [
+        "input_data_locally.json",
+        "input_data_missing_signal.json",
+        "input_data_missing_background.json",
     ]:
         # fetch data from GIN and download locally
         # download GIN data to specified local directory
@@ -151,7 +156,9 @@ def test_add_signal_and_background_files(
     # retrieve data
     add_signal_and_background_files(config)
 
-    assert message in caplog.messages[-1]
+    # match
+    out = re.fullmatch(message_pattern, caplog.messages[-1])
+    assert out.group() is not None
 
 
 # def test_setup_workflow(input_config_path):
