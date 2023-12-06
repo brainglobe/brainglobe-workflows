@@ -113,7 +113,7 @@ def test_add_signal_and_background_files(
     config = read_cellfinder_config(input_configs_dir / input_config)
 
     # monkeypatch cellfinder config:
-    # - set install_path to pytest temp directory
+    # set install_path to pytest temporary directory
     config.install_path = tmp_path / config.install_path
 
     # check lists of signal and background files are not defined
@@ -132,16 +132,14 @@ def test_add_signal_and_background_files(
     )
 
     # monkeypatch cellfinder config:
-    # - if config is "local" or "signal/background missing":
-    #    ensure signal and background data from GIN are downloaded locally
+    # if config is "local" or "signal/background missing":
+    # ensure signal and background data from GIN are downloaded locally
     if input_config in [
         "input_data_locally.json",
         "input_data_missing_signal.json",
         "input_data_missing_background.json",
     ]:
         # fetch data from GIN and download locally
-        # download GIN data to specified local directory
-        # can I download data only once? - but then same pytest directory?
         pooch.retrieve(
             url=cellfinder_GIN_data["url"],
             known_hash=cellfinder_GIN_data["hash"],
@@ -153,7 +151,7 @@ def test_add_signal_and_background_files(
             ),
         )
 
-    # retrieve data
+    # add signal and background files lists to config
     add_signal_and_background_files(config)
 
     # check log messages
@@ -175,9 +173,12 @@ def test_add_signal_and_background_files(
 
 #     config = setup_workflow(input_config_path)
 
-#     assert config.list_signal_files # all files exist
-#     assert config.list_background_files  # all files exist
-#     assert config.output_path
+#     assert config.list_signal_files # check all files exist
+#     assert config.list_background_files  # check all files exist
+#     assert config.output_path # check path exists
+#     assert config.output_path # check timestamped format:
+# install_path /  str(config.output_path_basename_relative)
+# + timestamp_formatted
 # #---should be timestamped with this format strftime("%Y%m%d_%H%M%S")
-#     assert config.detected_cells_path
+#     assert config.detected_cells_path # check this field is defined
 # # should be config.output_path / config.detected_cells_filename
