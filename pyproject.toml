@@ -44,6 +44,9 @@ dev = [
   "setuptools_scm",
 ]
 
+[project.scripts]
+cellfinder-workflow = "brainglobe_workflows.cellfinder:app_wrapper"
+
 [build-system]
 requires = [
     "setuptools>=45",

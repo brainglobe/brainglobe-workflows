@@ -363,7 +363,13 @@ def main(input_config_path=DEFAULT_JSON_CONFIG_PATH_CELLFINDER):
     # run workflow
     run_workflow_from_cellfinder_run(cfg)  # only this will be benchmarked
 
+    return cfg
+
+
+def app_wrapper():
+    typer.run(main)
+
 
 if __name__ == "__main__":
     # run setup and workflow
-    typer.run(main)
+    app_wrapper()
