@@ -64,7 +64,7 @@ def test_main(monkeypatch, tmp_path):
     assert (cfg.detected_cells_path).is_file()
 
 
-# TODO: test main CLI with default and custom json?
+# TODO: test main CLI with default and specific json?
 def test_app_wrapper(monkeypatch, tmp_path):
     # monkeypatch to change current directory to
     # pytest temporary directory
@@ -75,7 +75,7 @@ def test_app_wrapper(monkeypatch, tmp_path):
     subprocess_output = subprocess.run(
         [
             sys.executable,
-            Path(__file__).resolve().parents[2]
+            Path(__file__).resolve().parents[3]
             / "brainglobe_workflows"
             / "cellfinder.py",
         ],
@@ -89,6 +89,7 @@ def test_app_wrapper(monkeypatch, tmp_path):
     assert subprocess_output.returncode == 0
 
 
+# TODO: test main CLI with default and specific json?
 def test_main_entry_point(monkeypatch, tmp_path):
     #  monkeypatch to change current directory to
     # pytest temporary directory
