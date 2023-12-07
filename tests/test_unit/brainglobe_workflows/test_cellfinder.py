@@ -14,7 +14,14 @@ from brainglobe_workflows.utils import setup_logger
 
 
 @pytest.fixture()
-def input_configs_dir():
+def input_configs_dir() -> Path:
+    """Return the test data directory path
+
+    Returns
+    -------
+    Path
+        Test data directory path
+    """
     return Path(__file__).parents[2] / "data"
 
 
@@ -34,7 +41,20 @@ def cellfinder_GIN_data() -> dict:
 
 
 @pytest.fixture()
-def input_config_fetch_GIN(input_configs_dir):
+def input_config_fetch_GIN(input_configs_dir: Path) -> Path:
+    """
+    Return the config json file for fetching data from GIN
+
+    Parameters
+    ----------
+    input_configs_dir : Path
+        Path to the directory holding the test config files.
+
+    Returns
+    -------
+    Path
+        Path to the config json file for fetching data from GIN
+    """
     return input_configs_dir / "input_data_GIN.json"
 
 
@@ -48,7 +68,16 @@ def input_config_fetch_GIN(input_configs_dir):
         "input_data_not_locally_or_GIN.json",
     ],
 )
-def test_read_cellfinder_config(input_config, input_configs_dir):
+def test_read_cellfinder_config(input_config: str, input_configs_dir: Path):
+    """Test for reading a cellfinder config file
+
+    Parameters
+    ----------
+    input_config : str
+        Name of input config json file
+    input_configs_dir : Path
+        Test data directory path
+    """
     # path to config json file
     input_config_path = input_configs_dir / input_config
 
@@ -89,27 +118,29 @@ def test_read_cellfinder_config(input_config, input_configs_dir):
     ],
 )
 def test_add_signal_and_background_files(
-    caplog,
-    tmp_path,
-    cellfinder_GIN_data,
-    input_configs_dir,
-    input_config,
-    message_pattern,
+    caplog: pytest.LogCaptureFixture,
+    tmp_path: Path,
+    cellfinder_GIN_data: dict,
+    input_configs_dir: Path,
+    input_config: str,
+    message_pattern: str,
 ):
-    """_summary_
+    """Test signal and background files addition to the cellfinder config
 
     Parameters
     ----------
-    caplog : _type_
-        _description_
+    caplog : pytest.LogCaptureFixture
+        Pytest fixture to capture the logs during testing
     tmp_path : Path
-        path to pytest-generated temporary directory
-    input_configs_dir : _type_
-        _description_
-    input_config : _type_
-        _description_
-    message : _type_
-        _description_
+        Pytest fixture providing a temporary path for each test
+    cellfinder_GIN_data : dict
+        Dict holding the URL and hash of the cellfinder test data in GIN
+    input_configs_dir : Path
+        Test data directory path
+    input_config : str
+        Name of input config json file
+    message_pattern : str
+        Expected pattern in the log
     """
     # instantiate our custom logger
     _ = setup_logger()
@@ -162,6 +193,7 @@ def test_add_signal_and_background_files(
     # check log messages
     assert len(caplog.messages) > 0
     out = re.fullmatch(message_pattern, caplog.messages[-1])
+    assert out is not None
     assert out.group() is not None
 
 
@@ -173,15 +205,36 @@ def test_add_signal_and_background_files(
     ],
 )
 def test_setup_workflow(
-    input_config, message, monkeypatch, tmp_path, caplog, request
+    input_config: str,
+    message: str,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    request: pytest.FixtureRequest,
 ):
-    """Test setup steps for the cellfinder workflow are completed
+    """Test setup steps for the cellfinder workflow
 
     These setup steps include:
-    - instantiating a CellfinderConfig object with the required parameters,
-    - add signal and background files to config if these do not exist
-    - creating a timestamped directory for the output of the workflow if
-    it doesn't exist and adding its path to the config
+    - instantiating a CellfinderConfig object using the input json file,
+    - add the signal and background files to the config if these are not
+      defined,
+    - create a timestamped directory for the output of the workflow if
+      it doesn't exist and add its path to the config
+
+    Parameters
+    ----------
+    input_config : str
+        Name of input config json file
+    message : str
+        Expected log message
+    monkeypatch : pytest.MonkeyPatch
+        Pytest fixture to use monkeypatching utils
+    tmp_path : Path
+        Pytest fixture providing a temporary path for each test
+    caplog : pytest.LogCaptureFixture
+        Pytest fixture to capture the logs during testing
+    request : pytest.FixtureRequest
+        Pytest fixture to enable requesting fixtures by name
     """
 
     # setup logger
@@ -199,9 +252,11 @@ def test_setup_workflow(
     assert message in caplog.text
 
     # check all signal files exist
+    assert config.list_signal_files
     assert all([Path(f).is_file() for f in config.list_signal_files])
 
     # check all background files exist
+    assert config.list_background_files
     assert all([Path(f).is_file() for f in config.list_background_files])
 
     # check output directory exists
@@ -209,13 +264,14 @@ def test_setup_workflow(
 
     # check output directory name has correct format
     out = re.fullmatch(
-        config.output_path_basename_relative + "\\d{8}_\\d{6}$",
+        str(config.output_path_basename_relative) + "\\d{8}_\\d{6}$",
         Path(config.output_path).stem,
     )
+    assert out is not None
     assert out.group() is not None
 
     # check output file path
     assert (
-        config.detected_cells_path
-        == config.output_path / config.detected_cells_filename
+        Path(config.detected_cells_path)
+        == Path(config.output_path) / config.detected_cells_filename
     )
