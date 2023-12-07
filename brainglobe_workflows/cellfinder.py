@@ -357,20 +357,9 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
     )
 
 
-def main(
-    argv_: Optional[list[str]] = None,
-):
-    # parse CLI arguments
-    # the following line will take sys.argv in most cases except
-    # for testing when we monkeypatch it
-    if argv_ is not None:
-        argv = argv_
-    else:
-        argv = sys.argv[1:]  # sys.argv[0] is the script name
-    args = config_parser(str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER), argv)
-
+def main(input_config: str = str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)):
     # run setup
-    cfg = setup(args.config)
+    cfg = setup(input_config)
 
     # run workflow
     run_workflow_from_cellfinder_run(cfg)  # only this will be benchmarked
@@ -379,5 +368,9 @@ def main(
 
 
 if __name__ == "__main__":
+    # parse CLI arguments
+    argv = sys.argv[1:]  # sys.argv[0] is the script name
+    args = config_parser(argv, str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER))
+
     # run setup and workflow
-    main()
+    main(args.config)
