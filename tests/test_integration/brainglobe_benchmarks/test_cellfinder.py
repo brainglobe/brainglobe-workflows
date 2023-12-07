@@ -23,7 +23,7 @@ def asv_config_monkeypatched_path(tmp_path):
         _description_
     """
     # read reference asv config
-    asv_original_path = Path(__file__).resolve().parents[2] / "asv.conf.json"
+    asv_original_path = Path(__file__).resolve().parents[3] / "asv.conf.json"
     asv_monkeypatched_dict = util.load_json(
         asv_original_path, js_comments=True
     )
