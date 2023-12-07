@@ -356,9 +356,9 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
     )
 
 
-def main(input_config_path=DEFAULT_JSON_CONFIG_PATH_CELLFINDER):
+def main(config=DEFAULT_JSON_CONFIG_PATH_CELLFINDER):
     # run setup
-    cfg = setup(input_config_path)
+    cfg = setup(config)
 
     # run workflow
     run_workflow_from_cellfinder_run(cfg)  # only this will be benchmarked
