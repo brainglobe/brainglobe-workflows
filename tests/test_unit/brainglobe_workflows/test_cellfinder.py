@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 from pathlib import Path
 
@@ -6,16 +7,20 @@ import pooch
 import pytest
 
 from brainglobe_workflows.cellfinder import (
+    CellfinderConfig,
     add_signal_and_background_files,
     read_cellfinder_config,
+    run_workflow_from_cellfinder_run,
     setup_workflow,
 )
+from brainglobe_workflows.cellfinder import setup as setup_full
 from brainglobe_workflows.utils import setup_logger
 
 
 @pytest.fixture()
 def input_configs_dir() -> Path:
-    """Return the test data directory path
+    """Return the directory path to the input configs
+    used for testing
 
     Returns
     -------
@@ -40,7 +45,7 @@ def cellfinder_GIN_data() -> dict:
     }
 
 
-@pytest.fixture()
+@pytest.fixture()  # ---Do I need this???
 def input_config_fetch_GIN(input_configs_dir: Path) -> Path:
     """
     Return the config json file for fetching data from GIN
@@ -56,6 +61,77 @@ def input_config_fetch_GIN(input_configs_dir: Path) -> Path:
         Path to the config json file for fetching data from GIN
     """
     return input_configs_dir / "input_data_GIN.json"
+
+
+@pytest.fixture()  # ---Do I need this???
+def input_config_fetch_local(
+    input_configs_dir: Path,
+    cellfinder_GIN_data: dict,
+) -> Path:
+    """
+    Download the cellfinder data locally and return the config json
+    file for fetching data locally.
+
+    The data is downloaded to a directory relative to cwd
+
+    Parameters
+    ----------
+    input_configs_dir : Path
+        Path to the directory holding the test config files.
+    cellfinder_GIN_data : dict
+        URL and hash of the GIN repository with the cellfinder test data
+
+    Returns
+    -------
+    Path
+        Path to the config json file for fetching data locally
+    """
+    # read local config
+    input_config_path = input_configs_dir / "input_data_locally.json"
+    config = read_cellfinder_config(input_config_path)
+
+    # fetch data from GIN and download locally
+    pooch.retrieve(
+        url=cellfinder_GIN_data["url"],
+        known_hash=cellfinder_GIN_data["hash"],
+        path=config.install_path,  # path to download zip to
+        progressbar=True,
+        processor=pooch.Unzip(
+            extract_dir=config.data_dir_relative
+            # path to unzipped dir, *relative*  to 'path'
+        ),
+    )
+
+    return input_config_path
+
+
+@pytest.fixture()
+def default_input_config_cellfinder() -> Path:
+    """Return path to default input config for cellfinder workflow
+
+    Returns
+    -------
+    Path
+        Path to default input config
+
+    """
+    from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+
+    return DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+
+
+@pytest.fixture()
+def custom_logger_name() -> str:
+    """Return name of custom logger created in workflow utils
+
+    Returns
+    -------
+    str
+        Name of custom logger
+    """
+    from brainglobe_workflows.utils import __name__ as LOGGER_NAME
+
+    return LOGGER_NAME
 
 
 @pytest.mark.parametrize(
@@ -212,7 +288,8 @@ def test_setup_workflow(
     caplog: pytest.LogCaptureFixture,
     request: pytest.FixtureRequest,
 ):
-    """Test setup steps for the cellfinder workflow
+    """Test setup steps for the cellfinder workflow, using the default config
+    and passing a specific config file.
 
     These setup steps include:
     - instantiating a CellfinderConfig object using the input json file,
@@ -275,3 +352,96 @@ def test_setup_workflow(
         Path(config.detected_cells_path)
         == Path(config.output_path) / config.detected_cells_filename
     )
+
+
+@pytest.mark.parametrize(
+    "input_config",
+    [
+        "default_input_config_cellfinder",
+        "input_config_fetch_GIN",
+        "input_config_fetch_local",
+    ],
+)
+def test_setup(
+    input_config: Path,
+    custom_logger_name: str,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    request: pytest.FixtureRequest,
+):
+    """Test full setup for cellfinder workflow, using the default config
+    and passing a specific config file.
+
+    Parameters
+    ----------
+    input_config : Path
+        Path to input config file
+    custom_logger_name : str
+        Name of custom logger
+    monkeypatch : MonkeyPatch
+        Pytest fixture to use monkeypatching utils
+    tmp_path : Path
+        Pytest fixture providing a temporary path for each test
+    request : pytest.FixtureRequest
+        Pytest fixture to enable requesting fixtures by name
+    """
+    # Monkeypatch to change current directory to
+    # pytest temporary directory
+    # (cellfinder cache directory is created in cwd)
+    # ------ does this work alright for local?
+    monkeypatch.chdir(tmp_path)
+
+    # run setup on default configuration
+    cfg = setup_full(request.getfixturevalue(input_config))
+
+    # check logger exists
+    logger = logging.getLogger(custom_logger_name)
+    assert logger.level == logging.DEBUG
+    assert logger.hasHandlers()
+
+    # check config is CellfinderConfig
+    assert isinstance(cfg, CellfinderConfig)
+
+
+@pytest.mark.parametrize(
+    "input_config",
+    [
+        "default_input_config_cellfinder",
+        "input_config_fetch_GIN",
+        "input_config_fetch_local",
+    ],
+)
+def test_run_workflow_from_cellfinder_run(  # --------------------
+    input_config: str,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    request: pytest.FixtureRequest,
+):
+    """Test running cellfinder workflow with default input config
+    (fetches data from GIN) and local input config
+
+    Parameters
+    ----------
+    input_config : str
+        Path to input config json file
+    monkeypatch : MonkeyPatch
+        Pytest fixture to use monkeypatching utils
+    tmp_path : Path
+        Pytest fixture providing a temporary path for each test
+    request : pytest.FixtureRequest
+        Pytest fixture to enable requesting fixtures by name
+    """
+    # monkeypatch to change current directory to
+    # pytest temporary directory
+    # (cellfinder cache directory is created in cwd)
+    # ------ does this work alright for local?
+    monkeypatch.chdir(tmp_path)
+
+    # run setup
+    cfg = setup_full(str(request.getfixturevalue(input_config)))
+
+    # run workflow
+    run_workflow_from_cellfinder_run(cfg)
+
+    # check output files are those expected?
+    assert Path(cfg.detected_cells_path).is_file()
