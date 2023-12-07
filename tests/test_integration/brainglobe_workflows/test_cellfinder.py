@@ -42,7 +42,7 @@ def test_main(
 
     # run main
     if not input_config:
-        cfg = main()  # use default config
+        cfg = main([])  # use default config
     else:
         cfg = main(["--config", str(request.getfixturevalue(input_config))])
 
@@ -58,7 +58,7 @@ def test_main(
         "input_config_fetch_local",
     ],
 )
-def test_app_wrapper(
+def test_script(
     input_config: Optional[str],
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -118,7 +118,7 @@ def test_app_wrapper(
         "input_config_fetch_local",
     ],
 )
-def test_main_entry_point(
+def test_entry_point(
     input_config: Optional[str],
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

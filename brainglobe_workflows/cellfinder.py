@@ -358,11 +358,16 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
 
 
 def main(
-    argv: Optional[list[str]] = None,
+    argv_: Optional[list[str]] = None,
 ):
     # parse CLI arguments
-    argv = argv or sys.argv[1:]  # sys.argv[0] is the script name
-    args = config_parser(argv, str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER))
+    # the following line will take sys.argv in most cases except
+    # for testing when we monkeypatch it
+    if argv_ is not None:
+        argv = argv_
+    else:
+        argv = sys.argv[1:]  # sys.argv[0] is the script name
+    args = config_parser(str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER), argv)
 
     # run setup
     cfg = setup(args.config)

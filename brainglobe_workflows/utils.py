@@ -3,6 +3,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
+from typing import Optional
 
 DEFAULT_JSON_CONFIGS_PATH = Path(__file__).resolve().parent / "configs"
 
@@ -38,20 +39,24 @@ def setup_logger() -> logging.Logger:
     return logger
 
 
-def config_parser(argv_: list[str], default_config: str) -> argparse.Namespace:
-    """Define argument parser for cellfinder
-    workflow script.
+def config_parser(
+    default_config: str,
+    argv_: Optional[list[str]] = None,
+) -> argparse.Namespace:
+    """Define argument parser for a workflow script.
 
-    It expects a path to a json file with the
-    parameters required to run the workflow.
-    If none is provided, the default
+    The only CLI argument defined in the parser is
+    the input config file. The default config to use if
+    no config is passed must be passed as an input to this
+    function. The list of input arguments `arg_v` can be
+    an empty list or None.
 
     Parameters
     ----------
-    argv_ : list[str]
-        List of strings to parse
     default_config : str
-        path to default config if none is passed as a CLI argument
+        _description_
+    argv_ : Optional[list[str]], optional
+        _description_, by default None
 
     Returns
     -------
@@ -81,6 +86,8 @@ def config_parser(argv_: list[str], default_config: str) -> argparse.Namespace:
     )
 
     # build parser object
+    if not argv_:
+        argv_ = []
     args = parser.parse_args(argv_)
 
     return args
