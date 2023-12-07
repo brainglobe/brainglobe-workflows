@@ -18,94 +18,6 @@ from brainglobe_workflows.utils import setup_logger
 
 
 @pytest.fixture()
-def input_configs_dir() -> Path:
-    """Return the directory path to the input configs
-    used for testing
-
-    Returns
-    -------
-    Path
-        Test data directory path
-    """
-    return Path(__file__).parents[2] / "data"
-
-
-@pytest.fixture(scope="session")
-def cellfinder_GIN_data() -> dict:
-    """Return the URL and hash to the GIN repository with the input data
-
-    Returns
-    -------
-    dict
-        URL and hash of the GIN repository with the cellfinder test data
-    """
-    return {
-        "url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
-        "hash": "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914",  # noqa
-    }
-
-
-@pytest.fixture()  # ---Do I need this???
-def input_config_fetch_GIN(input_configs_dir: Path) -> Path:
-    """
-    Return the config json file for fetching data from GIN
-
-    Parameters
-    ----------
-    input_configs_dir : Path
-        Path to the directory holding the test config files.
-
-    Returns
-    -------
-    Path
-        Path to the config json file for fetching data from GIN
-    """
-    return input_configs_dir / "input_data_GIN.json"
-
-
-@pytest.fixture()  # ---Do I need this???
-def input_config_fetch_local(
-    input_configs_dir: Path,
-    cellfinder_GIN_data: dict,
-) -> Path:
-    """
-    Download the cellfinder data locally and return the config json
-    file for fetching data locally.
-
-    The data is downloaded to a directory relative to cwd
-
-    Parameters
-    ----------
-    input_configs_dir : Path
-        Path to the directory holding the test config files.
-    cellfinder_GIN_data : dict
-        URL and hash of the GIN repository with the cellfinder test data
-
-    Returns
-    -------
-    Path
-        Path to the config json file for fetching data locally
-    """
-    # read local config
-    input_config_path = input_configs_dir / "input_data_locally.json"
-    config = read_cellfinder_config(input_config_path)
-
-    # fetch data from GIN and download locally
-    pooch.retrieve(
-        url=cellfinder_GIN_data["url"],
-        known_hash=cellfinder_GIN_data["hash"],
-        path=config.install_path,  # path to download zip to
-        progressbar=True,
-        processor=pooch.Unzip(
-            extract_dir=config.data_dir_relative
-            # path to unzipped dir, *relative*  to 'path'
-        ),
-    )
-
-    return input_config_path
-
-
-@pytest.fixture()
 def default_input_config_cellfinder() -> Path:
     """Return path to default input config for cellfinder workflow
 
@@ -363,7 +275,7 @@ def test_setup_workflow(
     ],
 )
 def test_setup(
-    input_config: Path,
+    input_config: str,
     custom_logger_name: str,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -374,7 +286,7 @@ def test_setup(
 
     Parameters
     ----------
-    input_config : Path
+    input_config : str
         Path to input config file
     custom_logger_name : str
         Name of custom logger
@@ -388,7 +300,6 @@ def test_setup(
     # Monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
-    # ------ does this work alright for local?
     monkeypatch.chdir(tmp_path)
 
     # run setup on default configuration
@@ -411,7 +322,7 @@ def test_setup(
         "input_config_fetch_local",
     ],
 )
-def test_run_workflow_from_cellfinder_run(  # --------------------
+def test_run_workflow_from_cellfinder_run(
     input_config: str,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -434,7 +345,6 @@ def test_run_workflow_from_cellfinder_run(  # --------------------
     # monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
-    # ------ does this work alright for local?
     monkeypatch.chdir(tmp_path)
 
     # run setup
