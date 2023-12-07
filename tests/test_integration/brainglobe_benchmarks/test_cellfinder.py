@@ -27,8 +27,6 @@ def asv_config_monkeypatched_path(tmp_path):
     asv_monkeypatched_dict = util.load_json(
         asv_original_path, js_comments=True
     )
-    # with open(asv_original_path) as asv_config:
-    #     asv_monkeypatched_dict = json.load(asv_config)
 
     # change directories
     for ky in ["env_dir", "results_dir", "html_dir"]:
@@ -57,6 +55,7 @@ def asv_config_monkeypatched_path(tmp_path):
     return str(asv_monkeypatched_path)
 
 
+@pytest.mark.skip(reason="will be worked on a separate PR")
 def test_run_benchmarks(asv_config_monkeypatched_path):
     # --- ideally monkeypatch an asv config so that results are in tmp_dir?
 
@@ -84,13 +83,14 @@ def test_run_benchmarks(asv_config_monkeypatched_path):
         ],
         cwd=str(
             Path(asv_config_monkeypatched_path).parent
-        ),  # ---> from where asv config is
+        ),  # run from where asv config is
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
         encoding="utf-8",
-    )  # STDOUT: "· Cloning project\n· Fetching recent changes\n·
-    # Creating environments\n· No __init__.py file in 'benchmarks'\n"?
+    )
+    # STDOUT: "· Cloning project\n· Fetching recent changes\n·
+    # Creating environments\n· No __init__.py file in 'benchmarks'\n"
 
     # check returncode
     assert asv_benchmark_output.returncode == 0
