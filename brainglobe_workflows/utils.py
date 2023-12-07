@@ -3,7 +3,6 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
 
 DEFAULT_JSON_CONFIGS_PATH = Path(__file__).resolve().parent / "configs"
 
@@ -40,23 +39,25 @@ def setup_logger() -> logging.Logger:
 
 
 def config_parser(
+    argv: list[str],
     default_config: str,
-    argv_: Optional[list[str]] = None,
 ) -> argparse.Namespace:
     """Define argument parser for a workflow script.
 
     The only CLI argument defined in the parser is
-    the input config file. The default config to use if
-    no config is passed must be passed as an input to this
-    function. The list of input arguments `arg_v` can be
-    an empty list or None.
+    the input config file. The list of input arguments
+    `argv` can be an empty list.
+
+    Both the list of input arguments and the default config to use if
+    no config is specified must be passed as an input to this
+    function.
 
     Parameters
     ----------
+    argv_ : list[str]
+        _description_
     default_config : str
         _description_
-    argv_ : Optional[list[str]], optional
-        _description_, by default None
 
     Returns
     -------
@@ -86,8 +87,6 @@ def config_parser(
     )
 
     # build parser object
-    if not argv_:
-        argv_ = []
-    args = parser.parse_args(argv_)
+    args = parser.parse_args(argv)
 
     return args

@@ -27,12 +27,12 @@ def test_setup_logger(custom_logger_name: str):
 
 @pytest.mark.parametrize(
     "list_input_args",
-    [[], ["--config", str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)], None],
+    [[], ["--config", str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)]],
 )
 def test_config_parser(list_input_args: list[str]):
     args = config_parser(
-        str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER),
         list_input_args,
+        str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER),
     )
 
     assert args.config
