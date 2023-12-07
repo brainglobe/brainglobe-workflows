@@ -9,7 +9,6 @@ dependencies = [
     "asv",
     "pooch",
     "cellfinder-core",
-    "typer"
 ]
 license = {text = "BSD-3-Clause"}
 
@@ -45,7 +44,7 @@ dev = [
 ]
 
 [project.scripts]
-cellfinder-workflow = "brainglobe_workflows.cellfinder:app_wrapper"
+cellfinder-workflow = "brainglobe_workflows.cellfinder:main"
 
 [build-system]
 requires = [

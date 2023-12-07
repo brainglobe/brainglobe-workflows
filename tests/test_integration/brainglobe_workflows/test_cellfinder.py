@@ -44,7 +44,7 @@ def test_main(
     if not input_config:
         cfg = main()  # use default config
     else:
-        cfg = main(str(request.getfixturevalue(input_config)))
+        cfg = main(["--config", str(request.getfixturevalue(input_config))])
 
     # check output files exist
     assert (cfg.detected_cells_path).is_file()

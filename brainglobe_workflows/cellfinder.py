@@ -22,12 +22,12 @@ import datetime
 import json
 import logging
 import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
 import pooch
-import typer
 from brainglobe_utils.IO.cells import save_cells
 from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
@@ -35,6 +35,7 @@ from cellfinder_core.train.train_yml import depth_type
 
 from brainglobe_workflows.utils import (
     DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
+    config_parser,
     setup_logger,
 )
 from brainglobe_workflows.utils import __name__ as LOGGER_NAME
@@ -356,9 +357,15 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
     )
 
 
-def main(config=DEFAULT_JSON_CONFIG_PATH_CELLFINDER):
+def main(
+    argv: Optional[list[str]] = None,
+):
+    # parse CLI arguments
+    argv = argv or sys.argv[1:]  # sys.argv[0] is the script name
+    args = config_parser(argv, str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER))
+
     # run setup
-    cfg = setup(config)
+    cfg = setup(args.config)
 
     # run workflow
     run_workflow_from_cellfinder_run(cfg)  # only this will be benchmarked
@@ -366,10 +373,6 @@ def main(config=DEFAULT_JSON_CONFIG_PATH_CELLFINDER):
     return cfg
 
 
-def app_wrapper():
-    typer.run(main)
-
-
 if __name__ == "__main__":
     # run setup and workflow
-    app_wrapper()
+    main()
