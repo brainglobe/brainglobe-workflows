@@ -1,4 +1,3 @@
-import json
 import shutil
 from pathlib import Path
 
@@ -8,7 +7,7 @@ from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 
 from brainglobe_workflows.cellfinder import (
-    CellfinderConfig,
+    read_cellfinder_config,
     run_workflow_from_cellfinder_run,
 )
 from brainglobe_workflows.cellfinder import setup as setup_cellfinder_workflow
@@ -77,11 +76,10 @@ class TimeBenchmarkPrepGIN:
     min_run_count = 2  # default:2
 
     # Custom attributes
-    input_config_path = str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)
+    input_config_path = str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)  # default
+    # --- next: parametrise https://asv.readthedocs.io/en/stable/writing_benchmarks.html#parameterized-benchmarks
 
-    def setup_cache(
-        self,
-    ):
+    def setup_cache(self):
         """
         Download the input data from the GIN repository to the local
         directory specified in the default_config.json
@@ -100,13 +98,10 @@ class TimeBenchmarkPrepGIN:
         # Check config file exists
         assert Path(self.input_config_path).exists()
 
-        # Instantiate a CellfinderConfig from the input json file
-        # (assumes config is json serializable)
-        with open(self.input_config_path) as cfg:
-            config_dict = json.load(cfg)
-        config = CellfinderConfig(**config_dict)
+        # Instantiate a CellfinderConfig
+        config = read_cellfinder_config(self.input_config_path)
 
-        # Download data with pooch
+        # Use pooch to download data to a subdir of cwd
         _ = pooch.retrieve(
             url=config.data_url,
             known_hash=config.data_hash,
@@ -115,7 +110,7 @@ class TimeBenchmarkPrepGIN:
             processor=pooch.Unzip(extract_dir=config.data_dir_relative),
         )
 
-        # Check paths to input data should now exist in config
+        # Check paths to input data exist now in config
         assert Path(config.signal_dir_path).exists()
         assert Path(config.background_dir_path).exists()
 
@@ -127,15 +122,7 @@ class TimeBenchmarkPrepGIN:
         """
 
         # Run setup
-        cfg = setup_cellfinder_workflow(
-            [
-                "--config",
-                self.input_config_path,
-            ]
-        )
-
-        # Save configuration as attribute
-        self.cfg = cfg
+        self.cfg = setup_cellfinder_workflow(self.input_config_path)
 
     def teardown(self):
         """

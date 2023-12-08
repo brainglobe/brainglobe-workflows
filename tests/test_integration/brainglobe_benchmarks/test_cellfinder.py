@@ -64,9 +64,12 @@ def test_run_benchmarks(asv_config_monkeypatched_path):
         [
             "asv",
             "machine",
+            "--machine",
+            "MACHINENAME",  # name of the machine
             "--yes",
             "--config",
             asv_config_monkeypatched_path,
+            # use this config rather than default
         ]
     )
     assert asv_machine_output.returncode == 0
@@ -78,7 +81,9 @@ def test_run_benchmarks(asv_config_monkeypatched_path):
             "run",
             "--config",
             asv_config_monkeypatched_path,
-            # "--dry-run"
+            # "--machine",
+            # "MACHINENAME",
+            # "--dry-run",
             # # Do not save any results to disk? not truly testing then
         ],
         cwd=str(

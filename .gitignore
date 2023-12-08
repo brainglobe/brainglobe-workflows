@@ -81,4 +81,4 @@ venv/
 
 # written by setuptools_scm
 **/_version.py
-benchmarks/results/*
+brainglobe_benchmarks/results/*
