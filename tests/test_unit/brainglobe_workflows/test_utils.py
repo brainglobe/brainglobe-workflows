@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 import pytest
 
@@ -29,7 +30,7 @@ def test_setup_logger(custom_logger_name: str):
     "list_input_args",
     [[], ["--config", str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)]],
 )
-def test_config_parser(list_input_args: list[str]):
+def test_config_parser(list_input_args: List[str]):
     args = config_parser(
         list_input_args,
         str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER),

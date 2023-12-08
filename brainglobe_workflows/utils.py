@@ -3,6 +3,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
+from typing import List
 
 DEFAULT_JSON_CONFIGS_PATH = Path(__file__).resolve().parent / "configs"
 
@@ -39,7 +40,7 @@ def setup_logger() -> logging.Logger:
 
 
 def config_parser(
-    argv: list[str],
+    argv: List[str],
     default_config: str,
 ) -> argparse.Namespace:
     """Define argument parser for a workflow script.
@@ -54,7 +55,7 @@ def config_parser(
 
     Parameters
     ----------
-    argv_ : list[str]
+    argv_ : List[str]
         _description_
     default_config : str
         _description_
