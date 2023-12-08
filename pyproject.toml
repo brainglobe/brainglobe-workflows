@@ -44,7 +44,7 @@ dev = [
 ]
 
 [project.scripts]
-cellfinder-workflow = "brainglobe_workflows.cellfinder:main"
+cellfinder-workflow = "brainglobe_workflows.cellfinder:main_app_wrapper"
 
 [build-system]
 requires = [
@@ -60,9 +60,6 @@ include-package-data = true
 [tool.setuptools.packages.find]
 include = ["brainglobe_workflows*"]
 exclude = ["tests*"]
-
-[tool.pytest.ini_options]
-addopts = "--cov=brainglobe_workflows"
 
 [tool.black]
 target-version = ['py38', 'py39', 'py310']

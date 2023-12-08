@@ -367,10 +367,16 @@ def main(input_config: str = str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)):
     return cfg
 
 
-if __name__ == "__main__":
+def main_app_wrapper():
     # parse CLI arguments
-    argv = sys.argv[1:]  # sys.argv[0] is the script name
-    args = config_parser(argv, str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER))
+    args = config_parser(
+        sys.argv[1:],  # sys.argv[0] is the script name
+        str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER),
+    )
 
     # run setup and workflow
-    main(args.config)
+    _ = main(args.config)
+
+
+if __name__ == "__main__":
+    main_app_wrapper()

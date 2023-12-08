@@ -100,10 +100,6 @@ def test_script(
     # run workflow script from the CLI
     subprocess_output = subprocess.run(
         subprocess_input,
-        # stdout=subprocess.PIPE,
-        # stderr=subprocess.STDOUT,
-        # text=True,
-        # encoding="utf-8",
     )
 
     # check returncode
@@ -152,10 +148,6 @@ def test_entry_point(
     # run workflow with no CLI arguments,
     subprocess_output = subprocess.run(
         subprocess_input,
-        # stdout=subprocess.PIPE,
-        # stderr=subprocess.STDOUT,
-        # text=True,
-        # encoding="utf-8",
     )
 
     # check returncode
