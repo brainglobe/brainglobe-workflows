@@ -21,6 +21,21 @@ def input_configs_dir() -> Path:
     return Path(__file__).parent / "data"
 
 
+@pytest.fixture(scope="session")
+def cellfinder_GIN_data() -> dict:
+    """Return the URL and hash to the GIN repository with the input data
+
+    Returns
+    -------
+    dict
+        URL and hash of the GIN repository with the cellfinder test data
+    """
+    return {
+        "url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
+        "hash": "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914",  # noqa
+    }
+
+
 @pytest.fixture()
 def input_config_fetch_GIN(input_configs_dir: Path) -> Path:
     """
@@ -37,21 +52,6 @@ def input_config_fetch_GIN(input_configs_dir: Path) -> Path:
         Path to the config json file for fetching data from GIN
     """
     return input_configs_dir / "input_data_GIN.json"
-
-
-@pytest.fixture(scope="session")
-def cellfinder_GIN_data() -> dict:
-    """Return the URL and hash to the GIN repository with the input data
-
-    Returns
-    -------
-    dict
-        URL and hash of the GIN repository with the cellfinder test data
-    """
-    return {
-        "url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
-        "hash": "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914",  # noqa
-    }
 
 
 @pytest.fixture()
