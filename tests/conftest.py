@@ -39,7 +39,7 @@ def cellfinder_GIN_data() -> dict:
 @pytest.fixture()
 def input_config_fetch_GIN(input_configs_dir: Path) -> Path:
     """
-    Return the config json file for fetching data from GIN
+    Return the cellfinder config json file that is configured to fetch from GIN
 
     Parameters
     ----------
@@ -61,7 +61,7 @@ def input_config_fetch_local(
 ) -> Path:
     """
     Download the cellfinder data locally and return the config json
-    file for fetching data locally.
+    file configured to fetch local data.
 
     The data is downloaded to a directory under the current working
     directory (that is, to a directory under the directory from where

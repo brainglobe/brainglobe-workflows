@@ -1,4 +1,3 @@
-# import argparse
 import argparse
 import logging
 import sys
@@ -13,16 +12,18 @@ DEFAULT_JSON_CONFIG_PATH_CELLFINDER = (
 
 
 def setup_logger() -> logging.Logger:
-    """Setup a logger for this script
+    """Setup a logger for workflow runs
 
     The logger's level is set to DEBUG, and it
     is linked to a handler that writes to the
-    console
+    console. This utility function helps run 
+    workflows, and test their logs, in a 
+    consistent way.
 
     Returns
     -------
     logging.Logger
-        a logger object
+        a logger object configured for workflow runs
     """
     # define handler that writes to stdout
     console_handler = logging.StreamHandler(sys.stdout)

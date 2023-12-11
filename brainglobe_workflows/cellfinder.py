@@ -110,13 +110,13 @@ def read_cellfinder_config(input_config_path: Path):
 
     Parameters
     ----------
-    input_config_path : _type_
-        _description_
+    input_config_path : Path
+        Absolute path to a cellfinder config file
 
     Returns
     -------
-    _type_
-        _description_
+    CellfinderConfig:
+        The cellfinder config object, populated with data from the input
     """
     # read input config
     with open(input_config_path) as cfg:
@@ -147,14 +147,12 @@ def add_signal_and_background_files(
     Parameters
     ----------
     config : CellfinderConfig
-        a dataclass whose attributes are the parameters
-        for running cellfinder.
+        a cellfinder config with input data files to be validated
 
     Returns
     -------
     config : CellfinderConfig
-        a dataclass whose attributes are the parameters
-        for running cellfinder.
+        a cellfinder config with updated input data lists.
     """
     # Fetch logger
     logger = logging.getLogger(LOGGER_NAME)
