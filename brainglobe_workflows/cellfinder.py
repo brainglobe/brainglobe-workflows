@@ -131,15 +131,18 @@ def add_signal_and_background_files(
 ) -> CellfinderConfig:
     """
     Adds the lists of input data files (signal and background)
-    to the config, when these are not defined.
+    to the config.
 
-    It first checks if the input data exists locally.
-    - If both directories (signal and background) exist, the lists of
-    signal and background files are added to the config.
-    - If exactly one of the input data directories is missing, an error
+    These files are first searched locally. If not found, we
+    attempt to download them from GIN.
+
+    Specifically:
+    - If both parent data directories (signal and background) exist locally,
+    the lists of signal and background files are added to the config.
+    - If exactly one of the parent data directories is missing, an error
     message is logged.
     - If neither of them exist, the data is retrieved from the provided GIN
-    repository. If no URL or hash to GIN is provided, an error is shown.
+    repository. If no URL or hash to GIN is provided, an error is thrown.
 
     Parameters
     ----------
@@ -192,14 +195,8 @@ def add_signal_and_background_files(
     # If neither of the input data directories exist,
     # retrieve data from GIN repository and add list of files to config
     else:
-        # check if GIN URL and hash are defined (log error otherwise)
-        if (not config.data_url) or (not config.data_hash):
-            logger.error(
-                "Input data not found locally, and URL/hash to "
-                "GIN repository not provided"
-            )
-
-        else:
+        # Check if GIN URL and hash are defined (log error otherwise)
+        if config.data_url and config.data_hash:
             # get list of files in GIN archive with pooch.retrieve
             list_files_archive = pooch.retrieve(
                 url=config.data_url,
@@ -235,6 +232,12 @@ def add_signal_and_background_files(
                     str(Path(config.background_dir_path).resolve())
                 )
             ]
+        # If one of URL/hash to GIN repo not defined, throw an error
+        else:
+            logger.error(
+                "Input data not found locally, and URL/hash to "
+                "GIN repository not provided"
+            )
 
     return config
 
@@ -278,7 +281,7 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
         logger.info("Using default config file")
 
     # Add lists of input data files to the config,
-    # if these are defined yet
+    # if these are not defined yet
     if not (config.list_signal_files and config.list_background_files):
         # build fullpaths to input directories
         config.signal_dir_path = str(
@@ -301,7 +304,10 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
     output_path_timestamped = Path(config.install_path) / (
         str(config.output_path_basename_relative) + timestamp_formatted
     )
-    output_path_timestamped.mkdir(parents=True, exist_ok=True)
+    output_path_timestamped.mkdir(
+        parents=True,  # create any missing parents
+        exist_ok=True,  # ignore FileExistsError exceptions
+    )
 
     # Add output path and output file path to config
     config.output_path = output_path_timestamped
@@ -357,7 +363,29 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
     )
 
 
-def main(input_config: str = str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)):
+def main(
+    input_config: str = str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER),
+) -> CellfinderConfig:
+    """
+    Setup and run cellfinder workflow.
+
+    This function runs the setup steps required
+    to run the cellfinder workflow, and the
+    workflow itself. Note that only the workflow
+    will be benchmarked.
+
+    Parameters
+    ----------
+    input_config : str, optional
+        Absolute path to input config file,
+        by default str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)
+
+    Returns
+    -------
+    cfg : CellfinderConfig
+        a class with the required setup methods and parameters for
+        the cellfinder workflow
+    """
     # run setup
     cfg = setup(input_config)
 
@@ -368,6 +396,18 @@ def main(input_config: str = str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)):
 
 
 def main_app_wrapper():
+    """
+    Parse command line arguments and
+    run cellfinder setup and workflow
+
+    This function is used to define an entry-point,
+    that allows the user to run the cellfinder workflow
+    for a given input config file as:
+    `cellfinder-workflow --config <path-to-input-config>`.
+
+    If no input config file is provided, the default is used.
+
+    """
     # parse CLI arguments
     args = config_parser(
         sys.argv[1:],  # sys.argv[0] is the script name

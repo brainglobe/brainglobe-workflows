@@ -63,7 +63,9 @@ def input_config_fetch_local(
     Download the cellfinder data locally and return the config json
     file for fetching data locally.
 
-    The data is downloaded to a directory relative to cwd
+    The data is downloaded to a directory under the current working
+    directory (that is, to a directory under the directory from where
+    pytest is launched).
 
     Parameters
     ----------
