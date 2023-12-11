@@ -98,3 +98,5 @@ def test_run_benchmarks(asv_config_monkeypatched_path):
     # check logs?
 
     # delete directories?
+    # check teardown after yield:
+    # https://docs.pytest.org/en/6.2.x/fixture.html#yield-fixtures-recommended
