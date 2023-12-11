@@ -16,8 +16,8 @@ def setup_logger() -> logging.Logger:
 
     The logger's level is set to DEBUG, and it
     is linked to a handler that writes to the
-    console. This utility function helps run 
-    workflows, and test their logs, in a 
+    console. This utility function helps run
+    workflows, and test their logs, in a
     consistent way.
 
     Returns
