@@ -37,10 +37,7 @@ def asv_config_monkeypatched_path(tmp_path):
     # change repo to URL rather than local
     asv_monkeypatched_dict[
         "repo"
-    ] = "https://github.com/brainglobe/brainglobe-workflows/"
-    asv_monkeypatched_dict[
-        "dvcs"
-    ] = "git"  # not sure why I need this with the URL?
+    ] = "https://github.com/brainglobe/brainglobe-workflows.git"
 
     # define path to a temp json file to dump config data
     asv_monkeypatched_path = tmp_path / "asv.conf.json"
