@@ -7,20 +7,21 @@ from asv import util
 
 
 @pytest.fixture()
-def asv_config_monkeypatched_path(tmp_path):
-    """Create a monkeypatched asv.conf.json file
-    in tmp_path and return its path
+def asv_config_monkeypatched_path(tmp_path: Path) -> str:
+    """
+    Create a monkeypatched asv.conf.json file
+    in a Pytest-generated temporary directory
+    and return its path
 
     Parameters
     ----------
     tmp_path : Path
         path to pytest-generated temporary directory
 
-
     Returns
     -------
-    _type_
-        _description_
+    str
+        Path to monkeypatched asv config file
     """
     # read reference asv config
     asv_original_path = Path(__file__).resolve().parents[3] / "asv.conf.json"
