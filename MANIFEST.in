@@ -1,16 +1,25 @@
-include LICENSE
 include README.md
+include LICENSE
+
 exclude .pre-commit-config.yaml
+exclude *.yaml
+exclude *.yml
+exclude Dockerfile
+exclude *.ini
+exclude asv.conf.json
+exclude brainglobe_workflows/cellfinder/default_config.json
 
 recursive-include brainglobe_workflows *.py
-include brainglobe_workflows/cellfinder/default_config.json
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
-recursive-exclude docs *
-recursive-exclude tests *
 
-include *.json
-recursive-include benchmarks *.json
-recursive-include benchmarks *.py
-recursive-exclude benchmarks/results *
+global-include *.pxd
+
+prune benchmarks
+prune docs
+prune tests
+prune resources
+
+prune .github
+prune .tox

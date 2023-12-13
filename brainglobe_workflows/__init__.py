@@ -1,7 +1,11 @@
-from importlib.metadata import PackageNotFoundError, version
+from importlib.metadata import PackageNotFoundError, metadata
 
 try:
-    __version__ = version("brainglobe-workflows")
+    __version__ = metadata("brainglobe_workflows")["version"]
+    __author__ = metadata("brainglobe_workflows")["author-email"]
+    __license__ = metadata("brainglobe_workflows")["license"]
 except PackageNotFoundError:
-    # package is not installed
+    # Package not installed
     pass
+
+del metadata
