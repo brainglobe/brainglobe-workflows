@@ -46,14 +46,14 @@ Once BrainGlobe version 1 is available, this package will fetch all BrainGlobe t
 
 Whole-brain cell detection, registration and analysis.
 
-If you want to just use the cell detection part of `cellfinder`, please see the standalone [cellfinder-core](https://github.com/brainglobe/cellfinder-core) package, or the [cellfinder plugin](https://github.com/brainglobe/cellfinder-napari) for [napari](https://napari.org/).
+If you want to just use the cell detection part of `cellfinder`, please see the standalone [cellfinder](https://github.com/brainglobe/cellfinder-core) package, or the [cellfinder plugin](https://github.com/brainglobe/cellfinder-napari) for [napari](https://napari.org/).
 
 `cellfinder` is a collection of tools developed by [Adam Tyson](https://github.com/adamltyson), [Charly Rousseau](https://github.com/crousseau) and [Christian Niedworok](https://github.com/cniedwor) in the [Margrie Lab](https://www.sainsburywellcome.org/web/groups/margrie-lab), generously supported by the [Sainsbury Wellcome Centre](https://www.sainsburywellcome.org/web/).
 
 `cellfinder` is designed for the analysis of whole-brain imaging data such as [serial-section imaging](https://sainsburywellcomecentre.github.io/OpenSerialSection/) and lightsheet imaging in cleared tissue.
 The aim is to provide a single solution for:
 
-- Cell detection (initial cell candidate detection and refinement using  deep learning) (using [cellfinder-core](https://github.com/brainglobe/cellfinder-core)),
+- Cell detection (initial cell candidate detection and refinement using  deep learning) (using the [cellfinder](https://github.com/brainglobe/cellfinder-core) backend package),
 - Atlas registration (using [brainreg](https://github.com/brainglobe/brainreg)),
 - Analysis of cell positions in a common space.
 
