@@ -68,7 +68,7 @@ napari = [
 
 [project.scripts]
 cellfinder-workflow = "brainglobe_workflows.cellfinder:main_app_wrapper"
-cellfinder = "brainglobe_workflows.main:main"
+cellfinder = "brainglobe_workflows.cellfinder_brainreg.main:main"
 
 [build-system]
 requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
@@ -97,7 +97,10 @@ archs = ["x86_64", "arm64"]
 [tool.check-manifest]
 
 [tool.pytest.ini_options]
-addopts = "--cov=brainglobe_workflows"
+addopts = "--cov=brainglobe-workflows"
+# markers =
+#     slow: marks tests as slow (deselect with '-m "not slow"')
+#     serial
 
 [tool.ruff]
 line-length = 79
