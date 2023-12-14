@@ -10,7 +10,7 @@ def custom_logger_name() -> str:
     str
         Name of custom logger
     """
-    from brainglobe_workflows.cellfinder_core.utils import (
+    from brainglobe_workflows.utils import (
         __name__ as logger_name,
     )
 
