@@ -1,16 +1,26 @@
-include LICENSE
 include README.md
+include LICENSE
+
 exclude .pre-commit-config.yaml
+exclude *.yaml
+exclude *.yml
+exclude Dockerfile
+exclude *.ini
 
 recursive-include brainglobe_workflows *.py
-recursive-include brainglobe_workflows *.json
+recursive-include brainglobe_workflows/configs *.json
+recursive-include brainglobe_benchmarks *.py
+recursive-exclude brainglobe_benchmarks/results *
+include asv.conf.json
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
-recursive-exclude docs *
-recursive-exclude tests *
 
-include asv.conf.json
-recursive-include brainglobe_benchmarks *.py
-recursive-include brainglobe_benchmarks *.json
-recursive-exclude brainglobe_benchmarks/results *
+global-include *.pxd
+
+prune docs
+prune tests
+prune resources
+
+prune .github
+prune .tox
