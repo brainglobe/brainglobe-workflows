@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import imio
 import numpy as np
@@ -15,8 +16,7 @@ from brainglobe_workflows.cellfinder_brainreg.extract import (
     extract_cubes as extract_cubes,
 )
 
-data_dir = os.path.join("tests", "data")
-
+data_dir = Path(__file__).parents[3] / Path("tests", "data")
 signal_data_dir = os.path.join(data_dir, "signal")
 background_data_dir = os.path.join(data_dir, "background")
 xml_path = os.path.join(data_dir, "cube_extract", "cells.xml")
