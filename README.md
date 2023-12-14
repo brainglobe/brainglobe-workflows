@@ -15,7 +15,6 @@
 
 # BrainGlobe Workflows
 
-<<<<<<< HEAD
 `brainglobe-workflows` is a package that provides users with a number of out-of-the-box data analysis workflows employed in neuroscience, implemented using BrainGlobe tools.
 You can view the [full documentation for each workflow](https://brainglobe.info/documentation/brainglobe-workflows/index.html) online.
 You can also find the documentation for the backend BrainGlobe tools these workflows use [on our website](https://brainglobe.info/).
@@ -23,21 +22,17 @@ You can also find the documentation for the backend BrainGlobe tools these workf
 At present, the package offers the following workflows:
 
 - [cellfinder](#cellfinder): Whole-brain detection, registration, and analysis.
-=======
-The main purpose of this repository is to host Python scripts and Command Line Interfaces that capture typical workflows of the BrainGlobe tools. 
 
 These workflows should be representative of the most common use-cases and are meant to be easy to reuse. They also serve as an example of how to combine several BrainGlobe tools to achieve a goal, such as whole brain cell detection and atlas registration.
-These workflows typically combine several BrainGlobe tools (possibly together with other tools) to achieve a goal, 
+These workflows typically combine several BrainGlobe tools (possibly together with other tools) to achieve a goal,
 such as whole brain cell detection and atlas registration.
 
 ## Secondary purposes of brainglobe-workflows, for developers
 
-Secondarily, this repository further has related purposes for BrainGlobe code development itself. 
-* It contains benchmarks for these workflows to ensure performance is stable as the code changes
-    * (default) run benchmarks on CI with small data
-    * (optionally) specify a configuration (as a json file) to run benchmarks on locally available, typically "real", data
-    * these configurations are not intended to be user-facing
->>>>>>> af7935f (Apply suggestions from code review)
+We also use these workflows to support code development. We do this by regularly benchmarking the time they take to complete to ensure performance is stable as the code changes.
+* Developers can install these benchmarks locally via `pip install [dev]`. By executing `asv run`,  the benchmarks will run with default parameters on a small dataset that is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). See [the asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further details on how to run benchmarks.
+* Developers can also run these benchmarks on  data available locally, by specifying the relevant paths in an input configuration file (JSON file).
+* We additionally run and benchmark the workflows locally on a internal desktop machine with large example datasets. These benchmarks are run periodically and the results are made publicly available.
 
 ## Installation
 
