@@ -33,12 +33,12 @@ from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 from cellfinder_core.train.train_yml import depth_type
 
-from brainglobe_workflows.utils import (
+from brainglobe_workflows.cellfinder_core.utils import (
     DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
     config_parser,
     setup_logger,
 )
-from brainglobe_workflows.utils import __name__ as LOGGER_NAME
+from brainglobe_workflows.cellfinder_core.utils import __name__ as LOGGER_NAME
 
 Pathlike = Union[str, os.PathLike]
 

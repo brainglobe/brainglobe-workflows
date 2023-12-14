@@ -5,7 +5,9 @@ from pathlib import Path
 import pooch
 import pytest
 
-from brainglobe_workflows.cellfinder import read_cellfinder_config
+from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+    read_cellfinder_config,
+)
 
 
 @pytest.fixture()
@@ -18,7 +20,7 @@ def input_configs_dir() -> Path:
     Path
         Test data directory path
     """
-    return Path(__file__).parent / "data"
+    return Path(__file__).parents[1] / "data"
 
 
 @pytest.fixture(scope="session")

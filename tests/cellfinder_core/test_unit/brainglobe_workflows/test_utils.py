@@ -3,7 +3,7 @@ from typing import List
 
 import pytest
 
-from brainglobe_workflows.utils import (
+from brainglobe_workflows.cellfinder_core.utils import (
     DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
     config_parser,
     setup_logger,

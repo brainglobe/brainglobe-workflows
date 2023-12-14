@@ -6,15 +6,17 @@ from pathlib import Path
 import pooch
 import pytest
 
-from brainglobe_workflows.cellfinder import (
+from brainglobe_workflows.cellfinder_core.cellfinder_core import (
     CellfinderConfig,
     add_signal_and_background_files,
     read_cellfinder_config,
     run_workflow_from_cellfinder_run,
     setup_workflow,
 )
-from brainglobe_workflows.cellfinder import setup as setup_full
-from brainglobe_workflows.utils import setup_logger
+from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+    setup as setup_full,
+)
+from brainglobe_workflows.cellfinder_core.utils import setup_logger
 
 
 @pytest.fixture()
@@ -27,7 +29,9 @@ def default_input_config_cellfinder() -> Path:
         Path to default input config
 
     """
-    from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+    from brainglobe_workflows.cellfinder_core.utils import (
+        DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
+    )
 
     return DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
