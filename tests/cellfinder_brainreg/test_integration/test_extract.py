@@ -11,7 +11,9 @@ from brainglobe_utils.general.system import (
 from brainglobe_utils.IO.cells import get_cells
 from tifffile import tifffile
 
-import brainglobe_workflows.extract.extract_cubes as extract_cubes
+from brainglobe_workflows.cellfinder_brainreg.extract import (
+    extract_cubes as extract_cubes,
+)
 
 data_dir = os.path.join("tests", "data")
 

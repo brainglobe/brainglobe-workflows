@@ -3,7 +3,7 @@ import random
 import numpy as np
 import pytest
 
-import brainglobe_workflows.tools.tools as tools
+import brainglobe_workflows.cellfinder_brainreg.tools.tools as tools
 
 a = [1, "a", 10, 30]
 b = [30, 10, "c", "d"]

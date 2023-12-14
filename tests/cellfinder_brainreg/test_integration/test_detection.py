@@ -1,14 +1,17 @@
 import os
 import sys
 from math import isclose
+from pathlib import Path
 
 import brainglobe_utils.IO.cells as cell_io
 import pytest
 
-from brainglobe_workflows.main import main as cellfinder_run
+from brainglobe_workflows.cellfinder_brainreg.main import (
+    main as cellfinder_run,
+)
 
-data_dir = os.path.join(
-    os.getcwd(), "tests", "data", "integration", "detection"
+data_dir = Path(__file__).parents[3] / Path(
+    "tests", "data", "integration", "detection"
 )
 signal_data = os.path.join(data_dir, "crop_planes", "ch0")
 background_data = os.path.join(data_dir, "crop_planes", "ch1")

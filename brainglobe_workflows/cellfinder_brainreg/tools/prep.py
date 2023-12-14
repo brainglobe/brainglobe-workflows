@@ -18,9 +18,11 @@ from brainreg.core.paths import Paths as BrainRegPaths
 from fancylog import fancylog
 
 import brainglobe_workflows as program_for_log
-import brainglobe_workflows.tools.parser as parser
-from brainglobe_workflows.tools import system, tools
-from brainglobe_workflows.tools.parser import cellfinder_parser
+import brainglobe_workflows.cellfinder_brainreg.tools.parser as parser
+from brainglobe_workflows.cellfinder_brainreg.tools import system, tools
+from brainglobe_workflows.cellfinder_brainreg.tools.parser import (
+    cellfinder_parser,
+)
 
 
 def get_arg_groups(args, parser):

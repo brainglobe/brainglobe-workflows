@@ -2,7 +2,9 @@ import random
 
 import numpy as np
 
-from brainglobe_workflows.tools import image_processing as img_tools
+from brainglobe_workflows.cellfinder_brainreg.tools import (
+    image_processing as img_tools,
+)
 
 
 def test_crop_center_2d():

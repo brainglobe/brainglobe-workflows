@@ -4,7 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from brainglobe_workflows.analyse.analyse import Point, get_region_totals
+from brainglobe_workflows.cellfinder_brainreg.analyse.analyse import (
+    Point,
+    get_region_totals,
+)
 
 
 @pytest.fixture
