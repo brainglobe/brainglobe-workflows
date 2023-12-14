@@ -14,7 +14,7 @@ from brainglobe_workflows.cellfinder_core.cellfinder_core import (
 from brainglobe_workflows.cellfinder_core.cellfinder_core import (
     setup as setup_cellfinder_workflow,
 )
-from brainglobe_workflows.cellfinder_core.utils import (
+from brainglobe_workflows.utils import (
     DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
 )
 
