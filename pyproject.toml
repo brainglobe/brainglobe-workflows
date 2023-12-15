@@ -42,6 +42,7 @@ dependencies = [
     "scikit-image",
     "tifffile",
     "tqdm",
+    # "asv" #----- needed for tox! combine pyproject.toml and tox.ini
 
 ]
 
@@ -128,18 +129,28 @@ fix = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{38,39,310}
+envlist = py{39,310}-{coredev}
 isolated_build = True
 
 [gh-actions]
 python =
-    3.8: py38
     3.9: py39
     3.10: py310
+
+[gh-actions:env]
+# This runs the coredev environment if the "coredev" github actions input
+# is set to "true"
+INPUT_COREDEV =
+    true: coredev
 
 [testenv]
 extras =
     dev
+deps =
+    coredev: git+https://github.com/brainglobe/cellfinder-core.git
 commands =
-    pytest -v --color=yes --cov=brainglobe_workflows --cov-report=xml
+    pytest {toxinidir} -v --color=yes --cov=./ --cov-report=xml
+description =
+    Run tests
+    coredev: Run tests with the development version of cellfinder-core
 """
