@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import List
 
-DEFAULT_JSON_CONFIGS_PATH = Path(__file__).resolve().parents[1] / "configs"
+DEFAULT_JSON_CONFIGS_PATH = Path(__file__).resolve().parent / "configs"
 
 DEFAULT_JSON_CONFIG_PATH_CELLFINDER = (
     DEFAULT_JSON_CONFIGS_PATH / "cellfinder.json"
