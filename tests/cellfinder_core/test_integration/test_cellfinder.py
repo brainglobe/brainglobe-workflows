@@ -86,7 +86,8 @@ def test_script(
     script_path = (
         Path(__file__).resolve().parents[3]
         / "brainglobe_workflows"
-        / "cellfinder.py"
+        / "cellfinder_core"
+        / "cellfinder_core.py"
     )
     subprocess_input = [
         sys.executable,
