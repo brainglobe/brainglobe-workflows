@@ -42,8 +42,6 @@ dependencies = [
     "scikit-image",
     "tifffile",
     "tqdm",
-    # "asv" #----- needed for tox! combine pyproject.toml and tox.ini
-
 ]
 
 [project.optional-dependencies]
@@ -83,7 +81,7 @@ napari = [
 "Source Code" = "https://github.com/brainglobe/brainglobe-workflows"
 
 [project.scripts]
-cellfinder-workflow = "brainglobe_workflows.cellfinder_core:main_app_wrapper"
+cellfinder-workflow = "brainglobe_workflows.cellfinder_core.cellfinder_core:main_app_wrapper"
 cellfinder = "brainglobe_workflows.cellfinder_brainreg.main:main"
 
 [build-system]
@@ -96,7 +94,7 @@ zip-safe = false
 
 [tool.setuptools.packages.find]
 include = ["brainglobe_workflows"]
-exclude = ["brainglobe_workflows.cellfinder_core","tests", "resources", "benchmarks"]
+exclude = ["brainglobe_workflows.cellfinder_core","tests", "resources", "benchmarks"] # it's not excluding "brainglobe_workflows.cellfinder_core"!
 
 [tool.black]
 target-version = ["py39", "py310"]
