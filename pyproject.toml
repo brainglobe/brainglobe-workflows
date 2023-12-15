@@ -8,7 +8,7 @@ authors = [
 ]
 description = "A collection of end-to-end data analysis workflows executed using BrainGlobe tools."
 readme = "README.md"
-license = { file = "LICENSE" } #{text = "BSD-3-Clause"}
+license = { file = "LICENSE" }
 requires-python = ">=3.9"
 dynamic = ["version"]
 
@@ -24,6 +24,8 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 
+# Below the dependenciess for the cellfinder CLI tool only
+# (i.e., only what users will need for the CLI)
 dependencies = [
     "brainreg>=1.0.0",
     "cellfinder-core>=0.2.4,<1.0.0",
@@ -40,11 +42,12 @@ dependencies = [
     "scikit-image",
     "tifffile",
     "tqdm",
-    "asv",
-    "pooch",
+
 ]
 
 [project.optional-dependencies]
+# Below, everything developers need to contribute
+# to the workflows (i.e., run tests, run benchmarks, etc)
 dev = [
     "black",
     "pytest-cov",
@@ -53,7 +56,19 @@ dev = [
     "coverage>=5.0.3",
     "pre-commit",
     "setuptools_scm",
+    "asv",
+    "pooch",
 ]
+# Below, all the dependencies asv needs to run the benchmarks
+# (i.e., everything needed to install this package without the CLI tool)
+# Once the cellfinder CLI tool is deprecated, these will move to the
+# default dependencies.
+asv_version = [
+    "asv",
+    "pooch",
+    "cellfinder-core",
+]
+
 napari = [
     "napari[pyqt5]",
     "brainglobe-napari-io",
@@ -67,7 +82,7 @@ napari = [
 "Source Code" = "https://github.com/brainglobe/brainglobe-workflows"
 
 [project.scripts]
-cellfinder-workflow = "brainglobe_workflows.cellfinder:main_app_wrapper"
+cellfinder-workflow = "brainglobe_workflows.cellfinder_core:main_app_wrapper"
 cellfinder = "brainglobe_workflows.cellfinder_brainreg.main:main"
 
 [build-system]
@@ -80,7 +95,7 @@ zip-safe = false
 
 [tool.setuptools.packages.find]
 include = ["brainglobe_workflows"]
-exclude = ["tests", "resources"]
+exclude = ["brainglobe_workflows.cellfinder_core","tests", "resources", "benchmarks"]
 
 [tool.black]
 target-version = ["py39", "py310"]
