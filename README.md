@@ -16,27 +16,23 @@
 # BrainGlobe Workflows
 
 `brainglobe-workflows` is a package that provides users with a number of out-of-the-box data analysis workflows employed in neuroscience, implemented using BrainGlobe tools.
+
+These workflows represent the most common use-cases and are meant to be easy to reuse. They also serve as an example of how to combine several BrainGlobe tools  (possibly together with other tools) to achieve a goal, such as whole brain cell detection and atlas registration.
+
 You can view the [full documentation for each workflow](https://brainglobe.info/documentation/brainglobe-workflows/index.html) online.
 You can also find the documentation for the backend BrainGlobe tools these workflows use [on our website](https://brainglobe.info/).
 
-At present, the package offers the following workflows:
+At present, the package offers the following workflows to users:
 
-- [cellfinder](#cellfinder): Whole-brain detection, registration, and analysis.
+- [cellfinder](#cellfinder): a command-line tool for whole-brain detection, registration, and analysis.
 
-These workflows should be representative of the most common use-cases and are meant to be easy to reuse. They also serve as an example of how to combine several BrainGlobe tools to achieve a goal, such as whole brain cell detection and atlas registration.
-These workflows typically combine several BrainGlobe tools (possibly together with other tools) to achieve a goal,
-such as whole brain cell detection and atlas registration.
+Additionally, this repository provides functionalities to support code developers. See [Developers documentation](#developers-documentation) for further details.
 
-## Secondary purposes of brainglobe-workflows, for developers
+## Users documentation
 
-We also use these workflows to support code development. We do this by regularly benchmarking the time they take to complete to ensure performance is stable as the code changes.
-* Developers can install these benchmarks locally via `pip install .[dev]`. By executing `asv run`,  the benchmarks will run with default parameters on a small dataset that is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). See [the asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further details on how to run benchmarks.
-* Developers can also run these benchmarks on  data available locally, by specifying the relevant paths in an input configuration file (JSON file).
-* We additionally run and benchmark the workflows locally on a internal desktop machine with large example datasets. These benchmarks are run periodically and the results are made publicly available.
 
-## Installation
-
-If you want to install BrainGlobe workflows as a standalone tool, you can run `pip install` in your desired environment:
+### Installation of the cellfinder CLI tool
+At the moment, users can install the cellfinder CLI tool as a standalone tool, by running `pip install` in your desired environment:
 
 ```bash
 pip install brainglobe-workflows
@@ -45,24 +41,8 @@ pip install brainglobe-workflows
 `brainglobe-workflows` is built using BrainGlobe tools, and it will automatically fetch the tools that it needs and install them into your environment.
 Once BrainGlobe version 1 is available, this package will fetch all BrainGlobe tools and handle their install into your environment, to prevent potential conflicts from partial-installs.
 
-## Contributing
 
-Contributions to BrainGlobe are more than welcome.
-Please see the [developers guide](https://brainglobe.info/developers/index.html).
-
-## Citing `brainglobe-workflows`
-
-**If you use any tools in the [brainglobe suite](https://brainglobe.info/documentation/index.html), please [let us know](mailto:code@adamltyson.com?subject=cellfinder), and we'd be happy to promote your paper/talk etc.**
-
-If you find [`cellfinder`](#cellfinder) useful, and use it in your research, please cite the paper outlining the cell detection algorithm:
-> Tyson, A. L., Rousseau, C. V., Niedworok, C. J., Keshavarzi, S., Tsitoura, C., Cossell, L., Strom, M. and Margrie, T. W. (2021) “A deep learning algorithm for 3D cell detection in whole mouse brain image datasets’ PLOS Computational Biology, 17(5), e1009074
-[https://doi.org/10.1371/journal.pcbi.1009074](https://doi.org/10.1371/journal.pcbi.1009074)
->
-If you use any of the image registration functions in `cellfinder`, please also cite [`brainreg`](https://github.com/brainglobe/brainreg#citing-brainreg).
-
----
-
-## Cellfinder
+### Cellfinder CLI tool
 
 Whole-brain cell detection, registration and analysis.
 
@@ -70,7 +50,7 @@ If you want to just use the cell detection part of `cellfinder`, please see the 
 
 `cellfinder` is a collection of tools developed by [Adam Tyson](https://github.com/adamltyson), [Charly Rousseau](https://github.com/crousseau) and [Christian Niedworok](https://github.com/cniedwor) in the [Margrie Lab](https://www.sainsburywellcome.org/web/groups/margrie-lab), generously supported by the [Sainsbury Wellcome Centre](https://www.sainsburywellcome.org/web/).
 
-`cellfinder` is a designed for the analysis of whole-brain imaging data such as [serial-section imaging](https://sainsburywellcomecentre.github.io/OpenSerialSection/) and lightsheet imaging in cleared tissue.
+`cellfinder` is designed for the analysis of whole-brain imaging data such as [serial-section imaging](https://sainsburywellcomecentre.github.io/OpenSerialSection/) and lightsheet imaging in cleared tissue.
 The aim is to provide a single solution for:
 
 - Cell detection (initial cell candidate detection and refinement using  deep learning) (using [cellfinder-core](https://github.com/brainglobe/cellfinder-core)),
@@ -84,3 +64,27 @@ cellfinder -s signal_images -b background_images -o output_dir --metadata metada
 ```
 
 Full documentation can be found [here](https://brainglobe.info/documentation/cellfinder/index.html).
+
+
+## Developers documentation
+
+This repository also includes workflow scripts that are benchmarked to support code development. We regularly benchmark the time the workflows take to complete to ensure performance is stable as the code changes.
+* Developers can install these benchmarks locally via `pip install .[dev]`. By executing `asv run`,  the benchmarks will run with default parameters on a small dataset that is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). See [the asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further details on how to run benchmarks.
+* Developers can also run these benchmarks on  data available locally, by specifying the relevant paths in an input configuration JSON file.
+* We additionally run and benchmark the workflows locally on a internal desktop machine using large example datasets. These benchmarks are run periodically and the results are made publicly available.
+
+Contributions to BrainGlobe are more than welcome.
+Please see the [developers guide](https://brainglobe.info/developers/index.html).
+
+
+## Citing `brainglobe-workflows`
+
+**If you use any tools in the [brainglobe suite](https://brainglobe.info/documentation/index.html), please [let us know](mailto:code@adamltyson.com?subject=cellfinder), and we'd be happy to promote your paper/talk etc.**
+
+If you find [`cellfinder`](#cellfinder) useful, and use it in your research, please cite the paper outlining the cell detection algorithm:
+> Tyson, A. L., Rousseau, C. V., Niedworok, C. J., Keshavarzi, S., Tsitoura, C., Cossell, L., Strom, M. and Margrie, T. W. (2021) “A deep learning algorithm for 3D cell detection in whole mouse brain image datasets’ PLOS Computational Biology, 17(5), e1009074
+[https://doi.org/10.1371/journal.pcbi.1009074](https://doi.org/10.1371/journal.pcbi.1009074)
+>
+If you use any of the image registration functions in `cellfinder`, please also cite [`brainreg`](https://github.com/brainglobe/brainreg#citing-brainreg).
+
+---
