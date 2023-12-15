@@ -30,7 +30,7 @@ such as whole brain cell detection and atlas registration.
 ## Secondary purposes of brainglobe-workflows, for developers
 
 We also use these workflows to support code development. We do this by regularly benchmarking the time they take to complete to ensure performance is stable as the code changes.
-* Developers can install these benchmarks locally via `pip install [dev]`. By executing `asv run`,  the benchmarks will run with default parameters on a small dataset that is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). See [the asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further details on how to run benchmarks.
+* Developers can install these benchmarks locally via `pip install .[dev]`. By executing `asv run`,  the benchmarks will run with default parameters on a small dataset that is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). See [the asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further details on how to run benchmarks.
 * Developers can also run these benchmarks on  data available locally, by specifying the relevant paths in an input configuration file (JSON file).
 * We additionally run and benchmark the workflows locally on a internal desktop machine with large example datasets. These benchmarks are run periodically and the results are made publicly available.
 
