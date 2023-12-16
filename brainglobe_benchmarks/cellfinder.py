@@ -7,14 +7,12 @@ from brainglobe_utils.IO.cells import save_cells
 from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 
-from brainglobe_workflows.cellfinder.cellfinder_main import (
-    DEFAULT_JSON_CONFIG_PATH,
+from brainglobe_workflows.cellfinder import (
     CellfinderConfig,
     run_workflow_from_cellfinder_run,
 )
-from brainglobe_workflows.cellfinder.cellfinder_main import (
-    setup as setup_cellfinder_workflow,
-)
+from brainglobe_workflows.cellfinder import setup as setup_cellfinder_workflow
+from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
 
 class TimeBenchmarkPrepGIN:
@@ -79,7 +77,7 @@ class TimeBenchmarkPrepGIN:
     min_run_count = 2  # default:2
 
     # Custom attributes
-    input_config_path = str(DEFAULT_JSON_CONFIG_PATH)
+    input_config_path = str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)
 
     def setup_cache(
         self,
@@ -114,7 +112,7 @@ class TimeBenchmarkPrepGIN:
             known_hash=config.data_hash,
             path=config.install_path,
             progressbar=True,
-            processor=pooch.Unzip(extract_dir=config.extract_dir_relative),
+            processor=pooch.Unzip(extract_dir=config.data_dir_relative),
         )
 
         # Check paths to input data should now exist in config

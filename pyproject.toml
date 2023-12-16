@@ -8,8 +8,10 @@ authors = [
 ]
 description = "A collection of end-to-end data analysis workflows executed using BrainGlobe tools."
 readme = "README.md"
-license = { file = "LICENSE" }
+license = { file = "LICENSE" } #{text = "BSD-3-Clause"}
 requires-python = ">=3.9"
+dynamic = ["version"]
+
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -21,6 +23,7 @@ classifiers = [
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
+
 dependencies = [
     "brainreg>=1.0.0",
     "cellfinder-core>=0.2.4,<1.0.0",
@@ -37,11 +40,9 @@ dependencies = [
     "scikit-image",
     "tifffile",
     "tqdm",
+    "asv",
+    "pooch",
 ]
-dynamic = ["version"]
-
-[project.scripts]
-cellfinder = "brainglobe_workflows.main:main"
 
 [project.optional-dependencies]
 dev = [
@@ -65,9 +66,21 @@ napari = [
 "Homepage" = "https://brainglobe.info"
 "Source Code" = "https://github.com/brainglobe/brainglobe-workflows"
 
+[project.scripts]
+cellfinder-workflow = "brainglobe_workflows.cellfinder:main_app_wrapper"
+cellfinder = "brainglobe_workflows.main:main"
+
 [build-system]
 requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+include = ["brainglobe_workflows"]
+exclude = ["tests", "resources"]
 
 [tool.black]
 target-version = ["py39", "py310"]
@@ -91,14 +104,6 @@ line-length = 79
 exclude = ["__init__.py", "build", ".eggs"]
 select = ["I", "E", "F"]
 fix = true
-
-[tool.setuptools]
-include-package-data = true
-zip-safe = false
-
-[tool.setuptools.packages.find]
-include = ["brainglobe_workflows"]
-exclude = ["benchmarks", "tests", "resources"]
 
 [tool.setuptools_scm]
 
