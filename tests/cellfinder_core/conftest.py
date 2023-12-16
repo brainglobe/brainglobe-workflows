@@ -5,7 +5,7 @@ from pathlib import Path
 import pooch
 import pytest
 
-from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+from brainglobe_workflows.cellfinder_core.cellfinder import (
     read_cellfinder_config,
 )
 

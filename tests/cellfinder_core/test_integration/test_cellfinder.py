@@ -5,7 +5,7 @@ from typing import Optional
 
 import pytest
 
-from brainglobe_workflows.cellfinder_core.cellfinder_core import main
+from brainglobe_workflows.cellfinder_core.cellfinder import main
 
 
 @pytest.mark.parametrize(
@@ -87,7 +87,7 @@ def test_script(
         Path(__file__).resolve().parents[3]
         / "brainglobe_workflows"
         / "cellfinder_core"
-        / "cellfinder_core.py"
+        / "cellfinder.py"
     )
     subprocess_input = [
         sys.executable,
