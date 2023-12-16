@@ -53,7 +53,7 @@ def asv_config_monkeypatched_path(tmp_path: Path) -> str:
     return str(asv_monkeypatched_path)
 
 
-@pytest.mark.skip(reason="will be worked on a separate PR")
+@pytest.mark.skip(reason="focus of PR32")
 def test_run_benchmarks(asv_config_monkeypatched_path):
     # --- ideally monkeypatch an asv config so that results are in tmp_dir?
 
