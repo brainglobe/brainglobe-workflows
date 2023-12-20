@@ -113,23 +113,21 @@ class CellfinderConfig:
     ################ Internal ########################
     # The following attributes are added
     # during the setup phase of the workflow
+    # even tho these are optional we dont expect users to
+    # change them!!!
     _signal_dir_path: Optional[Pathlike] = None
     _background_dir_path: Optional[Pathlike] = None
     _list_signal_files: Optional[list] = None
     _list_background_files: Optional[list] = None
     _detected_cells_path: Pathlike = ""
     _output_path: Pathlike = ""
+    # _input_data_download_dir: Optional[Pathlike] = None
 
     def __post_init__(self: "CellfinderConfig"):
         # See https://peps.python.org/pep-0557/#post-init-processing
         if self.input_data_dir is None:
             self.input_data_dir = (
                 Path(self._install_path) / "cellfinder_test_data"
-            )
-
-        if self.output_parent_dir is None:
-            self.output_parent_dir = (
-                Path(self._install_path) / self.output_dir_basename
             )
 
         # install path (root for donwloaded inputs and outputs)
@@ -139,6 +137,11 @@ class CellfinderConfig:
         self._background_dir_path: Pathlike = self.input_data_dir / Path(
             self.background_subdir
         )
+
+        if self.output_parent_dir is None:
+            self.output_parent_dir = (
+                Path(self._install_path) / self.output_dir_basename
+            )
 
     ################# Methods #########################
     def add_output_timestamped(self):

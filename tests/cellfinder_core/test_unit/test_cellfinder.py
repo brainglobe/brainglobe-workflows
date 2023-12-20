@@ -17,21 +17,6 @@ import pytest
 from brainglobe_workflows.utils import setup_logger
 
 
-@pytest.fixture()
-def default_input_config_cellfinder() -> Path:
-    """Return path to default input config for cellfinder workflow
-
-    Returns
-    -------
-    Path
-        Path to default input config
-
-    """
-    from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
-
-    return DEFAULT_JSON_CONFIG_PATH_CELLFINDER
-
-
 @pytest.mark.parametrize(
     "input_config",
     [
@@ -70,9 +55,10 @@ def test_read_cellfinder_config(input_config: str, request):
 @pytest.mark.parametrize(
     "input_config, message_pattern",
     [
-        (
-            "config_GIN",
+        pytest.param(
+            "config_force_GIN",
             "Fetching input data from the provided GIN repository",
+            marks=pytest.mark.slow,
         ),
         (
             "config_local",
@@ -137,7 +123,7 @@ def test_add_signal_and_background_files(
     "input_config, message",
     [
         ("default_input_config_cellfinder", "Using default config file"),
-        ("input_config_fetch_GIN", "Input config read from"),
+        ("config_GIN", "Input config read from"),
     ],
 )
 def test_setup_workflow(
