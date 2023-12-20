@@ -1,35 +1,17 @@
 """Pytest fixtures shared across unit and integration tests"""
 
+import json
 from pathlib import Path
 
 import pooch
 import pytest
 
-# from brainglobe_workflows.cellfinder_core.cellfinder import (
-#     read_cellfinder_config,
-# )
-
 
 @pytest.fixture(autouse=True)
-def mock_home_directory(monkeypatch: pytest.MonkeyPatch, tmp_path):
-    """_summary_
-
-    from https://github.com/brainglobe/brainrender-napari/blob/52673db58df247261b1ad43c52135e5a26f88d1e/tests/conftest.py#L10
-
-    Parameters
-    ----------
-    monkeypatch : pytest.MonkeyPatch
-        _description_
-
-    Returns
-    -------
-    _type_
-        _description_
-    """
-
+def mock_home_directory(monkeypatch: pytest.MonkeyPatch):
     # define mock home path
-    # home_path = Path.home()  # actual home path
-    mock_home_path = tmp_path  # home_path / ".brainglobe-tests"
+    home_path = Path.home()  # actual home path
+    mock_home_path = home_path / ".brainglobe-tests"  # tmp_path  #
 
     # create dir if it doesn't exist
     if not mock_home_path.exists():
@@ -42,7 +24,7 @@ def mock_home_directory(monkeypatch: pytest.MonkeyPatch, tmp_path):
     monkeypatch.setattr(Path, "home", mock_home)
 
 
-@pytest.fixture()
+@pytest.fixture()  # Do I need this?
 def input_configs_dir() -> Path:
     """Return the directory path to the input configs
     used for testing
@@ -71,66 +53,93 @@ def cellfinder_GIN_data() -> dict:
 
 
 @pytest.fixture()
-def input_config_fetch_GIN(input_configs_dir: Path) -> Path:
+def config_GIN(cellfinder_GIN_data):
     """
-    Return the cellfinder config json file that is configured to fetch from GIN
-
-    Parameters
-    ----------
-    input_configs_dir : Path
-        Path to the directory holding the test config files.
-
-    Returns
-    -------
-    Path
-        Path to the config json file for fetching data from GIN
-    """
-    return input_configs_dir / "input_data_GIN.json"
-
-
-@pytest.fixture()
-def input_config_fetch_local(
-    input_configs_dir: Path,
-    cellfinder_GIN_data: dict,
-) -> Path:
-    """
-    Download the cellfinder data locally and return the config json
-    file configured to fetch local data.
-
-    The data is downloaded to a directory under the current working
-    directory (that is, to a directory under the directory from where
-    pytest is launched).
-
-    Parameters
-    ----------
-    input_configs_dir : Path
-        Path to the directory holding the test config files.
-    cellfinder_GIN_data : dict
-        URL and hash of the GIN repository with the cellfinder test data
-
-    Returns
-    -------
-    Path
-        Path to the config json file for fetching data locally
+    Return a config pointing to the location where GIN would be by default
     """
     from brainglobe_workflows.cellfinder_core.cellfinder import (
         read_cellfinder_config,
     )
-
-    # read local config
-    input_config_path = input_configs_dir / "input_data_locally.json"
-    config = read_cellfinder_config(input_config_path)
+    from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
     # fetch data from GIN and download locally
+    # if it exists, pooch doesnt download again
     pooch.retrieve(
         url=cellfinder_GIN_data["url"],
         known_hash=cellfinder_GIN_data["hash"],
-        path=config._install_path,  # path to download zip to
+        path=Path.home(),  # path to download zip to
+        progressbar=True,
+        processor=pooch.Unzip(
+            extract_dir="cellfinder_test_data"
+            # path to unzipped dir, *relative*  to 'path'
+        ),
+    )
+
+    return read_cellfinder_config(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)
+    # read_cellfinder_config(input_configs_dir / "input_data_GIN.json")
+
+
+@pytest.fixture()
+def config_local(cellfinder_GIN_data):
+    """ """
+
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        CellfinderConfig,
+    )
+    from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+
+    # read default config as dict
+    # as dict because some paths are computed derived from input_data_dir
+    with open(DEFAULT_JSON_CONFIG_PATH_CELLFINDER) as cfg:
+        config_dict = json.load(cfg)
+
+    # modify location of data?
+    # - remove url
+    # - remove data hash
+    # - add input_data_dir
+    config_dict["data_url"] = None
+    config_dict["data_hash"] = None
+    config_dict["input_data_dir"] = Path.home() / "local_data"
+
+    # instantiate object
+    config = CellfinderConfig(**config_dict)
+
+    # fetch data from GIN and download locally to local location?
+    pooch.retrieve(
+        url=cellfinder_GIN_data["url"],
+        known_hash=cellfinder_GIN_data["hash"],
+        path=Path(config.input_data_dir).parent,  # path to download zip to
         progressbar=True,
         processor=pooch.Unzip(
             extract_dir=Path(config.input_data_dir).stem
             # path to unzipped dir, *relative*  to 'path'
         ),
     )
+    return config
 
-    return input_config_path
+
+@pytest.fixture()
+def config_missing_signal(config_local):
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        CellfinderConfig,
+    )
+
+    config_local.signal_subdir = "_"
+    config = CellfinderConfig(**config_local)
+
+    return config
+
+
+@pytest.fixture()
+def config_missing_background(config_local):
+    config_local.background_subdir = "_"
+    return config_local
+
+
+@pytest.fixture()
+def config_not_GIN_or_local(config_GIN):
+    # remove GIN refs
+    config_GIN.data_url = None
+    config_GIN.data_hash = None
+
+    return config_GIN

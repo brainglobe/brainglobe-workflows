@@ -91,16 +91,19 @@ class CellfinderConfig:
     )
 
     # input data: if not specified the are assumed to be signal and
-    # background dirs under
-    # ~/.brainglobe/workflows/cellfinder/cellfinder_test_data/
-    input_data_dir: Pathlike = Path(_install_path) / "cellfinder_test_data"
+    # background dirs under _install_path/cellfinder_test_data/
+    # see __post_init__
+    input_data_dir: Optional[Pathlike] = None
     signal_subdir: Pathlike = "signal"
     background_subdir: Pathlike = "background"
 
     # output data
+    # if dir not specified it is assumed to be under
+    # _install_path/output_dir_basename
+    # see __post_init__
     output_dir_basename: str = "cellfinder_output_"
     detected_cells_filename: str = "detected_cells.xml"
-    output_parent_dir: Pathlike = Path(_install_path) / output_dir_basename
+    output_parent_dir: Optional[Pathlike] = None
 
     # source of data to download
     # (if not provided in JSON it is set to None)
@@ -108,10 +111,6 @@ class CellfinderConfig:
     data_hash: Optional[str] = None
 
     ################ Internal ########################
-    # install path (root for donwloaded inputs and outputs)
-    _signal_dir_path: Pathlike = input_data_dir / Path(signal_subdir)
-    _background_dir_path: Pathlike = input_data_dir / Path(background_subdir)
-
     # The following attributes are added
     # during the setup phase of the workflow
     # _signal_dir_path: Pathlike = ""
@@ -121,6 +120,27 @@ class CellfinderConfig:
     _detected_cells_path: Pathlike = ""
     _output_path: Pathlike = ""
 
+    def __post_init__(self: "CellfinderConfig"):
+        # See https://peps.python.org/pep-0557/#post-init-processing
+        if self.input_data_dir is None:
+            self.input_data_dir = (
+                Path(self._install_path) / "cellfinder_test_data"
+            )
+
+        if self.output_parent_dir is None:
+            self.output_parent_dir = (
+                Path(self._install_path) / self.output_dir_basename
+            )
+
+        # install path (root for donwloaded inputs and outputs)
+        self._signal_dir_path: Pathlike = self.input_data_dir / Path(
+            self.signal_subdir
+        )
+        self._background_dir_path: Pathlike = self.input_data_dir / Path(
+            self.background_subdir
+        )
+
+    ################# Methods #########################
     def add_output_timestamped(self):
         # output dir and file
         timestamp = datetime.datetime.now()
@@ -138,6 +158,120 @@ class CellfinderConfig:
         self._detected_cells_path = (
             self.output_path / self.detected_cells_filename
         )
+
+    def add_signal_and_background_files(self):
+        """Adds the lists of input data files (signal and background)
+        to the config.
+
+        These files are first searched locally. If not found, we
+        attempt to download them from GIN.
+
+        Specifically:
+        - If both parent data directories (signal and background) exist
+        locally,
+        the lists of signal and background files are added to the config.
+        - If exactly one of the parent data directories is missing, an error
+        message is logged.
+        - If neither of them exist, the data is retrieved from the provided GIN
+        repository. If no URL or hash to GIN is provided, an error is thrown.
+
+        Parameters
+        ----------
+        config : CellfinderConfig
+            a cellfinder config with input data files to be validated
+
+        Returns
+        -------
+        config : CellfinderConfig
+            a cellfinder config with updated input data lists.
+        """
+        # Fetch logger
+        logger = logging.getLogger(LOGGER_NAME)
+
+        # Check if input data directories (signal and background) exist
+        # locally.
+        # If both directories exist, get list of signal and background files
+        if (
+            Path(self._signal_dir_path).exists()
+            and Path(self._background_dir_path).exists()
+        ):
+            logger.info("Fetching input data from the local directories")
+
+            self._list_signal_files = [
+                f
+                for f in Path(self._signal_dir_path).resolve().iterdir()
+                if f.is_file()
+            ]
+            self._list_background_files = [
+                f
+                for f in Path(self._background_dir_path).resolve().iterdir()
+                if f.is_file()
+            ]
+
+        # If exactly one of the input data directories is missing, print error
+        elif (
+            Path(self._signal_dir_path).resolve().exists()
+            or Path(self._background_dir_path).resolve().exists()
+        ):
+            if not Path(self._signal_dir_path).resolve().exists():
+                logger.error(
+                    f"The directory {self._signal_dir_path} does not exist",
+                )
+            else:
+                logger.error(
+                    f"The directory {self._background_dir_path} "
+                    "does not exist",
+                )
+
+        # If neither of the input data directories exist,
+        # retrieve data from GIN repository and add list of files to config
+        else:
+            # Check if GIN URL and hash are defined (log error otherwise)
+            if self.data_url and self.data_hash:
+                # get list of files in GIN archive with pooch.retrieve
+                list_files_archive = pooch.retrieve(
+                    url=self.data_url,
+                    known_hash=self.data_hash,
+                    path=Path(self.input_data_dir).parent,
+                    # self._install_path,  # ----zip will be downloaded here
+                    progressbar=True,
+                    processor=pooch.Unzip(
+                        extract_dir=Path(self.input_data_dir).stem,
+                        # files are unpacked here, a dir
+                        # *relative* to the path set in 'path'
+                    ),
+                )
+                logger.info(
+                    "Fetching input data from the provided GIN repository"
+                )
+
+                # Check signal and background parent directories exist now
+                assert Path(self._signal_dir_path).resolve().exists()
+                assert Path(self._background_dir_path).resolve().exists()
+
+                # Add signal files to config
+                self._list_signal_files = [
+                    f
+                    for f in list_files_archive
+                    if f.startswith(
+                        str(Path(self._signal_dir_path).resolve()),
+                    )  # if str(self.signal_dir_path) in f
+                ]
+
+                # Add background files to config
+                self._list_background_files = [
+                    f
+                    for f in list_files_archive
+                    if f.startswith(
+                        str(Path(self._background_dir_path).resolve()),
+                    )
+                ]
+            # If one of URL/hash to GIN repo not defined, throw an error
+            else:
+                logger.error(
+                    "Input data not found locally, and URL/hash to "
+                    "GIN repository not provided",
+                )
 
 
 def read_cellfinder_config(input_config_path: Path) -> CellfinderConfig:
@@ -159,121 +293,6 @@ def read_cellfinder_config(input_config_path: Path) -> CellfinderConfig:
     with open(input_config_path) as cfg:
         config_dict = json.load(cfg)
     config = CellfinderConfig(**config_dict)
-
-    return config
-
-
-def add_signal_and_background_files(
-    config: CellfinderConfig,
-) -> CellfinderConfig:
-    """Adds the lists of input data files (signal and background)
-    to the config.
-
-    These files are first searched locally. If not found, we
-    attempt to download them from GIN.
-
-    Specifically:
-    - If both parent data directories (signal and background) exist locally,
-    the lists of signal and background files are added to the config.
-    - If exactly one of the parent data directories is missing, an error
-    message is logged.
-    - If neither of them exist, the data is retrieved from the provided GIN
-    repository. If no URL or hash to GIN is provided, an error is thrown.
-
-    Parameters
-    ----------
-    config : CellfinderConfig
-        a cellfinder config with input data files to be validated
-
-    Returns
-    -------
-    config : CellfinderConfig
-        a cellfinder config with updated input data lists.
-    """
-    # Fetch logger
-    logger = logging.getLogger(LOGGER_NAME)
-
-    # Check if input data directories (signal and background) exist locally.
-    # If both directories exist, get list of signal and background files
-    if (
-        Path(config._signal_dir_path).exists()
-        and Path(config._background_dir_path).exists()
-    ):
-        logger.info("Fetching input data from the local directories")
-
-        config._list_signal_files = [
-            f
-            for f in Path(config._signal_dir_path).resolve().iterdir()
-            if f.is_file()
-        ]
-        config._list_background_files = [
-            f
-            for f in Path(config._background_dir_path).resolve().iterdir()
-            if f.is_file()
-        ]
-
-    # If exactly one of the input data directories is missing, print error
-    elif (
-        Path(config._signal_dir_path).resolve().exists()
-        or Path(config._background_dir_path).resolve().exists()
-    ):
-        if not Path(config._signal_dir_path).resolve().exists():
-            logger.error(
-                f"The directory {config._signal_dir_path} does not exist",
-            )
-        else:
-            logger.error(
-                f"The directory {config._background_dir_path} "
-                "does not exist",
-            )
-
-    # If neither of the input data directories exist,
-    # retrieve data from GIN repository and add list of files to config
-    else:
-        # Check if GIN URL and hash are defined (log error otherwise)
-        if config.data_url and config.data_hash:
-            # get list of files in GIN archive with pooch.retrieve
-            list_files_archive = pooch.retrieve(
-                url=config.data_url,
-                known_hash=config.data_hash,
-                path=Path(config.input_data_dir).parent,
-                # config._install_path,  # ----zip will be downloaded here
-                progressbar=True,
-                processor=pooch.Unzip(
-                    extract_dir=Path(config.input_data_dir).stem,
-                    # files are unpacked here, a dir
-                    # *relative* to the path set in 'path'
-                ),
-            )
-            logger.info("Fetching input data from the provided GIN repository")
-
-            # Check signal and background parent directories exist now
-            assert Path(config._signal_dir_path).resolve().exists()
-            assert Path(config._background_dir_path).resolve().exists()
-
-            # Add signal files to config
-            config._list_signal_files = [
-                f
-                for f in list_files_archive
-                if f.startswith(
-                    str(Path(config._signal_dir_path).resolve()),
-                )  # if str(config.signal_dir_path) in f
-            ]
-
-            # Add background files to config
-            config._list_background_files = [
-                f
-                for f in list_files_archive
-                if f.startswith(
-                    str(Path(config._background_dir_path).resolve()),
-                )
-            ]
-        # If one of URL/hash to GIN repo not defined, throw an error
-        else:
-            logger.error(
-                "Input data not found locally, and URL/hash to "
-                "GIN repository not provided",
-            )
 
     return config
 
@@ -331,7 +350,8 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
         # )
 
         # add signal and background files to config
-        config = add_signal_and_background_files(config)
+        # config = add_signal_and_background_files(config)
+        config.add_signal_and_background_files()
 
     # Create timestamped output directory if it doesn't exist
     config.add_output_timestamped()
