@@ -14,17 +14,14 @@ import pytest
 # )
 # from brainglobe_workflows.cellfinder_core.cellfinder import
 # setup as setup_full
-from brainglobe_workflows.utils import setup_logger
-
-
-@pytest.mark.parametrize(
-    "input_config",
-    [
-        "default_input_config_cellfinder",
-    ],
+from brainglobe_workflows.utils import (
+    DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
+    setup_logger,
 )
-def test_read_cellfinder_config(input_config: str, request):
-    """Test for reading a cellfinder config file
+
+
+def test_read_cellfinder_config():
+    """Test for reading a cellfinder config file default
 
     Parameters
     ----------
@@ -37,7 +34,8 @@ def test_read_cellfinder_config(input_config: str, request):
         read_cellfinder_config,
     )
 
-    input_config_path = request.getfixturevalue(input_config)
+    input_config_path = DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+    # request.getfixturevalue(input_config)
 
     # read json as Cellfinder config
     config = read_cellfinder_config(input_config_path)
@@ -53,24 +51,24 @@ def test_read_cellfinder_config(input_config: str, request):
 
 
 @pytest.mark.parametrize(
-    "input_config, message_pattern",
+    "input_config_dict, message_pattern",
     [
         pytest.param(
-            "config_force_GIN",
+            "config_force_GIN_dict",
             "Fetching input data from the provided GIN repository",
             marks=pytest.mark.slow,
         ),
         (
-            "config_local",
+            "config_local_dict",
             "Fetching input data from the local directories",
         ),
         (
-            "config_missing_signal",
+            "config_missing_signal_dict",
             "The directory .+ does not exist$",
         ),
-        ("config_missing_background", "The directory .+ does not exist$"),
+        ("config_missing_background_dict", "The directory .+ does not exist$"),
         (
-            "config_not_GIN_or_local",
+            "config_not_GIN_nor_local_dict",
             "Input data not found locally, and URL/hash to "
             "GIN repository not provided",
         ),
@@ -78,7 +76,7 @@ def test_read_cellfinder_config(input_config: str, request):
 )
 def test_add_signal_and_background_files(
     caplog: pytest.LogCaptureFixture,
-    input_config: str,
+    input_config_dict: dict,
     message_pattern: str,
     request: pytest.FixtureRequest,
 ):
@@ -88,29 +86,21 @@ def test_add_signal_and_background_files(
     ----------
     caplog : pytest.LogCaptureFixture
         Pytest fixture to capture the logs during testing
-    cellfinder_GIN_data : dict
-        Dict holding the URL and hash of the cellfinder test data in GIN
-    input_configs_dir : Path
-        Test data directory path
-    input_config : str
-        Name of input config json file
+    input_config_dict : dicy
+        input config as a dict
     message_pattern : str
         Expected pattern in the log
     """
 
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        CellfinderConfig,
+    )
+
     # instantiate custom logger
     _ = setup_logger()
 
-    # read json as Cellfinder config
-    # ---> change so that the fixture is the config object!
-    # config = read_cellfinder_config(input_configs_dir / input_config)
-    config = request.getfixturevalue(input_config)
-
-    # check lists of signal and background files are not defined
-    assert not (config._list_signal_files and config._list_background_files)
-
-    # add signal and background files lists to config
-    config.add_signal_and_background_files()
+    # instantiate config object
+    _ = CellfinderConfig(**request.getfixturevalue(input_config_dict))
 
     # check log messages
     assert len(caplog.messages) > 0
@@ -122,7 +112,7 @@ def test_add_signal_and_background_files(
 @pytest.mark.parametrize(
     "input_config, message",
     [
-        ("default_input_config_cellfinder", "Using default config file"),
+        (DEFAULT_JSON_CONFIG_PATH_CELLFINDER, "Using default config file"),
         # ("config_GIN", "Input config read from"),
     ],
 )
@@ -168,7 +158,9 @@ def test_setup_workflow(
     # monkeypatch.chdir(tmp_path)
 
     # setup workflow
-    config = setup_workflow(request.getfixturevalue(input_config))
+    config = setup_workflow(
+        input_config
+    )  # request.getfixturevalue(input_config))
 
     # check logs
     assert message in caplog.text
@@ -202,7 +194,7 @@ def test_setup_workflow(
 @pytest.mark.parametrize(
     "input_config",
     [
-        "default_input_config_cellfinder",
+        DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
         # "input_config_fetch_GIN",
         # "input_config_fetch_local",
     ],
@@ -210,7 +202,6 @@ def test_setup_workflow(
 def test_setup(
     input_config: str,
     custom_logger_name: str,
-    request: pytest.FixtureRequest,
 ):
     """Test full setup for cellfinder workflow, using the default config
     and passing a specific config file.
@@ -239,9 +230,8 @@ def test_setup(
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
     # monkeypatch.chdir(tmp_path)
-
     # run setup on default configuration
-    cfg = setup_full(request.getfixturevalue(input_config))
+    cfg = setup_full(input_config)  # (request.getfixturevalue(input_config))
 
     # check logger exists
     logger = logging.getLogger(custom_logger_name)
@@ -255,16 +245,13 @@ def test_setup(
 @pytest.mark.parametrize(
     "input_config",
     [
-        "default_input_config_cellfinder",
+        DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
         # "input_config_fetch_GIN",
         # "input_config_fetch_local",
     ],
 )
 def test_run_workflow_from_cellfinder_run(
     input_config: str,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-    request: pytest.FixtureRequest,
 ):
     """Test running cellfinder workflow with default input config
     (fetches data from GIN) and local input config
@@ -291,9 +278,10 @@ def test_run_workflow_from_cellfinder_run(
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
     # monkeypatch.chdir(tmp_path)
-
     # run setup
-    cfg = setup_full(str(request.getfixturevalue(input_config)))
+    cfg = setup_full(
+        input_config
+    )  # str(request.getfixturevalue(input_config)))
 
     # run workflow
     run_workflow_from_cellfinder_run(cfg)

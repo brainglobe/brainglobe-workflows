@@ -120,17 +120,19 @@ class CellfinderConfig:
     _list_signal_files: Optional[list] = None
     _list_background_files: Optional[list] = None
     _detected_cells_path: Pathlike = ""
-    _output_path: Pathlike = ""
+    # _output_path: Pathlike = ""
     # _input_data_download_dir: Optional[Pathlike] = None
 
     def __post_init__(self: "CellfinderConfig"):
         # See https://peps.python.org/pep-0557/#post-init-processing
+
+        # Input data dir if not specified
         if self.input_data_dir is None:
             self.input_data_dir = (
                 Path(self._install_path) / "cellfinder_test_data"
             )
 
-        # install path (root for donwloaded inputs and outputs)
+        # add derived input data paths
         self._signal_dir_path: Pathlike = self.input_data_dir / Path(
             self.signal_subdir
         )
@@ -138,10 +140,16 @@ class CellfinderConfig:
             self.background_subdir
         )
 
+        self.add_signal_and_background_files()
+
+        # output dir if not specified
         if self.output_parent_dir is None:
             self.output_parent_dir = (
                 Path(self._install_path) / self.output_dir_basename
             )
+
+        # add derived output paths
+        self.add_output_timestamped()
 
     ################# Methods #########################
     def add_output_timestamped(self):
@@ -277,14 +285,14 @@ class CellfinderConfig:
                 )
 
 
-def read_cellfinder_config(input_config_path: Path) -> CellfinderConfig:
+def read_cellfinder_config(input_config_path: str) -> CellfinderConfig:
     """Instantiate a CellfinderConfig from the input json file.
 
     Assumes config is json serializable.
 
     Parameters
     ----------
-    input_config_path : Path
+    input_config_path : str
         Absolute path to a cellfinder config file
 
     Returns
@@ -300,7 +308,7 @@ def read_cellfinder_config(input_config_path: Path) -> CellfinderConfig:
     return config
 
 
-def setup_workflow(input_config_path: Path) -> CellfinderConfig:
+def setup_workflow(input_config_path: str) -> CellfinderConfig:
     """Run setup steps prior to executing the workflow
 
     These setup steps include:
@@ -313,7 +321,7 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
 
     Parameters
     ----------
-    input_config_path : Path
+    input_config_path : str
         path to the input config file
 
     Returns
@@ -326,7 +334,7 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
     logger = logging.getLogger(LOGGER_NAME)
 
     # Check config file exists
-    assert input_config_path.exists()
+    assert Path(input_config_path).exists()
 
     # Instantiate a CellfinderConfig from the input json file
     # (assumes config is json serializable)
@@ -337,41 +345,14 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
     if input_config_path == DEFAULT_JSON_CONFIG_PATH_CELLFINDER:
         logger.info("Using default config file")
 
-    # Add lists of input data files to the config,
-    # if these are not defined yet
-    if not (config._list_signal_files and config._list_background_files):
-        # # build fullpaths to input directories
-        # config._signal_dir_path = str(
-        #     Path(config._install_path)
-        #     / config.data_dir_relative
-        #     / config.signal_subdir,
-        # )
-        # config._background_dir_path = str(
-        #     Path(config._install_path)
-        #     / config.data_dir_relative
-        #     / config.background_subdir,
-        # )
+    # # Add lists of input data files to the config,
+    # # ----> should this go in the class?
+    # # if these are not defined yet
+    # if not (config._list_signal_files and config._list_background_files):
+    #     config.add_signal_and_background_files()
 
-        # add signal and background files to config
-        config.add_signal_and_background_files()
-
-    # Create timestamped output directory if it doesn't exist
-    config.add_output_timestamped()
-    # timestamp = datetime.datetime.now()
-    # timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
-    # output_path_timestamped = Path(config._install_path) / (
-    #     str(config.output_dir_basename) + timestamp_formatted
-    # )
-    # output_path_timestamped.mkdir(
-    #     parents=True,  # create any missing parents
-    #     exist_ok=True,  # ignore FileExistsError exceptions
-    # )
-
-    # # Add output path and output file path to config
-    # config.output_path = output_path_timestamped
-    # config._detected_cells_path = (
-    #     config.output_path / config.detected_cells_filename
-    # )
+    # # Create timestamped output directory if it doesn't exist
+    # config.add_output_timestamped()
 
     return config
 
@@ -381,7 +362,7 @@ def setup(input_config_path: str) -> CellfinderConfig:
     _ = setup_logger()
 
     # run setup steps and return config
-    cfg = setup_workflow(Path(input_config_path))
+    cfg = setup_workflow(input_config_path)
 
     return cfg
 
