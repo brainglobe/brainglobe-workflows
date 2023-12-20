@@ -124,22 +124,38 @@ def config_missing_signal(config_local):
         CellfinderConfig,
     )
 
-    config_local.signal_subdir = "_"
-    config = CellfinderConfig(**config_local)
+    config_dict = config_local.__dict__
+    config_dict["signal_subdir"] = "_"
+
+    # update rest of the paths
+    config = CellfinderConfig(**config_dict)
 
     return config
 
 
 @pytest.fixture()
 def config_missing_background(config_local):
-    config_local.background_subdir = "_"
-    return config_local
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        CellfinderConfig,
+    )
+
+    config_dict = config_local.__dict__
+    config_dict["background_subdir"] = "_"
+
+    # update rest of the paths
+    config = CellfinderConfig(**config_dict)
+    return config
 
 
 @pytest.fixture()
-def config_not_GIN_or_local(config_GIN):
-    # remove GIN refs
-    config_GIN.data_url = None
-    config_GIN.data_hash = None
+def config_not_GIN_or_local(config_local):
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        CellfinderConfig,
+    )
 
-    return config_GIN
+    config_dict = config_local.__dict__
+    config_dict["input_data_dir"] = "_"
+
+    # update rest of the paths
+    config = CellfinderConfig(**config_dict)
+    return config
