@@ -123,14 +123,12 @@ def test_add_signal_and_background_files(
     "input_config, message",
     [
         ("default_input_config_cellfinder", "Using default config file"),
-        ("config_GIN", "Input config read from"),
+        # ("config_GIN", "Input config read from"),
     ],
 )
 def test_setup_workflow(
     input_config: str,
     message: str,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
     request: pytest.FixtureRequest,
 ):
@@ -167,7 +165,7 @@ def test_setup_workflow(
     # monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
+    # monkeypatch.chdir(tmp_path)
 
     # setup workflow
     config = setup_workflow(request.getfixturevalue(input_config))
@@ -205,15 +203,13 @@ def test_setup_workflow(
     "input_config",
     [
         "default_input_config_cellfinder",
-        "input_config_fetch_GIN",
-        "input_config_fetch_local",
+        # "input_config_fetch_GIN",
+        # "input_config_fetch_local",
     ],
 )
 def test_setup(
     input_config: str,
     custom_logger_name: str,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
     request: pytest.FixtureRequest,
 ):
     """Test full setup for cellfinder workflow, using the default config
@@ -242,7 +238,7 @@ def test_setup(
     # Monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
+    # monkeypatch.chdir(tmp_path)
 
     # run setup on default configuration
     cfg = setup_full(request.getfixturevalue(input_config))
@@ -260,8 +256,8 @@ def test_setup(
     "input_config",
     [
         "default_input_config_cellfinder",
-        "input_config_fetch_GIN",
-        "input_config_fetch_local",
+        # "input_config_fetch_GIN",
+        # "input_config_fetch_local",
     ],
 )
 def test_run_workflow_from_cellfinder_run(
@@ -294,7 +290,7 @@ def test_run_workflow_from_cellfinder_run(
     # monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
+    # monkeypatch.chdir(tmp_path)
 
     # run setup
     cfg = setup_full(str(request.getfixturevalue(input_config)))

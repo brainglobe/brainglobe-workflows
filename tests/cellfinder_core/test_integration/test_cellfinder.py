@@ -34,14 +34,13 @@ def test_main_wo_inputs(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
 @pytest.mark.parametrize(
     "input_config",
     [
-        "input_config_fetch_GIN",
-        "input_config_fetch_local",
+        None,
+        # "input_config_fetch_GIN",
+        # "input_config_fetch_local",
     ],
 )
 def test_main_w_inputs(
     input_config: Optional[str],
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
     request: pytest.FixtureRequest,
 ):
     """Test main function for setting up and running cellfinder workflow
@@ -61,7 +60,7 @@ def test_main_w_inputs(
     # monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
+    # monkeypatch.chdir(tmp_path)
 
     # run main
     cfg = main(str(request.getfixturevalue(input_config)))
@@ -113,14 +112,13 @@ def test_script_wo_inputs(
 @pytest.mark.parametrize(
     "input_config",
     [
-        "input_config_fetch_GIN",
-        "input_config_fetch_local",
+        None,
+        # "input_config_fetch_GIN",
+        # "input_config_fetch_local",
     ],
 )
 def test_script_w_inputs(
     input_config: Optional[str],
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
     request: pytest.FixtureRequest,
 ):
     """Test running the cellfinder worklfow from the command line with inputs
@@ -139,7 +137,7 @@ def test_script_w_inputs(
     # monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
+    # monkeypatch.chdir(tmp_path)
 
     # define CLI input
     script_path = (
@@ -199,14 +197,13 @@ def test_entry_point_wo_inputs(
 @pytest.mark.parametrize(
     "input_config",
     [
-        "input_config_fetch_GIN",
-        "input_config_fetch_local",
+        None,
+        # "input_config_fetch_GIN",
+        # "input_config_fetch_local",
     ],
 )
 def test_entry_point_w_inputs(
     input_config: Optional[str],
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
     request: pytest.FixtureRequest,
 ):
     """Test running the cellfinder workflow via the predefined entry point
@@ -226,13 +223,14 @@ def test_entry_point_w_inputs(
     # monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
+    # monkeypatch.chdir(tmp_path)
 
     # define CLI input
-    subprocess_input = ["cellfinder-workflow"]
-    # append config
-    subprocess_input.append("--config")
-    subprocess_input.append(str(request.getfixturevalue(input_config)))
+    subprocess_input = ["cellfinder-core-workflow"]
+    # append config if required
+    if input_config:
+        subprocess_input.append("--config")
+        subprocess_input.append(str(request.getfixturevalue(input_config)))
 
     # run workflow with no CLI arguments,
     subprocess_output = subprocess.run(

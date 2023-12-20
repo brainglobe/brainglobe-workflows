@@ -353,7 +353,6 @@ def setup_workflow(input_config_path: Path) -> CellfinderConfig:
         # )
 
         # add signal and background files to config
-        # config = add_signal_and_background_files(config)
         config.add_signal_and_background_files()
 
     # Create timestamped output directory if it doesn't exist
@@ -406,8 +405,8 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
         the cellfinder workflow
     """
     # Read input data as Dask arrays
-    signal_array = read_with_dask(cfg._signal_dir_path)
-    background_array = read_with_dask(cfg._background_dir_path)
+    signal_array = read_with_dask(str(cfg._signal_dir_path))
+    background_array = read_with_dask(str(cfg._background_dir_path))
 
     # Run main analysis using `cellfinder_run`
     detected_cells = cellfinder_run(
@@ -434,7 +433,6 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
         cfg.cube_height,
         cfg.cube_depth,
         cfg.network_depth,
-        # *cfg,  # .voxel_sizes, ---> does this work?
     )
 
     # Save results to xml file
