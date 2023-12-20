@@ -1,12 +1,12 @@
 import subprocess
 import sys
 from pathlib import Path
-
 from brainglobe_workflows.cellfinder_core.cellfinder_core import main
 
 
 def test_main():
     """Test main function for setting up and running cellfinder workflow
+    without inputs
 
     Parameters
     ----------
@@ -29,6 +29,7 @@ def test_main():
 
 def test_script():
     """Test running the cellfinder worklfow from the command line
+    without inputs
 
     Parameters
     ----------
@@ -65,6 +66,7 @@ def test_script():
 
 def test_entry_point():
     """Test running the cellfinder workflow via the predefined entry point
+    without inputs
 
     Parameters
     ----------
