@@ -8,7 +8,7 @@ import pytest
 from brainglobe_workflows.cellfinder_core.cellfinder import main
 
 
-def test_main_wo_inputs(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+def test_main():
     """Test main function for setting up and running cellfinder workflow
     with no inputs
 
@@ -28,7 +28,7 @@ def test_main_wo_inputs(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     cfg = main()
 
     # check output files exist
-    assert Path(cfg.detected_cells_path).is_file()
+    assert Path(cfg._detected_cells_path).is_file()
 
 
 @pytest.mark.parametrize(
@@ -69,10 +69,7 @@ def test_main_w_inputs(
     assert Path(cfg._detected_cells_path).is_file()
 
 
-def test_script_wo_inputs(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-):
+def test_script():
     """Test running the cellfinder worklfow from the command line
     with no inputs
 
@@ -163,10 +160,7 @@ def test_script_w_inputs(
     assert subprocess_output.returncode == 0
 
 
-def test_entry_point_wo_inputs(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-):
+def test_entry_point():
     """Test running the cellfinder workflow via the predefined entry point
     with no inputs
 
@@ -183,7 +177,7 @@ def test_entry_point_wo_inputs(
     monkeypatch.chdir(tmp_path)
 
     # define CLI input
-    subprocess_input = ["cellfinder-workflow"]
+    subprocess_input = ["cellfinder-core-workflow"]
 
     # run workflow with no CLI arguments,
     subprocess_output = subprocess.run(
