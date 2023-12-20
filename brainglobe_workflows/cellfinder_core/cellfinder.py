@@ -113,8 +113,8 @@ class CellfinderConfig:
     ################ Internal ########################
     # The following attributes are added
     # during the setup phase of the workflow
-    # _signal_dir_path: Pathlike = ""
-    # _background_dir_path: Pathlike = ""
+    _signal_dir_path: Optional[Pathlike] = None
+    _background_dir_path: Optional[Pathlike] = None
     _list_signal_files: Optional[list] = None
     _list_background_files: Optional[list] = None
     _detected_cells_path: Pathlike = ""
