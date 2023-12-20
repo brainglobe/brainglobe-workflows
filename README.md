@@ -28,7 +28,7 @@ At present, the package offers the following workflows to users:
 
 Additionally, this repository provides functionalities to support code developers. See [Developers documentation](#developers-documentation) for further details.
 
-## Users documentation
+## User documentation
 
 
 ### Installation of the cellfinder CLI tool
@@ -42,7 +42,7 @@ pip install brainglobe-workflows
 Once BrainGlobe version 1 is available, this package will fetch all BrainGlobe tools and handle their install into your environment, to prevent potential conflicts from partial-installs.
 
 
-### Cellfinder CLI tool
+### Cellfinder Command Line Interface (CLI)
 
 Whole-brain cell detection, registration and analysis.
 
@@ -66,15 +66,16 @@ cellfinder -s signal_images -b background_images -o output_dir --metadata metada
 Full documentation can be found [here](https://brainglobe.info/documentation/cellfinder/index.html).
 
 
-## Developers documentation
+## Developer documentation
 
-This repository also includes workflow scripts that are benchmarked to support code development. We regularly benchmark the time the workflows take to complete to ensure performance is stable as the code changes.
-* Developers can install these benchmarks locally via `pip install .[dev]`. By executing `asv run`,  the benchmarks will run with default parameters on a small dataset that is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). See [the asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further details on how to run benchmarks.
-* Developers can also run these benchmarks on  data available locally, by specifying the relevant paths in an input configuration JSON file.
-* We additionally run and benchmark the workflows locally on a internal desktop machine using large example datasets. These benchmarks are run periodically and the results are made publicly available.
+This repository also includes workflow scripts that are benchmarked to support code development.
+These benchmarks are run regularly to ensure performance is stable, as the tools are developed and extended.
+* Developers can install these benchmarks locally via `pip install .[dev]`. By executing `asv run`, the benchmarks will run with default parameters on a small dataset that is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). See [the asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further details on how to run benchmarks.
+* Developers can also run these benchmarks on data they have stored locally, by specifying the relevant paths in an input (JSON) file.
+* We also maintain an internal runner that benchmarks the workflows over a large, exemplar dataset, of the scale we expect users to be handling. The result of these benchmarks are made publicly available.
 
 Contributions to BrainGlobe are more than welcome.
-Please see the [developers guide](https://brainglobe.info/developers/index.html).
+Please see the [developer guide](https://brainglobe.info/developers/index.html).
 
 
 ## Citing `brainglobe-workflows`
