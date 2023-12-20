@@ -1,10 +1,5 @@
 {
-  "install_path": ".cellfinder_workflows",
-  "data_dir_relative": "cellfinder_test_data",
-  "signal_subdir": "signal",
-  "background_subdir": "background",
-  "output_path_basename_relative": "cellfinder_output_",
-  "detected_cells_filename": "detected_cells.xml",
+  "input_data_dir": "/Users/sofia/Documents_local/project_BrainGlobe_workflows/brainglobe-workflows/tests/data",
   "voxel_sizes": [
     5,
     2,

@@ -5,9 +5,41 @@ from pathlib import Path
 import pooch
 import pytest
 
-from brainglobe_workflows.cellfinder_core.cellfinder import (
-    read_cellfinder_config,
-)
+# from brainglobe_workflows.cellfinder_core.cellfinder import (
+#     read_cellfinder_config,
+# )
+
+
+@pytest.fixture(autouse=True)
+def mock_home_directory(monkeypatch: pytest.MonkeyPatch, tmp_path):
+    """_summary_
+
+    from https://github.com/brainglobe/brainrender-napari/blob/52673db58df247261b1ad43c52135e5a26f88d1e/tests/conftest.py#L10
+
+    Parameters
+    ----------
+    monkeypatch : pytest.MonkeyPatch
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+
+    # define mock home path
+    # home_path = Path.home()  # actual home path
+    mock_home_path = tmp_path  # home_path / ".brainglobe-tests"
+
+    # create dir if it doesn't exist
+    if not mock_home_path.exists():
+        mock_home_path.mkdir()
+
+    # monkeypatch Path.home() to point to the mock home
+    def mock_home():
+        return mock_home_path
+
+    monkeypatch.setattr(Path, "home", mock_home)
 
 
 @pytest.fixture()
@@ -81,6 +113,10 @@ def input_config_fetch_local(
     Path
         Path to the config json file for fetching data locally
     """
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        read_cellfinder_config,
+    )
+
     # read local config
     input_config_path = input_configs_dir / "input_data_locally.json"
     config = read_cellfinder_config(input_config_path)
@@ -89,10 +125,10 @@ def input_config_fetch_local(
     pooch.retrieve(
         url=cellfinder_GIN_data["url"],
         known_hash=cellfinder_GIN_data["hash"],
-        path=config.install_path,  # path to download zip to
+        path=config._install_path,  # path to download zip to
         progressbar=True,
         processor=pooch.Unzip(
-            extract_dir=config.data_dir_relative
+            extract_dir=Path(config.input_data_dir).stem
             # path to unzipped dir, *relative*  to 'path'
         ),
     )

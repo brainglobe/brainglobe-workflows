@@ -67,7 +67,7 @@ def test_main_w_inputs(
     cfg = main(str(request.getfixturevalue(input_config)))
 
     # check output files exist
-    assert Path(cfg.detected_cells_path).is_file()
+    assert Path(cfg._detected_cells_path).is_file()
 
 
 def test_script_wo_inputs(
