@@ -85,12 +85,17 @@ def test_read_cellfinder_config(
     """
     from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         read_cellfinder_config,
+        DEFAULT_JSON_CONFIG_PATH_CELLFINDER
     )
 
     # instantiate custom logger
     _ = setup_logger()
 
-    input_config_path = request.getfixturevalue(input_config)
+    # instantiate custom logger
+    _ = setup_logger()
+
+    input_config_path = DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+    # request.getfixturevalue(input_config)
 
     # read json as Cellfinder config
     config = read_cellfinder_config(input_config_path, log_on=True)
@@ -135,17 +140,17 @@ def test_read_cellfinder_config(
 
 @pytest.mark.skip(reason="focus of PR62")
 @pytest.mark.parametrize(
-    "input_config, message_pattern",
+    "input_config_dict, message_pattern",
     [
         (
-            "config_local",
+            "config_local_dict",
             "Fetching input data from the local directories",
         ),
     ],
 )
 def test_add_input_paths(
     caplog: pytest.LogCaptureFixture,
-    input_config: str,
+    input_config_dict: dict,
     message_pattern: str,
     request: pytest.FixtureRequest,
 ):
@@ -155,12 +160,8 @@ def test_add_input_paths(
     ----------
     caplog : pytest.LogCaptureFixture
         Pytest fixture to capture the logs during testing
-    cellfinder_GIN_data : dict
-        Dict holding the URL and hash of the cellfinder test data in GIN
-    input_configs_dir : Path
-        Test data directory path
-    input_config : str
-        Name of input config json file
+    input_config_dict : dicy
+        input config as a dict
     message_pattern : str
         Expected pattern in the log
     """
@@ -171,7 +172,7 @@ def test_add_input_paths(
     # read json as Cellfinder config
     # ---> change so that the fixture is the config object!
     # config = read_cellfinder_config(input_configs_dir / input_config)
-    _ = request.getfixturevalue(input_config)
+    _ = request.getfixturevalue(input_config_dict)
 
     # check log messages
     assert len(caplog.messages) > 0
@@ -220,7 +221,10 @@ def test_setup_workflow(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
-    from brainglobe_workflows.cellfinder_core.cellfinder_core import setup
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+        setup,
+        DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+    )
 
     # setup logger
     _ = setup_logger()
@@ -228,10 +232,10 @@ def test_setup_workflow(
     # monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
+    # monkeypatch.chdir(tmp_path)
 
     # setup workflow
-    config = setup(request.getfixturevalue(input_config))
+    config = setup(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)
 
     # check logs
     assert message in caplog.text
@@ -271,7 +275,6 @@ def test_setup_workflow(
 def test_setup(
     input_config: str,
     custom_logger_name: str,
-    request: pytest.FixtureRequest,
 ):
     """Test full setup for cellfinder workflow, using the default config
     and passing a specific config file.
@@ -300,9 +303,8 @@ def test_setup(
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
     # monkeypatch.chdir(tmp_path)
-
     # run setup on default configuration
-    cfg = setup_full(request.getfixturevalue(input_config))
+    cfg = setup_full(input_config)  # (request.getfixturevalue(input_config))
 
     # check logger exists
     logger = logging.getLogger(custom_logger_name)
@@ -348,9 +350,10 @@ def test_run_workflow_from_cellfinder_run(
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
     # monkeypatch.chdir(tmp_path)
-
     # run setup
-    cfg = setup_full(str(request.getfixturevalue(input_config)))
+    cfg = setup_full(
+        input_config
+    )  # str(request.getfixturevalue(input_config)))
 
     # run workflow
     run_workflow_from_cellfinder_run(cfg)

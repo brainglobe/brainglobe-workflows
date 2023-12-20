@@ -4,20 +4,20 @@ from pathlib import Path
 
 import pytest
 
+# @pytest.fixture()
+# def default_input_config_cellfinder() -> Path:  # do I need this?
+#     """Return path to default input config for cellfinder workflow
 
-@pytest.fixture()
-def default_input_config_cellfinder() -> Path:
-    """Return path to default input config for cellfinder workflow
+#     Returns
+#     -------
+#     Path
+#         Path to default input config
 
-    Returns
-    -------
-    Path
-        Path to default input config
+#     """
+#     from brainglobe_workflows.utils import
+# DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
-    """
-    from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
-
-    return DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+#     return DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
 
 @pytest.fixture(autouse=True)
