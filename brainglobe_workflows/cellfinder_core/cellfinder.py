@@ -351,7 +351,30 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
 
     # Run main analysis using `cellfinder_run`
     detected_cells = cellfinder_run(
-        signal_array, background_array, cfg.voxel_sizes
+        signal_array,
+        background_array,
+        cfg.voxel_sizes,
+        cfg.start_plane,
+        cfg.end_plane,
+        cfg.trained_model,
+        cfg.model_weights,
+        cfg.model,
+        cfg.batch_size,
+        cfg.n_free_cpus,
+        cfg.network_voxel_sizes,
+        cfg.soma_diameter,
+        cfg.ball_xy_size,
+        cfg.ball_z_size,
+        cfg.ball_overlap_fraction,
+        cfg.log_sigma_size,
+        cfg.n_sds_above_mean_thresh,
+        cfg.soma_spread_factor,
+        cfg.max_cluster_size,
+        cfg.cube_width,
+        cfg.cube_height,
+        cfg.cube_depth,
+        cfg.network_depth,
+        # *cfg,  # .voxel_sizes, ---> does this work?
     )
 
     # Save results to xml file
