@@ -3,7 +3,6 @@ import logging
 import re
 from pathlib import Path
 
-import pooch
 import pytest
 
 # from brainglobe_workflows.cellfinder_core.cellfinder import (
@@ -36,14 +35,10 @@ def default_input_config_cellfinder() -> Path:
 @pytest.mark.parametrize(
     "input_config",
     [
-        "input_data_GIN.json",
-        "input_data_locally.json",
-        "input_data_missing_background.json",
-        "input_data_missing_signal.json",
-        "input_data_not_locally_or_GIN.json",
+        "default_input_config_cellfinder",
     ],
 )
-def test_read_cellfinder_config(input_config: str, input_configs_dir: Path):
+def test_read_cellfinder_config(input_config: str, request):
     """Test for reading a cellfinder config file
 
     Parameters
@@ -57,8 +52,7 @@ def test_read_cellfinder_config(input_config: str, input_configs_dir: Path):
         read_cellfinder_config,
     )
 
-    # path to config json file
-    input_config_path = input_configs_dir / input_config
+    input_config_path = request.getfixturevalue(input_config)
 
     # read json as Cellfinder config
     config = read_cellfinder_config(input_config_path)
@@ -77,33 +71,30 @@ def test_read_cellfinder_config(input_config: str, input_configs_dir: Path):
     "input_config, message_pattern",
     [
         (
-            "input_data_GIN.json",
+            "config_GIN",
             "Fetching input data from the provided GIN repository",
         ),
         (
-            "input_data_locally.json",
+            "config_local",
             "Fetching input data from the local directories",
         ),
         (
-            "input_data_missing_background.json",
+            "config_missing_signal",
             "The directory .+ does not exist$",
         ),
-        ("input_data_missing_signal.json", "The directory .+ does not exist$"),
+        ("config_missing_background", "The directory .+ does not exist$"),
         (
-            "input_data_not_locally_or_GIN.json",
+            "config_not_GIN_or_local",
             "Input data not found locally, and URL/hash to "
             "GIN repository not provided",
         ),
     ],
 )
 def test_add_signal_and_background_files(
-    mock_home_directory,
     caplog: pytest.LogCaptureFixture,
-    tmp_path: Path,
-    cellfinder_GIN_data: dict,
-    input_configs_dir: Path,
     input_config: str,
     message_pattern: str,
+    request: pytest.FixtureRequest,
 ):
     """Test signal and background files addition to the cellfinder config
 
@@ -111,8 +102,6 @@ def test_add_signal_and_background_files(
     ----------
     caplog : pytest.LogCaptureFixture
         Pytest fixture to capture the logs during testing
-    tmp_path : Path
-        Pytest fixture providing a temporary path for each test
     cellfinder_GIN_data : dict
         Dict holding the URL and hash of the cellfinder test data in GIN
     input_configs_dir : Path
@@ -122,51 +111,20 @@ def test_add_signal_and_background_files(
     message_pattern : str
         Expected pattern in the log
     """
-    # mock_home_directory
 
-    # import after mocking home dir!
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
-        add_signal_and_background_files,
-        read_cellfinder_config,
-    )
-
-    # instantiate our custom logger
+    # instantiate custom logger
     _ = setup_logger()
 
     # read json as Cellfinder config
-    config = read_cellfinder_config(input_configs_dir / input_config)
-
-    # monkeypatch cellfinder config:
-    # set install_path to pytest temporary directory
-    # config._install_path =
-    # Path.home() / ".brainglobe" / "workflows" / "cellfinder_core"
-    # config._install_path = tmp_path / config._install_path
+    # ---> change so that the fixture is the config object!
+    # config = read_cellfinder_config(input_configs_dir / input_config)
+    config = request.getfixturevalue(input_config)
 
     # check lists of signal and background files are not defined
     assert not (config._list_signal_files and config._list_background_files)
 
-    # monkeypatch cellfinder config:
-    # if config is "local" or "signal/background missing":
-    # ensure signal and background data from GIN are downloaded locally
-    if input_config in [
-        "input_data_locally.json",
-        "input_data_missing_signal.json",
-        "input_data_missing_background.json",
-    ]:
-        # fetch data from GIN and download locally
-        pooch.retrieve(
-            url=cellfinder_GIN_data["url"],
-            known_hash=cellfinder_GIN_data["hash"],
-            path=config._install_path,  # path to download zip to
-            progressbar=True,
-            processor=pooch.Unzip(
-                extract_dir=Path(config.input_data_dir).stem
-                # path to unzipped dir, *relative*  to 'path'
-            ),
-        )
-
     # add signal and background files lists to config
-    add_signal_and_background_files(config)
+    config.add_signal_and_background_files()
 
     # check log messages
     assert len(caplog.messages) > 0
