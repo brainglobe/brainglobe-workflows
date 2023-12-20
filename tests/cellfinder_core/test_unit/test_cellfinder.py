@@ -6,14 +6,15 @@ from pathlib import Path
 import pooch
 import pytest
 
-from brainglobe_workflows.cellfinder_core.cellfinder import (
-    CellfinderConfig,
-    add_signal_and_background_files,
-    read_cellfinder_config,
-    run_workflow_from_cellfinder_run,
-    setup_workflow,
-)
-from brainglobe_workflows.cellfinder_core.cellfinder import setup as setup_full
+# from brainglobe_workflows.cellfinder_core.cellfinder import (
+#     # CellfinderConfig,
+#     add_signal_and_background_files,
+#     read_cellfinder_config,
+#     run_workflow_from_cellfinder_run,
+#     setup_workflow,
+# )
+# from brainglobe_workflows.cellfinder_core.cellfinder import
+# setup as setup_full
 from brainglobe_workflows.utils import setup_logger
 
 
@@ -52,6 +53,10 @@ def test_read_cellfinder_config(input_config: str, input_configs_dir: Path):
     input_configs_dir : Path
         Test data directory path
     """
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        read_cellfinder_config,
+    )
+
     # path to config json file
     input_config_path = input_configs_dir / input_config
 
@@ -92,6 +97,7 @@ def test_read_cellfinder_config(input_config: str, input_configs_dir: Path):
     ],
 )
 def test_add_signal_and_background_files(
+    mock_home_directory,
     caplog: pytest.LogCaptureFixture,
     tmp_path: Path,
     cellfinder_GIN_data: dict,
@@ -116,6 +122,14 @@ def test_add_signal_and_background_files(
     message_pattern : str
         Expected pattern in the log
     """
+    # mock_home_directory
+
+    # import after mocking home dir!
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        add_signal_and_background_files,
+        read_cellfinder_config,
+    )
+
     # instantiate our custom logger
     _ = setup_logger()
 
@@ -124,22 +138,12 @@ def test_add_signal_and_background_files(
 
     # monkeypatch cellfinder config:
     # set install_path to pytest temporary directory
-    config.install_path = tmp_path / config.install_path
+    # config._install_path =
+    # Path.home() / ".brainglobe" / "workflows" / "cellfinder_core"
+    # config._install_path = tmp_path / config._install_path
 
     # check lists of signal and background files are not defined
-    assert not (config.list_signal_files and config.list_background_files)
-
-    # build fullpaths to input data directories
-    config.signal_dir_path = str(
-        Path(config.install_path)
-        / config.data_dir_relative
-        / config.signal_subdir
-    )
-    config.background_dir_path = str(
-        Path(config.install_path)
-        / config.data_dir_relative
-        / config.background_subdir
-    )
+    assert not (config._list_signal_files and config._list_background_files)
 
     # monkeypatch cellfinder config:
     # if config is "local" or "signal/background missing":
@@ -153,10 +157,10 @@ def test_add_signal_and_background_files(
         pooch.retrieve(
             url=cellfinder_GIN_data["url"],
             known_hash=cellfinder_GIN_data["hash"],
-            path=config.install_path,  # path to download zip to
+            path=config._install_path,  # path to download zip to
             progressbar=True,
             processor=pooch.Unzip(
-                extract_dir=config.data_dir_relative
+                extract_dir=Path(config.input_data_dir).stem
                 # path to unzipped dir, *relative*  to 'path'
             ),
         )
@@ -211,6 +215,7 @@ def test_setup_workflow(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
+    from brainglobe_workflows.cellfinder_core.cellfinder import setup_workflow
 
     # setup logger
     _ = setup_logger()
@@ -227,19 +232,19 @@ def test_setup_workflow(
     assert message in caplog.text
 
     # check all signal files exist
-    assert config.list_signal_files
-    assert all([Path(f).is_file() for f in config.list_signal_files])
+    assert config._list_signal_files
+    assert all([Path(f).is_file() for f in config._list_signal_files])
 
     # check all background files exist
-    assert config.list_background_files
-    assert all([Path(f).is_file() for f in config.list_background_files])
+    assert config._list_background_files
+    assert all([Path(f).is_file() for f in config._list_background_files])
 
     # check output directory exists
     assert Path(config.output_path).resolve().is_dir()
 
     # check output directory name has correct format
     out = re.fullmatch(
-        str(config.output_path_basename_relative) + "\\d{8}_\\d{6}$",
+        str(config.output_dir_basename) + "\\d{8}_\\d{6}$",
         Path(config.output_path).stem,
     )
     assert out is not None
@@ -247,7 +252,7 @@ def test_setup_workflow(
 
     # check output file path
     assert (
-        Path(config.detected_cells_path)
+        Path(config._detected_cells_path)
         == Path(config.output_path) / config.detected_cells_filename
     )
 
@@ -283,6 +288,13 @@ def test_setup(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        CellfinderConfig,
+    )
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        setup as setup_full,
+    )
+
     # Monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
@@ -328,6 +340,13 @@ def test_run_workflow_from_cellfinder_run(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        run_workflow_from_cellfinder_run,
+    )
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        setup as setup_full,
+    )
+
     # monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
@@ -340,4 +359,4 @@ def test_run_workflow_from_cellfinder_run(
     run_workflow_from_cellfinder_run(cfg)
 
     # check output files are those expected?
-    assert Path(cfg.detected_cells_path).is_file()
+    assert Path(cfg._detected_cells_path).is_file()
