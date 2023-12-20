@@ -181,6 +181,88 @@ def test_add_input_paths(
 
 
 @pytest.mark.parametrize(
+    "input_config, message",
+    [
+        ("default_input_config_cellfinder", "Using default config file"),
+        # ("config_GIN", "Input config read from"),
+    ],
+)
+def test_setup_workflow(
+    input_config: str,
+    message: str,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    request: pytest.FixtureRequest,
+):
+    """Test setup steps for the cellfinder workflow, using the default config
+    and passing a specific config file.
+
+    These setup steps include:
+    - instantiating a CellfinderConfig object using the input json file,
+    - add the signal and background files to the config if these are not
+      defined,
+    - create a timestamped directory for the output of the workflow if
+      it doesn't exist and add its path to the config
+
+    Parameters
+    ----------
+    input_config : str
+        Name of input config json file
+    message : str
+        Expected log message
+    monkeypatch : pytest.MonkeyPatch
+        Pytest fixture to use monkeypatching utils
+    tmp_path : Path
+        Pytest fixture providing a temporary path for each test
+    caplog : pytest.LogCaptureFixture
+        Pytest fixture to capture the logs during testing
+    request : pytest.FixtureRequest
+        Pytest fixture to enable requesting fixtures by name
+    """
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import setup
+
+    # setup logger
+    _ = setup_logger()
+
+    # monkeypatch to change current directory to
+    # pytest temporary directory
+    # (cellfinder cache directory is created in cwd)
+    monkeypatch.chdir(tmp_path)
+
+    # setup workflow
+    config = setup(request.getfixturevalue(input_config))
+
+    # check logs
+    assert message in caplog.text
+
+    # check all signal files exist
+    assert config._list_signal_files
+    assert all([Path(f).is_file() for f in config._list_signal_files])
+
+    # check all background files exist
+    assert config._list_background_files
+    assert all([Path(f).is_file() for f in config._list_background_files])
+
+    # check output directory exists
+    assert Path(config.output_path).resolve().is_dir()
+
+    # check output directory name has correct format
+    out = re.fullmatch(
+        str(config.output_dir_basename) + "\\d{8}_\\d{6}$",
+        Path(config.output_path).stem,
+    )
+    assert out is not None
+    assert out.group() is not None
+
+    # check output file path
+    assert (
+        Path(config._detected_cells_path)
+        == Path(config.output_path) / config.detected_cells_filename
+    )
+
+
+@pytest.mark.parametrize(
     "input_config",
     [
         "default_input_config_cellfinder",
@@ -189,8 +271,6 @@ def test_add_input_paths(
 def test_setup(
     input_config: str,
     custom_logger_name: str,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
     request: pytest.FixtureRequest,
 ):
     """Test full setup for cellfinder workflow, using the default config
@@ -219,7 +299,7 @@ def test_setup(
     # Monkeypatch to change current directory to
     # pytest temporary directory
     # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
+    # monkeypatch.chdir(tmp_path)
 
     # run setup on default configuration
     cfg = setup_full(request.getfixturevalue(input_config))
@@ -263,6 +343,11 @@ def test_run_workflow_from_cellfinder_run(
     from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         setup as setup_full,
     )
+
+    # monkeypatch to change current directory to
+    # pytest temporary directory
+    # (cellfinder cache directory is created in cwd)
+    # monkeypatch.chdir(tmp_path)
 
     # run setup
     cfg = setup_full(str(request.getfixturevalue(input_config)))

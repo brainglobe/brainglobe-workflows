@@ -7,17 +7,6 @@ from brainglobe_workflows.cellfinder_core.cellfinder_core import main
 def test_main():
     """Test main function for setting up and running cellfinder workflow
     without inputs
-
-    Parameters
-    ----------
-    input_config : Optional[str]
-        Path to input config json file
-    monkeypatch : pytest.MonkeyPatch
-        Pytest fixture to use monkeypatching utils
-    tmp_path : Path
-        Pytest fixture providing a temporary path for each test
-    request : pytest.FixtureRequest
-        Pytest fixture to enable requesting fixtures by name
     """
 
     # run main
@@ -30,17 +19,6 @@ def test_main():
 def test_script():
     """Test running the cellfinder worklfow from the command line
     without inputs
-
-    Parameters
-    ----------
-    input_config : Optional[str]
-        Path to input config json file
-    monkeypatch : pytest.MonkeyPatch
-        Pytest fixture to use monkeypatching utils
-    tmp_path : Path
-        Pytest fixture providing a temporary path for each test
-    request : pytest.FixtureRequest
-        Pytest fixture to enable requesting fixtures by name
     """
 
     # define CLI input
@@ -67,17 +45,6 @@ def test_script():
 def test_entry_point():
     """Test running the cellfinder workflow via the predefined entry point
     without inputs
-
-    Parameters
-    ----------
-    input_config : Optional[str]
-        Path to input config json file
-    monkeypatch : pytest.MonkeyPatch
-        Pytest fixture to use monkeypatching utils
-    tmp_path : Path
-        Pytest fixture providing a temporary path for each test
-    request : pytest.FixtureRequest
-        Pytest fixture to enable requesting fixtures by name
     """
 
     # define CLI input
