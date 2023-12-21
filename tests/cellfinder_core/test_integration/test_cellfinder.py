@@ -19,10 +19,6 @@ def test_main():
     tmp_path : Path
         Pytest fixture providing a temporary path for each test
     """
-    # monkeypatch to change current directory to
-    # pytest temporary directory
-    # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
 
     # run main
     cfg = main()
@@ -57,10 +53,6 @@ def test_main_w_inputs(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
-    # monkeypatch to change current directory to
-    # pytest temporary directory
-    # (cellfinder cache directory is created in cwd)
-    # monkeypatch.chdir(tmp_path)
 
     # run main
     cfg = main(str(request.getfixturevalue(input_config)))
@@ -80,10 +72,6 @@ def test_script():
     tmp_path : Path
         Pytest fixture providing a temporary path for each test
     """
-    # monkeypatch to change current directory to
-    # pytest temporary directory
-    # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
 
     # define CLI input
     script_path = (
@@ -171,10 +159,6 @@ def test_entry_point():
     tmp_path : Path
         Pytest fixture providing a temporary path for each test
     """
-    # monkeypatch to change current directory to
-    # pytest temporary directory
-    # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
 
     # define CLI input
     subprocess_input = ["cellfinder-core-workflow"]
