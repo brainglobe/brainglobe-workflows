@@ -222,6 +222,18 @@ def config_local_json(config_local_dict: dict, tmp_path: Path) -> Path:
     return config_file_path
 
 
+@pytest.fixture()
+def config_GIN_json(config_GIN_dict: dict, tmp_path: Path) -> Path:
+    # define location of input config file
+    config_file_path = tmp_path / "input_config.json"
+
+    # write config dict to that location
+    with open(config_file_path, "w") as js:
+        json.dump(config_GIN_dict, js)
+
+    return config_file_path
+
+
 @pytest.mark.parametrize(
     "input_config_dict, message_pattern",
     [
@@ -353,7 +365,7 @@ def test_read_cellfinder_config(
     [
         "default_input_config_cellfinder",
         "config_local_json",
-        # "input_config_fetch_local",
+        "config_GIN_json",
     ],
 )
 def test_setup(
@@ -399,7 +411,7 @@ def test_setup(
     [
         "default_input_config_cellfinder",
         "config_local_json",
-        # "input_config_fetch_local",
+        "config_GIN_json",
     ],
 )
 def test_run_workflow_from_cellfinder_run(
