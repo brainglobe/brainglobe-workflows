@@ -3,7 +3,6 @@ import logging
 import re
 from pathlib import Path
 
-import pooch
 import pytest
 
 from brainglobe_workflows.utils import setup_logger

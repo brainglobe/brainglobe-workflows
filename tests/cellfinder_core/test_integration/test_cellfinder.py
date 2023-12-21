@@ -18,12 +18,11 @@ def test_main():
     assert Path(cfg._detected_cells_path).is_file()
 
 
-@pytest.mark.skip()
 @pytest.mark.parametrize(
     "input_config",
     [
-        "input_config_fetch_GIN",
-        "input_config_fetch_local",
+        "config_local_json",
+        "config_GIN_json",
     ],
 )
 def test_main_w_inputs(
