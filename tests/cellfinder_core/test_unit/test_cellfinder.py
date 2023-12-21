@@ -158,7 +158,7 @@ def config_not_GIN_nor_local_dict(config_local_dict):
         ),
     ],
 )
-def test_add_signal_and_background_files(
+def test_add_input_paths(
     caplog: pytest.LogCaptureFixture,
     input_config_dict: dict,
     message_pattern: str,

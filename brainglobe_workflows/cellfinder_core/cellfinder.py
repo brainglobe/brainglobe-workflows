@@ -149,31 +149,13 @@ class CellfinderConfig:
             a CellfinderConfig instance
         """
 
-        # Fill in input data directory if not specified
-        if self.input_data_dir is None:
-            self.input_data_dir = (
-                Path(self._install_path) / "cellfinder_test_data"
-            )
-
-        # Add input data paths that are derived from 'input_data_dir'
-        self._signal_dir_path: Pathlike = self.input_data_dir / Path(
-            self.signal_subdir
-        )
-        self._background_dir_path: Pathlike = self.input_data_dir / Path(
-            self.background_subdir
-        )
-
         # Add signal and background files to config
-        self.add_signal_and_background_files()
+        self.add_input_paths()
 
-        # Fill in output directory if not specified
-        if self.output_parent_dir is None:
-            self.output_parent_dir = Path(self._install_path)
+        # Add output paths
+        self.add_output_paths()
 
-        # Add output paths that are derived from 'output_parent_dir'
-        self.add_output_timestamped()
-
-    def add_output_timestamped(self):
+    def add_output_paths(self):
         """Adds output paths to the cellfinder config
 
         Specifically it adds:
@@ -187,24 +169,27 @@ class CellfinderConfig:
             a cellfinder config
         """
 
-        # output directory and file
+        # Fill in output directory if not specified
+        if self.output_parent_dir is None:
+            self.output_parent_dir = Path(self._install_path)
+
+        # Add path to timestamped output directory to config
         timestamp = datetime.datetime.now()
         timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
-        output_path_timestamped = Path(self.output_parent_dir) / (
+        self.output_path = Path(self.output_parent_dir) / (
             str(self.output_dir_basename) + timestamp_formatted
         )
-        output_path_timestamped.mkdir(
+        self.output_path.mkdir(
             parents=True,  # create any missing parents
             exist_ok=True,  # ignore FileExistsError exceptions
         )
 
-        # Add paths to output directory and file to config
-        self.output_path = output_path_timestamped
+        # Add paths to output file to config
         self._detected_cells_path = (
             self.output_path / self.detected_cells_filename
         )
 
-    def add_signal_and_background_files(self):
+    def add_input_paths(self):
         """Adds the lists of input data files (signal and background)
         to the config.
 
@@ -229,6 +214,18 @@ class CellfinderConfig:
         """
         # Fetch logger
         logger = logging.getLogger(LOGGER_NAME)
+
+        # Fill in input data directory if not specified
+        if self.input_data_dir is None:
+            self.input_data_dir = (
+                Path(self._install_path) / "cellfinder_test_data"
+            )
+
+        # Fill in signal and background paths derived from 'input_data_dir'
+        self._signal_dir_path = self.input_data_dir / Path(self.signal_subdir)
+        self._background_dir_path = self.input_data_dir / Path(
+            self.background_subdir
+        )
 
         # Check if input data directories (signal and background) exist
         # locally.
