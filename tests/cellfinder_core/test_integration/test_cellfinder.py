@@ -5,8 +5,6 @@ from typing import Optional
 
 import pytest
 
-from brainglobe_workflows.cellfinder_core.cellfinder import main
-
 
 def test_main():
     """Test main function for setting up and running cellfinder workflow
@@ -20,6 +18,9 @@ def test_main():
         Pytest fixture providing a temporary path for each test
     """
 
+    from brainglobe_workflows.cellfinder_core.cellfinder import main
+
+    # otherwise imported before monkeypatching?
     # run main
     cfg = main()
 
@@ -52,6 +53,7 @@ def test_main_w_inputs(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
+    from brainglobe_workflows.cellfinder_core.cellfinder import main
 
     # run main
     cfg = main(str(request.getfixturevalue(input_config)))
@@ -63,28 +65,19 @@ def test_main_w_inputs(
 def test_script():
     """Test running the cellfinder worklfow from the command line
     with no inputs
-
-    Parameters
-    ----------
-    monkeypatch : pytest.MonkeyPatch
-        Pytest fixture to use monkeypatching utils
-    tmp_path : Path
-        Pytest fixture providing a temporary path for each test
     """
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        __file__ as script_path,
+    )
 
     # define CLI input
-    script_path = (
-        Path(__file__).resolve().parents[3]
-        / "brainglobe_workflows"
-        / "cellfinder_core"
-        / "cellfinder.py"
-    )
     subprocess_input = [
         sys.executable,
         str(script_path),
     ]
 
-    # run workflow script from the CLI
+    # run workflow
+    # Path.home() is not monkeypatched :(
     subprocess_output = subprocess.run(
         subprocess_input,
     )
@@ -93,12 +86,11 @@ def test_script():
     assert subprocess_output.returncode == 0
 
 
-@pytest.mark.skip()
 @pytest.mark.parametrize(
     "input_config",
     [
-        "input_config_fetch_GIN",
-        "input_config_fetch_local",
+        "config_local_json",
+        "config_GIN_json",
     ],
 )
 def test_script_w_inputs(
@@ -119,22 +111,23 @@ def test_script_w_inputs(
         Pytest fixture to enable requesting fixtures by name
     """
 
-    # define CLI input
+    # path to script
     script_path = (
         Path(__file__).resolve().parents[3]
         / "brainglobe_workflows"
         / "cellfinder_core"
         / "cellfinder.py"
     )
+
+    # define CLI input
     subprocess_input = [
         sys.executable,
         str(script_path),
     ]
-    # append config to subprocess input
     subprocess_input.append("--config")
     subprocess_input.append(str(request.getfixturevalue(input_config)))
 
-    # run workflow script from the CLI
+    # run workflow
     subprocess_output = subprocess.run(
         subprocess_input,
     )
@@ -158,7 +151,7 @@ def test_entry_point():
     # define CLI input
     subprocess_input = ["cellfinder-core-workflow"]
 
-    # run workflow with no CLI arguments,
+    # run workflow
     subprocess_output = subprocess.run(
         subprocess_input,
     )
@@ -167,12 +160,11 @@ def test_entry_point():
     assert subprocess_output.returncode == 0
 
 
-@pytest.mark.skip()
 @pytest.mark.parametrize(
     "input_config",
     [
-        "input_config_fetch_GIN",
-        "input_config_fetch_local",
+        "config_local_json",
+        "config_GIN_json",
     ],
 )
 def test_entry_point_w_inputs(
@@ -196,12 +188,10 @@ def test_entry_point_w_inputs(
 
     # define CLI input
     subprocess_input = ["cellfinder-core-workflow"]
-    # append config if required
-    if input_config:
-        subprocess_input.append("--config")
-        subprocess_input.append(str(request.getfixturevalue(input_config)))
+    subprocess_input.append("--config")
+    subprocess_input.append(str(request.getfixturevalue(input_config)))
 
-    # run workflow with no CLI arguments,
+    # run workflow
     subprocess_output = subprocess.run(
         subprocess_input,
     )
