@@ -2,7 +2,6 @@ import json
 import shutil
 from pathlib import Path
 
-import pooch
 from brainglobe_utils.IO.cells import save_cells
 from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
@@ -81,9 +80,10 @@ class TimeBenchmarkPrepGIN:
     # Custom attributes
     input_config_path = str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)
 
-    def setup_cache(
-        self,
-    ):
+    def setup_cache(self):
+        # here ensure all the data for all possible configs we sweep
+        # thru is available?
+        # but in a benchmark directory? (can I monkeypatch home? :S)
         """
         Download the input data from the GIN repository to the local
         directory specified in the default_config.json
@@ -108,14 +108,16 @@ class TimeBenchmarkPrepGIN:
             config_dict = json.load(cfg)
         config = CellfinderConfig(**config_dict)
 
-        # Download data with pooch
-        _ = pooch.retrieve(
-            url=config.data_url,
-            known_hash=config.data_hash,
-            path=config._install_path,
-            progressbar=True,
-            processor=pooch.Unzip(extract_dir=config.data_dir_relative),
-        )
+        # Download data with pooch ---> should be dealt with when making config
+        # _ = pooch.retrieve(
+        #     url=config.data_url,
+        #     known_hash=config.data_hash,
+        #     path=Path(config._install_path).parent,
+        #     progressbar=True,
+        #     processor=pooch.Unzip(
+        #         extract_dir=Path(config._install_path).stem
+        #     ),
+        # )
 
         # Check paths to input data should now exist in config
         assert Path(config._signal_dir_path).exists()
@@ -129,12 +131,7 @@ class TimeBenchmarkPrepGIN:
         """
 
         # Run setup
-        cfg = setup_cellfinder_workflow(
-            [
-                "--config",
-                self.input_config_path,
-            ]
-        )
+        cfg = setup_cellfinder_workflow(self.input_config_path)
 
         # Save configuration as attribute
         self.cfg = cfg
@@ -162,7 +159,7 @@ class TimeFullWorkflow(TimeBenchmarkPrepGIN):
         A base class for timing benchmarks for the cellfinder workflow.
     """
 
-    def time_workflow_from_cellfinder_run(self):
+    def time_workflow(self):
         run_workflow_from_cellfinder_run(self.cfg)
 
 
@@ -177,10 +174,10 @@ class TimeReadInputDask(TimeBenchmarkPrepGIN):
     """
 
     def time_read_signal_with_dask(self):
-        read_with_dask(self.cfg._signal_dir_path)
+        read_with_dask(str(self.cfg._signal_dir_path))
 
     def time_read_background_with_dask(self):
-        read_with_dask(self.cfg._background_dir_path)
+        read_with_dask(str(self.cfg._background_dir_path))
 
 
 class TimeDetectCells(TimeBenchmarkPrepGIN):
@@ -198,13 +195,37 @@ class TimeDetectCells(TimeBenchmarkPrepGIN):
         # basic setup
         TimeBenchmarkPrepGIN.setup(self)
 
-        # add input data as arrays to config
-        self.signal_array = read_with_dask(self.cfg._signal_dir_path)
-        self.background_array = read_with_dask(self.cfg._background_dir_path)
+        # add input data as arrays to the config
+        self.signal_array = read_with_dask(str(self.cfg._signal_dir_path))
+        self.background_array = read_with_dask(
+            str(self.cfg._background_dir_path)
+        )
 
     def time_cellfinder_run(self):
         cellfinder_run(
-            self.signal_array, self.background_array, self.cfg.voxel_sizes
+            self.signal_array,
+            self.background_array,
+            self.cfg.voxel_sizes,
+            self.cfg.start_plane,
+            self.cfg.end_plane,
+            self.cfg.trained_model,
+            self.cfg.model_weights,
+            self.cfg.model,
+            self.cfg.batch_size,
+            self.cfg.n_free_cpus,
+            self.cfg.network_voxel_sizes,
+            self.cfg.soma_diameter,
+            self.cfg.ball_xy_size,
+            self.cfg.ball_z_size,
+            self.cfg.ball_overlap_fraction,
+            self.cfg.log_sigma_size,
+            self.cfg.n_sds_above_mean_thresh,
+            self.cfg.soma_spread_factor,
+            self.cfg.max_cluster_size,
+            self.cfg.cube_width,
+            self.cfg.cube_height,
+            self.cfg.cube_depth,
+            self.cfg.network_depth,
         )
 
 
@@ -215,12 +236,36 @@ class TimeSaveCells(TimeBenchmarkPrepGIN):
         TimeBenchmarkPrepGIN.setup(self)
 
         # add input data as arrays to config
-        self.signal_array = read_with_dask(self.cfg._signal_dir_path)
-        self.background_array = read_with_dask(self.cfg._background_dir_path)
+        self.signal_array = read_with_dask(str(self.cfg._signal_dir_path))
+        self.background_array = read_with_dask(
+            str(self.cfg._background_dir_path)
+        )
 
         # detect cells
         self.detected_cells = cellfinder_run(
-            self.signal_array, self.background_array, self.cfg.voxel_sizes
+            self.signal_array,
+            self.background_array,
+            self.cfg.voxel_sizes,
+            self.cfg.start_plane,
+            self.cfg.end_plane,
+            self.cfg.trained_model,
+            self.cfg.model_weights,
+            self.cfg.model,
+            self.cfg.batch_size,
+            self.cfg.n_free_cpus,
+            self.cfg.network_voxel_sizes,
+            self.cfg.soma_diameter,
+            self.cfg.ball_xy_size,
+            self.cfg.ball_z_size,
+            self.cfg.ball_overlap_fraction,
+            self.cfg.log_sigma_size,
+            self.cfg.n_sds_above_mean_thresh,
+            self.cfg.soma_spread_factor,
+            self.cfg.max_cluster_size,
+            self.cfg.cube_width,
+            self.cfg.cube_height,
+            self.cfg.cube_depth,
+            self.cfg.network_depth,
         )
 
     def time_save_cells(self):
