@@ -37,25 +37,26 @@ def cellfinder_GIN_data() -> dict:
 
 
 @pytest.fixture()
-def config_GIN_dict(cellfinder_GIN_data):
+def config_GIN_dict(cellfinder_GIN_data: dict) -> dict:
     """
-    Return a config pointing to the location where GIN would be by default
+    Return a config pointing to the location where GIN would be by default,
+    and download the data
     """
 
-    # read default config as dict
+    # read default config as a dictionary
     with open(DEFAULT_JSON_CONFIG_PATH_CELLFINDER) as cfg:
         config_dict = json.load(cfg)
 
-    # modify / ensure
+    # modify
     # - add url
     # - add data hash
-    # - remove input_data_dir
+    # - remove input_data_dir if present
     config_dict["data_url"] = cellfinder_GIN_data["url"]
     config_dict["data_hash"] = cellfinder_GIN_data["hash"]
     if "input_data_dir" in config_dict.keys():
         del config_dict["input_data_dir"]
 
-    # download data to default location for GIN
+    # download GIN data to default location for GIN
     pooch.retrieve(
         url=cellfinder_GIN_data["url"],
         known_hash=cellfinder_GIN_data["hash"],
@@ -71,42 +72,49 @@ def config_GIN_dict(cellfinder_GIN_data):
 
 
 @pytest.fixture()
-def config_force_GIN_dict(cellfinder_GIN_data, tmp_path):
+def config_force_GIN_dict(cellfinder_GIN_data: dict, tmp_path: Path) -> dict:
     """
-    Return a config pointing to the location where GIN would be by default
+    Return a config pointing to a temporary directory where to download GIN
+    data, without downloading the data first.
+
+    Since there is no data at the input_data_dir location, the GIN download
+    will be triggered
     """
     # read default config as dict
     with open(DEFAULT_JSON_CONFIG_PATH_CELLFINDER) as cfg:
         config_dict = json.load(cfg)
 
     # modify
+    # - add url
+    # - add data hash
+    # - point to a temporary directory in input_data_dir
     config_dict["data_url"] = cellfinder_GIN_data["url"]
     config_dict["data_hash"] = cellfinder_GIN_data["hash"]
     config_dict["input_data_dir"] = tmp_path
-    # since the input_data_dir does not exist, it will
-    # download the GIN data there
 
     return config_dict
 
 
 @pytest.fixture()
-def config_local_dict(cellfinder_GIN_data):
-    """ """
+def config_local_dict(cellfinder_GIN_data: dict) -> dict:
+    """
+    Return a config pointing to a local dataset,
+    and ensure the data is downloaded there
+    """
 
     # read default config as dict
-    # as dict because some paths are computed derived from input_data_dir
     with open(DEFAULT_JSON_CONFIG_PATH_CELLFINDER) as cfg:
         config_dict = json.load(cfg)
 
     # modify dict
     # - remove url
     # - remove data hash
-    # - add input_data_dir
+    # - point to a local directory under home in input_data_dir
     config_dict["data_url"] = None
     config_dict["data_hash"] = None
     config_dict["input_data_dir"] = Path.home() / "local_cellfinder_data"
 
-    # fetch data from GIN and download locally to local location?
+    # fetch data from GIN and download to the local location
     pooch.retrieve(
         url=cellfinder_GIN_data["url"],
         known_hash=cellfinder_GIN_data["hash"],
@@ -123,7 +131,21 @@ def config_local_dict(cellfinder_GIN_data):
 
 
 @pytest.fixture()
-def config_missing_signal_dict(config_local_dict):
+def config_missing_signal_dict(config_local_dict: dict) -> dict:
+    """
+    Return a config pointing to a local dataset, whose signal directory
+    does not exist
+
+    Parameters
+    ----------
+    config_local_dict : _type_
+        _description_
+
+    Returns
+    -------
+    dict
+        _description_
+    """
     config_dict = config_local_dict.copy()
     config_dict["signal_subdir"] = "_"
 
@@ -132,6 +154,19 @@ def config_missing_signal_dict(config_local_dict):
 
 @pytest.fixture()
 def config_missing_background_dict(config_local_dict):
+    """Return a config pointing to a local dataset, whose background directory
+    does not exist
+
+    Parameters
+    ----------
+    config_local_dict : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
     config_dict = config_local_dict.copy()
     config_dict["background_subdir"] = "_"
 
@@ -140,7 +175,23 @@ def config_missing_background_dict(config_local_dict):
 
 @pytest.fixture()
 def config_not_GIN_nor_local_dict(config_local_dict):
+    """Return a config pointing to a local dataset whose input_data_dir
+    directory does not exist, and with no references to a GIN dataset.
+
+    Parameters
+    ----------
+    config_local_dict : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
     config_dict = config_local_dict.copy()
     config_dict["input_data_dir"] = "_"
+
+    config_dict["data_url"] = None
+    config_dict["data_hash"] = None
 
     return config_dict
