@@ -40,41 +40,41 @@ def cellfinder_GIN_data() -> dict:
 
 
 @pytest.fixture()
-def config_local(cellfinder_GIN_data, default_input_config_cellfinder):
-    """ """
-
-    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
-        CellfinderConfig,
-    )
+def config_local_dict(
+    cellfinder_GIN_data: dict, default_input_config_cellfinder: Path
+) -> dict:
+    """
+    Return a config pointing to a local dataset,
+    and ensure the data is downloaded there
+    """
 
     # read default config as dict
-    # as dict because some paths are computed derived from input_data_dir
     with open(default_input_config_cellfinder) as cfg:
         config_dict = json.load(cfg)
 
-    # modify location of data?
+    # modify dict
     # - remove url
     # - remove data hash
     # - add input_data_dir
     config_dict["data_url"] = None
     config_dict["data_hash"] = None
     config_dict["input_data_dir"] = Path.home() / "local_cellfinder_data"
-
-    # instantiate object
-    config = CellfinderConfig(**config_dict)
-
+    
     # fetch data from GIN and download locally to local location?
     pooch.retrieve(
         url=cellfinder_GIN_data["url"],
         known_hash=cellfinder_GIN_data["hash"],
-        path=Path(config.input_data_dir).parent,  # path to download zip to
+        path=Path(
+            config_dict["input_data_dir"]
+        ).parent,  # path to download zip to
         progressbar=True,
         processor=pooch.Unzip(
-            extract_dir=Path(config.input_data_dir).stem
+            extract_dir=Path(config_dict["input_data_dir"]).stem
             # path to unzipped dir, *relative*  to 'path'
         ),
     )
-    return config
+    return config_dict
+
 
 
 @pytest.mark.skip(reason="focus of PR62")
