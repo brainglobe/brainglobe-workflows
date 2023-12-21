@@ -238,7 +238,7 @@ def test_setup(
     )
 
     # run setup on default configuration
-    cfg = setup_full(str(request.getfixturevalue(input_config)))
+    cfg = setup_workflow(str(request.getfixturevalue(input_config)))
 
     # check logger exists
     logger = logging.getLogger(custom_logger_name)
@@ -281,7 +281,7 @@ def test_run_workflow_from_cellfinder_run(
     )
 
     # run setup
-    cfg = setup_full(str(request.getfixturevalue(input_config)))
+    cfg = setup_workflow(str(request.getfixturevalue(input_config)))
 
     # run workflow
     run_workflow_from_cellfinder_run(cfg)
