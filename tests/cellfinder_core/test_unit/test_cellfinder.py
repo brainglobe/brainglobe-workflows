@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 
 import pytest
-
+import pooch
 from brainglobe_workflows.utils import setup_logger
 
 
@@ -80,6 +80,10 @@ def config_local_dict(
 @pytest.mark.parametrize(
     "input_config_dict, message_pattern",
     [
+        (
+            "config_force_GIN_dict",
+            "Fetching input data from the provided GIN repository",
+        ),
         (
             "config_local_dict",
             "Fetching input data from the local directories",
@@ -237,7 +241,7 @@ def test_setup(
     )
 
     # run setup on default configuration
-    cfg = setup_workflow(str(request.getfixturevalue(input_config)))
+    cfg = setup_full(str(request.getfixturevalue(input_config)))
 
     # check logger exists
     logger = logging.getLogger(custom_logger_name)
@@ -280,7 +284,7 @@ def test_run_workflow_from_cellfinder_run(
     )
 
     # run setup
-    cfg = setup_workflow(str(request.getfixturevalue(input_config)))
+    cfg = setup_full(str(request.getfixturevalue(input_config)))
 
     # run workflow
     run_workflow_from_cellfinder_run(cfg)
