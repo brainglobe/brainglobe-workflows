@@ -101,7 +101,7 @@ def config_force_GIN_dict(
     # - point to a temporary directory in input_data_dir
     config_dict["data_url"] = cellfinder_GIN_data["url"]
     config_dict["data_hash"] = cellfinder_GIN_data["hash"]
-    config_dict["input_data_dir"] = tmp_path
+    config_dict["input_data_dir"] = str(tmp_path)
 
     return config_dict
 
@@ -125,7 +125,7 @@ def config_local_dict(
     # - point to a local directory under home in input_data_dir
     config_dict["data_url"] = None
     config_dict["data_hash"] = None
-    config_dict["input_data_dir"] = Path.home() / "local_cellfinder_data"
+    config_dict["input_data_dir"] = str(Path.home() / "local_cellfinder_data")
 
     # fetch data from GIN and download to the local location
     pooch.retrieve(
@@ -311,7 +311,7 @@ def test_read_cellfinder_config(
     )
 
     # read json as dict
-    with open(input_config_path) as cfg:
+    with open(request.getfixturevalue(input_config_path)) as cfg:
         config_dict = json.load(cfg)
 
     # check keys of dictionary are a subset of Cellfinder config attributes
