@@ -352,7 +352,7 @@ def test_read_cellfinder_config(
     "input_config",
     [
         "default_input_config_cellfinder",
-        # "input_config_fetch_GIN",
+        "config_local_json",
         # "input_config_fetch_local",
     ],
 )
@@ -379,11 +379,11 @@ def test_setup(
         CellfinderConfig,
     )
     from brainglobe_workflows.cellfinder_core.cellfinder import (
-        setup as setup_full,
+        setup as setup_workflow,
     )
 
     # run setup on default configuration
-    cfg = setup_full(str(request.getfixturevalue(input_config)))
+    cfg = setup_workflow(str(request.getfixturevalue(input_config)))
 
     # check logger exists
     logger = logging.getLogger(custom_logger_name)
@@ -398,7 +398,7 @@ def test_setup(
     "input_config",
     [
         "default_input_config_cellfinder",
-        # "input_config_fetch_GIN",
+        "config_local_json",
         # "input_config_fetch_local",
     ],
 )
@@ -423,11 +423,11 @@ def test_run_workflow_from_cellfinder_run(
         run_workflow_from_cellfinder_run,
     )
     from brainglobe_workflows.cellfinder_core.cellfinder import (
-        setup as setup_full,
+        setup as setup_workflow,
     )
 
     # run setup
-    cfg = setup_full(str(request.getfixturevalue(input_config)))
+    cfg = setup_workflow(str(request.getfixturevalue(input_config)))
 
     # run workflow
     run_workflow_from_cellfinder_run(cfg)
