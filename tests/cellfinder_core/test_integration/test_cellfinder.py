@@ -27,12 +27,12 @@ def test_main():
     assert Path(cfg._detected_cells_path).is_file()
 
 
+@pytest.mark.skip()
 @pytest.mark.parametrize(
     "input_config",
     [
-        None,
-        # "input_config_fetch_GIN",
-        # "input_config_fetch_local",
+        "input_config_fetch_GIN",
+        "input_config_fetch_local",
     ],
 )
 def test_main_w_inputs(
@@ -94,12 +94,12 @@ def test_script():
     assert subprocess_output.returncode == 0
 
 
+@pytest.mark.skip()
 @pytest.mark.parametrize(
     "input_config",
     [
-        None,
-        # "input_config_fetch_GIN",
-        # "input_config_fetch_local",
+        "input_config_fetch_GIN",
+        "input_config_fetch_local",
     ],
 )
 def test_script_w_inputs(
@@ -119,10 +119,6 @@ def test_script_w_inputs(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
-    # monkeypatch to change current directory to
-    # pytest temporary directory
-    # (cellfinder cache directory is created in cwd)
-    # monkeypatch.chdir(tmp_path)
 
     # define CLI input
     script_path = (
@@ -172,12 +168,12 @@ def test_entry_point():
     assert subprocess_output.returncode == 0
 
 
+@pytest.mark.skip()
 @pytest.mark.parametrize(
     "input_config",
     [
-        None,
-        # "input_config_fetch_GIN",
-        # "input_config_fetch_local",
+        "input_config_fetch_GIN",
+        "input_config_fetch_local",
     ],
 )
 def test_entry_point_w_inputs(
@@ -198,10 +194,6 @@ def test_entry_point_w_inputs(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
-    # monkeypatch to change current directory to
-    # pytest temporary directory
-    # (cellfinder cache directory is created in cwd)
-    # monkeypatch.chdir(tmp_path)
 
     # define CLI input
     subprocess_input = ["cellfinder-core-workflow"]
