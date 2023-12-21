@@ -9,8 +9,75 @@ from brainglobe_workflows.utils import setup_logger
 
 
 @pytest.fixture()
-def default_input_config_cellfinder() -> Path:
-    """Return path to default input config for cellfinder workflow
+def config_force_GIN_dict(
+    config_GIN_dict: dict, tmp_path: Path, monkeypatch
+) -> dict:
+    """
+    Return a config pointing to a temporary directory where to download GIN
+    data, without downloading the data first.
+
+    Since there is no data at the input_data_dir location, the GIN download
+    will be triggered
+    """
+    import shutil
+
+    import pooch
+
+    # read GIN config as dict
+    config_dict = config_GIN_dict.copy()
+
+    # point to a temporary directory in input_data_dir
+    config_dict["input_data_dir"] = str(tmp_path)
+
+    # monkeypatch pooch.retrieve
+    # when called: copy GIN downloaded data, instead of re-downloading
+    def mock_pooch_download(
+        url="", known_hash="", path="", progressbar="", processor=""
+    ):
+        # GIN downloaded data default location
+        GIN_default_location = (
+            Path.home()
+            / ".brainglobe"
+            / "workflows"
+            / "cellfinder_core"
+            / "cellfinder_test_data"
+        )
+
+        # Copy destination
+        GIN_copy_destination = tmp_path
+
+        # copy only relevant subdirectories
+        for subdir in ["signal", "background"]:
+            shutil.copytree(
+                GIN_default_location / subdir,  # src
+                GIN_copy_destination / subdir,  # dest
+                dirs_exist_ok=True,
+            )
+
+        # List of files in destination
+        list_of_files = [
+            str(f) for f in GIN_copy_destination.glob("**/*") if f.is_file()
+        ]
+        list_of_files.sort()
+
+        return list_of_files
+
+    # monkeypatch pooch.retreive with mock_pooch_download()
+    monkeypatch.setattr(pooch, "retrieve", mock_pooch_download)
+
+    return config_dict
+
+
+@pytest.fixture()
+def config_missing_signal_dict(config_local_dict: dict) -> dict:
+    """
+    Return a config pointing to a local dataset, whose signal directory
+    does not exist
+
+    Parameters
+    ----------
+    config_local_dict : _type_
+        _description_
 
     Returns
     -------

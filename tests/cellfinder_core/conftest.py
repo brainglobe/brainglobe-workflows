@@ -54,43 +54,6 @@ def cellfinder_GIN_data() -> dict:
 
 
 @pytest.fixture()
-def config_local_dict(
-    cellfinder_GIN_data: dict, default_input_config_cellfinder: Path
-) -> dict:
-    """
-    Return a config pointing to a local dataset,
-    and ensure the data is downloaded there
-    """
-
-    # read default config as dict
-    with open(default_input_config_cellfinder) as cfg:
-        config_dict = json.load(cfg)
-
-    # modify dict
-    # - remove url
-    # - remove data hash
-    # - point to a local directory under home in input_data_dir
-    config_dict["data_url"] = None
-    config_dict["data_hash"] = None
-    config_dict["input_data_dir"] = str(Path.home() / "local_cellfinder_data")
-
-    # fetch data from GIN and download to the local location
-    pooch.retrieve(
-        url=cellfinder_GIN_data["url"],
-        known_hash=cellfinder_GIN_data["hash"],
-        path=Path(
-            config_dict["input_data_dir"]
-        ).parent,  # path to download zip to
-        progressbar=True,
-        processor=pooch.Unzip(
-            extract_dir=Path(config_dict["input_data_dir"]).stem
-            # path to unzipped dir, *relative*  to 'path'
-        ),
-    )
-    return config_dict
-
-
-@pytest.fixture()
 def config_GIN_dict(
     cellfinder_GIN_data: dict, default_input_config_cellfinder: Path
 ) -> dict:
@@ -112,31 +75,64 @@ def config_GIN_dict(
     if "input_data_dir" in config_dict.keys():
         del config_dict["input_data_dir"]
 
+    # GIN downloaded data default location
+    GIN_default_location = (
+        Path.home()
+        / ".brainglobe"
+        / "workflows"
+        / "cellfinder_core"
+        / "cellfinder_test_data"
+    )
+
     # download GIN data to default location for GIN
     pooch.retrieve(
         url=cellfinder_GIN_data["url"],
         known_hash=cellfinder_GIN_data["hash"],
-        path=Path.home()
-        / ".brainglobe"
-        / "workflows"
-        / "cellfinder_core",  # path to download zip to
+        path=GIN_default_location.parent,  # path to download zip to
         progressbar=True,
-        processor=pooch.Unzip(extract_dir="cellfinder_test_data"),
+        processor=pooch.Unzip(extract_dir=GIN_default_location.stem),
     )
 
     return config_dict
 
 
 @pytest.fixture()
-def config_local_json(config_local_dict: dict, tmp_path: Path) -> Path:
-    # define location of input config file
-    config_file_path = tmp_path / "input_config.json"
+def config_local_dict(
+    config_GIN_dict,  # forces download to GIN default location
+) -> dict:
+    """
+    Return a config pointing to a local dataset,
+    and ensure the data is downloaded there
+    """
+    import shutil
 
-    # write config dict to that location
-    with open(config_file_path, "w") as js:
-        json.dump(config_local_dict, js)
+    # copy GIN config as dict
+    config_dict = config_GIN_dict.copy()
 
-    return config_file_path
+    # modify dict
+    # - remove url
+    # - remove data hash
+    # - point to a local directory under home in input_data_dir
+    config_dict["data_url"] = None
+    config_dict["data_hash"] = None
+    config_dict["input_data_dir"] = str(Path.home() / "local_cellfinder_data")
+
+    # copy data from default GIN location to the local location
+    # GIN downloaded data default location
+    GIN_default_location = (
+        Path.home()
+        / ".brainglobe"
+        / "workflows"
+        / "cellfinder_core"
+        / "cellfinder_test_data"
+    )
+    shutil.copytree(
+        GIN_default_location,
+        config_dict["input_data_dir"],
+        dirs_exist_ok=True,
+    )
+
+    return config_dict
 
 
 @pytest.fixture()
@@ -147,5 +143,17 @@ def config_GIN_json(config_GIN_dict: dict, tmp_path: Path) -> Path:
     # write config dict to that location
     with open(config_file_path, "w") as js:
         json.dump(config_GIN_dict, js)
+
+    return config_file_path
+
+
+@pytest.fixture()
+def config_local_json(config_local_dict: dict, tmp_path: Path) -> Path:
+    # define location of input config file
+    config_file_path = tmp_path / "input_config.json"
+
+    # write config dict to that location
+    with open(config_file_path, "w") as js:
+        json.dump(config_local_dict, js)
 
     return config_file_path
