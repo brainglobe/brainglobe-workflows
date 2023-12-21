@@ -5,16 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from brainglobe_workflows.utils import (
-    setup_logger,
-)
+from brainglobe_workflows.utils import setup_logger
 
 
 @pytest.fixture()
 def config_force_GIN_dict(
-    cellfinder_GIN_data: dict,
-    default_input_config_cellfinder: Path,
-    tmp_path: Path,
+    config_GIN_dict: dict, tmp_path: Path, monkeypatch
 ) -> dict:
     """
     Return a config pointing to a temporary directory where to download GIN
@@ -23,17 +19,55 @@ def config_force_GIN_dict(
     Since there is no data at the input_data_dir location, the GIN download
     will be triggered
     """
-    # read default config as dict
-    with open(default_input_config_cellfinder) as cfg:
-        config_dict = json.load(cfg)
+    import shutil
+
+    import pooch
+
+    # read config as dict
+    config_dict = config_GIN_dict.copy()
 
     # modify
     # - add url
     # - add data hash
+    # config_dict["data_url"] = cellfinder_GIN_data["url"]
+    # config_dict["data_hash"] = cellfinder_GIN_data["hash"]
+
     # - point to a temporary directory in input_data_dir
-    config_dict["data_url"] = cellfinder_GIN_data["url"]
-    config_dict["data_hash"] = cellfinder_GIN_data["hash"]
     config_dict["input_data_dir"] = str(tmp_path)
+
+    # monkeypatch pooch.retrieve!
+    # when called: copy GIN downloaded data, instead of re-downloading
+    def mock_pooch_download(
+        url="", known_hash="", path="", progressbar="", processor=""
+    ):
+        GIN_default_location = (
+            Path.home()
+            / ".brainglobe"
+            / "workflows"
+            / "cellfinder_core"
+            / "cellfinder_test_data"
+        )
+
+        GIN_copy_destination = tmp_path
+
+        # for subdir in ["signal", "background"]:
+        shutil.copytree(
+            GIN_default_location,  # src
+            GIN_copy_destination,  # dest
+            dirs_exist_ok=True,
+        )
+
+        list_of_files = [
+            str(f)
+            for f in GIN_copy_destination.glob("**/*")  # 495
+            if f.is_file()
+        ]
+
+        list_of_files.sort()
+
+        return list_of_files  # return list of files in archive
+
+    monkeypatch.setattr(pooch, "retrieve", mock_pooch_download)
 
     return config_dict
 
@@ -108,10 +142,9 @@ def config_not_GIN_nor_local_dict(config_local_dict):
 @pytest.mark.parametrize(
     "input_config_dict, message_pattern",
     [
-        pytest.param(
+        (
             "config_force_GIN_dict",
             "Fetching input data from the provided GIN repository",
-            marks=pytest.mark.slow,
         ),
         (
             "config_local_dict",
