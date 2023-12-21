@@ -9,6 +9,21 @@ import pytest
 from brainglobe_workflows.utils import setup_logger
 
 
+@pytest.fixture()
+def default_input_config_cellfinder() -> Path:
+    """Return path to default input config for cellfinder workflow
+
+    Returns
+    -------
+    Path
+        Path to default input config
+
+    """
+    from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+
+    return DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+
+
 @pytest.fixture(scope="session")
 def cellfinder_GIN_data() -> dict:
     """Return the URL and hash to the GIN repository with the input data
@@ -197,8 +212,7 @@ def test_read_cellfinder_config(
     ],
 )
 def test_setup(
-    input_config: str,
-    custom_logger_name: str,
+    input_config: str, custom_logger_name: str, request: pytest.FixtureRequest
 ):
     """Test full setup for cellfinder workflow, using the default config
     and passing a specific config file.
@@ -224,7 +238,7 @@ def test_setup(
     )
 
     # run setup on default configuration
-    cfg = setup_full(input_config)  # (request.getfixturevalue(input_config))
+    cfg = setup_full(str(request.getfixturevalue(input_config)))
 
     # check logger exists
     logger = logging.getLogger(custom_logger_name)
@@ -267,9 +281,7 @@ def test_run_workflow_from_cellfinder_run(
     )
 
     # run setup
-    cfg = setup_full(
-        input_config
-    )  # str(request.getfixturevalue(input_config)))
+    cfg = setup_full(str(request.getfixturevalue(input_config)))
 
     # run workflow
     run_workflow_from_cellfinder_run(cfg)
