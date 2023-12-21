@@ -112,14 +112,14 @@ class TimeBenchmarkPrepGIN:
         _ = pooch.retrieve(
             url=config.data_url,
             known_hash=config.data_hash,
-            path=config.install_path,
+            path=config._install_path,
             progressbar=True,
             processor=pooch.Unzip(extract_dir=config.data_dir_relative),
         )
 
         # Check paths to input data should now exist in config
-        assert Path(config.signal_dir_path).exists()
-        assert Path(config.background_dir_path).exists()
+        assert Path(config._signal_dir_path).exists()
+        assert Path(config._background_dir_path).exists()
 
     def setup(self):
         """
@@ -177,10 +177,10 @@ class TimeReadInputDask(TimeBenchmarkPrepGIN):
     """
 
     def time_read_signal_with_dask(self):
-        read_with_dask(self.cfg.signal_dir_path)
+        read_with_dask(self.cfg._signal_dir_path)
 
     def time_read_background_with_dask(self):
-        read_with_dask(self.cfg.background_dir_path)
+        read_with_dask(self.cfg._background_dir_path)
 
 
 class TimeDetectCells(TimeBenchmarkPrepGIN):
@@ -199,8 +199,8 @@ class TimeDetectCells(TimeBenchmarkPrepGIN):
         TimeBenchmarkPrepGIN.setup(self)
 
         # add input data as arrays to config
-        self.signal_array = read_with_dask(self.cfg.signal_dir_path)
-        self.background_array = read_with_dask(self.cfg.background_dir_path)
+        self.signal_array = read_with_dask(self.cfg._signal_dir_path)
+        self.background_array = read_with_dask(self.cfg._background_dir_path)
 
     def time_cellfinder_run(self):
         cellfinder_run(
@@ -215,8 +215,8 @@ class TimeSaveCells(TimeBenchmarkPrepGIN):
         TimeBenchmarkPrepGIN.setup(self)
 
         # add input data as arrays to config
-        self.signal_array = read_with_dask(self.cfg.signal_dir_path)
-        self.background_array = read_with_dask(self.cfg.background_dir_path)
+        self.signal_array = read_with_dask(self.cfg._signal_dir_path)
+        self.background_array = read_with_dask(self.cfg._background_dir_path)
 
         # detect cells
         self.detected_cells = cellfinder_run(
@@ -224,4 +224,4 @@ class TimeSaveCells(TimeBenchmarkPrepGIN):
         )
 
     def time_save_cells(self):
-        save_cells(self.detected_cells, self.cfg.detected_cells_path)
+        save_cells(self.detected_cells, self.cfg._detected_cells_path)
