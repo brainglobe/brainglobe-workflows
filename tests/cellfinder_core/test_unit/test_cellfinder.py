@@ -62,82 +62,6 @@ def config_local(cellfinder_GIN_data, default_input_config_cellfinder):
     return config
 
 
-@pytest.mark.parametrize(
-    "input_config, message",
-    [
-        ("default_input_config_cellfinder", "Using default config file"),
-    ],
-)
-def test_read_cellfinder_config(
-    input_config: str,
-    message: str,
-    caplog: pytest.LogCaptureFixture,
-    request: pytest.FixtureRequest,
-):
-    """Test for reading a cellfinder config file
-
-    Parameters
-    ----------
-    input_config : str
-        Name of input config json file
-    input_configs_dir : Path
-        Test data directory path
-    """
-    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
-        read_cellfinder_config,
-        DEFAULT_JSON_CONFIG_PATH_CELLFINDER
-    )
-
-    # instantiate custom logger
-    _ = setup_logger()
-
-    # instantiate custom logger
-    _ = setup_logger()
-
-    input_config_path = DEFAULT_JSON_CONFIG_PATH_CELLFINDER
-    # request.getfixturevalue(input_config)
-
-    # read json as Cellfinder config
-    config = read_cellfinder_config(input_config_path, log_on=True)
-
-    # read json as dict
-    with open(input_config_path) as cfg:
-        config_dict = json.load(cfg)
-
-    # check keys of dictionary are a subset of Cellfinder config attributes
-    assert all(
-        [ky in config.__dataclass_fields__.keys() for ky in config_dict.keys()]
-    )
-
-    # check logs
-    assert message in caplog.text
-
-    # check all signal files exist
-    assert config._list_signal_files
-    assert all([Path(f).is_file() for f in config._list_signal_files])
-
-    # check all background files exist
-    assert config._list_background_files
-    assert all([Path(f).is_file() for f in config._list_background_files])
-
-    # check output directory exists
-    assert Path(config._output_path).resolve().is_dir()
-
-    # check output directory name has correct format
-    out = re.fullmatch(
-        str(config.output_dir_basename) + "\\d{8}_\\d{6}$",
-        Path(config._output_path).stem,
-    )
-    assert out is not None
-    assert out.group() is not None
-
-    # check output file path is as expected
-    assert (
-        Path(config._detected_cells_path)
-        == Path(config._output_path) / config.detected_cells_filename
-    )
-
-
 @pytest.mark.skip(reason="focus of PR62")
 @pytest.mark.parametrize(
     "input_config_dict, message_pattern",
@@ -182,14 +106,14 @@ def test_add_input_paths(
 
 
 @pytest.mark.parametrize(
-    "input_config, message",
+    "input_config_path, message",
     [
         ("default_input_config_cellfinder", "Using default config file"),
         # ("config_GIN", "Input config read from"),
     ],
 )
-def test_setup_workflow(
-    input_config: str,
+def test_read_cellfinder_config(
+    input_config_path: str,
     message: str,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -259,7 +183,7 @@ def test_setup_workflow(
     assert out is not None
     assert out.group() is not None
 
-    # check output file path
+    # check output file path is as expected
     assert (
         Path(config._detected_cells_path)
         == Path(config.output_path) / config.detected_cells_filename
@@ -299,10 +223,6 @@ def test_setup(
         setup as setup_full,
     )
 
-    # Monkeypatch to change current directory to
-    # pytest temporary directory
-    # (cellfinder cache directory is created in cwd)
-    # monkeypatch.chdir(tmp_path)
     # run setup on default configuration
     cfg = setup_full(input_config)  # (request.getfixturevalue(input_config))
 
@@ -346,10 +266,6 @@ def test_run_workflow_from_cellfinder_run(
         setup as setup_full,
     )
 
-    # monkeypatch to change current directory to
-    # pytest temporary directory
-    # (cellfinder cache directory is created in cwd)
-    # monkeypatch.chdir(tmp_path)
     # run setup
     cfg = setup_full(
         input_config
@@ -358,5 +274,5 @@ def test_run_workflow_from_cellfinder_run(
     # run workflow
     run_workflow_from_cellfinder_run(cfg)
 
-    # check output files are those expected?
+    # check output files exist
     assert Path(cfg._detected_cells_path).is_file()
