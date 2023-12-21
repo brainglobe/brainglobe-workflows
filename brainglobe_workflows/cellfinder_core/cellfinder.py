@@ -49,21 +49,27 @@ class CellfinderConfig:
     the cellfinder preprocessing steps.
 
     We distinguish three types of fields:
-    - optional fields: they have a default value
     - required fields: must be provided, they do not have a default value
+    - optional fields: they have a default value
     - internal fields: their names start with _ indicating these are private.
-      Any functionality to update them is moved to a function of
+      Any functionality to update them is moved to a method of
       CellfinderConfig.
+
+    Notes on optional parameters:
+    - input data path: if not specified, the are assumed to be "signal" and
+      "background" dirs under _install_path/cellfinder_test_data/
+      (see __post_init__ method).
+    - output data path: if not specified, it is assumed to be under
+      _install_path/output_dir_basename (see __post_init__ method).
+    - data_url, data_hash: source of data to download. If not specified
+      in JSON, it is set to None.
     """
 
-    ################ Required ########################
-    # Parameters
+    # Required parameters
     voxel_sizes: tuple[float, float, float]
     start_plane: int
     end_plane: int
-    trained_model: Optional[
-        os.PathLike
-    ]  # if None, it will use a default model
+    trained_model: Optional[os.PathLike]
     model_weights: Optional[os.PathLike]
     model: str
     batch_size: int
@@ -82,57 +88,74 @@ class CellfinderConfig:
     cube_depth: int
     network_depth: depth_type
 
-    ################ Optional ########################
+    # Optional parameters
     # they have a default value if not specified in json
 
-    # install path (root for donwloaded inputs and outputs)
+    # install path: default path for downloaded and output data
     _install_path: Pathlike = (
         Path.home() / ".brainglobe" / "workflows" / "cellfinder_core"
     )
 
-    # input data: if not specified the are assumed to be signal and
-    # background dirs under _install_path/cellfinder_test_data/
-    # see __post_init__
+    # input data path:
+    # if not specified, the are assumed to be "signal" and
+    # "background" dirs under _install_path/cellfinder_test_data/
+    # (see __post_init__ method)
     input_data_dir: Optional[Pathlike] = None
     signal_subdir: Pathlike = "signal"
     background_subdir: Pathlike = "background"
 
-    # output data
-    # if dir not specified it is assumed to be under
+    # output data path:
+    # if not specified, it is assumed to be under
     # _install_path/output_dir_basename
-    # see __post_init__
+    # (see __post_init__ method)
     output_dir_basename: str = "cellfinder_output_"
     detected_cells_filename: str = "detected_cells.xml"
     output_parent_dir: Optional[Pathlike] = None
 
     # source of data to download
-    # (if not provided in JSON it is set to None)
+    # if not specified in JSON, it is set to None
     data_url: Optional[str] = None
     data_hash: Optional[str] = None
 
-    ################ Internal ########################
-    # The following attributes are added
-    # during the setup phase of the workflow
-    # even tho these are optional we dont expect users to
-    # change them!!!
+    # Internal parameters
+    # even though these are optional we don't expect users to
+    # change them
     _signal_dir_path: Optional[Pathlike] = None
     _background_dir_path: Optional[Pathlike] = None
     _list_signal_files: Optional[list] = None
     _list_background_files: Optional[list] = None
     _detected_cells_path: Pathlike = ""
-    # _output_path: Pathlike = ""
-    # _input_data_download_dir: Optional[Pathlike] = None
 
     def __post_init__(self: "CellfinderConfig"):
-        # See https://peps.python.org/pep-0557/#post-init-processing
+        """Executed after __init__ function.
 
-        # Input data dir if not specified
+        We use it to define attributes as a function of other
+        attributes. See https://peps.python.org/pep-0557/#post-init-processing
+
+        The following attributes are set:
+        - input_data_dir is set to a default value if not set in __init__
+        - _signal_dir_path: full path to the directory holding the signal files
+        - _background_dir_path: full path to the directory holding the
+          background files
+        In 'add_signal_and_background_files':
+        - _list_signal_files: list of signal files
+        - _list_background_files: list of background files
+        In 'add_output_timestamped':
+        - output_parent_dir
+
+        Parameters
+        ----------
+        self : CellfinderConfig
+            a CellfinderConfig instance
+        """
+
+        # Fill in input data directory if not specified
         if self.input_data_dir is None:
             self.input_data_dir = (
                 Path(self._install_path) / "cellfinder_test_data"
             )
 
-        # add derived input data paths
+        # Add input data paths that are derived from 'input_data_dir'
         self._signal_dir_path: Pathlike = self.input_data_dir / Path(
             self.signal_subdir
         )
@@ -140,20 +163,33 @@ class CellfinderConfig:
             self.background_subdir
         )
 
+        # Add signal and background files to config
         self.add_signal_and_background_files()
 
-        # output dir if not specified
+        # Fill in output directory if not specified
         if self.output_parent_dir is None:
             self.output_parent_dir = (
                 Path(self._install_path) / self.output_dir_basename
             )
 
-        # add derived output paths
+        # Add output paths that are derived from 'output_parent_dir'
         self.add_output_timestamped()
 
-    ################# Methods #########################
     def add_output_timestamped(self):
-        # output dir and file
+        """Adds output paths to the cellfinder config
+
+        Specifically it adds:
+        - output_path: a path to a timestamped output directory
+        - _detected_cells_path: the full path to the output file
+          (under output_path).
+
+        Parameters
+        ----------
+        config : CellfinderConfig
+            a cellfinder config
+        """
+
+        # output directory and file
         timestamp = datetime.datetime.now()
         timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
         output_path_timestamped = Path(self.output_parent_dir) / (
@@ -164,7 +200,7 @@ class CellfinderConfig:
             exist_ok=True,  # ignore FileExistsError exceptions
         )
 
-        # Add output path and output file path to config
+        # Add paths to output directory and file to config
         self.output_path = output_path_timestamped
         self._detected_cells_path = (
             self.output_path / self.detected_cells_filename
@@ -174,13 +210,14 @@ class CellfinderConfig:
         """Adds the lists of input data files (signal and background)
         to the config.
 
-        These files are first searched locally. If not found, we
-        attempt to download them from GIN.
+        These files are first searched locally at the given location.
+        If not found, we attempt to download them from GIN and place
+        them at the specified location.
 
         Specifically:
         - If both parent data directories (signal and background) exist
-        locally,
-        the lists of signal and background files are added to the config.
+        locally, the lists of signal and background files are added to
+        the config.
         - If exactly one of the parent data directories is missing, an error
         message is logged.
         - If neither of them exist, the data is retrieved from the provided GIN
@@ -191,10 +228,6 @@ class CellfinderConfig:
         config : CellfinderConfig
             a cellfinder config with input data files to be validated
 
-        Returns
-        -------
-        config : CellfinderConfig
-            a cellfinder config with updated input data lists.
         """
         # Fetch logger
         logger = logging.getLogger(LOGGER_NAME)
@@ -243,8 +276,9 @@ class CellfinderConfig:
                 list_files_archive = pooch.retrieve(
                     url=self.data_url,
                     known_hash=self.data_hash,
-                    path=Path(self.input_data_dir).parent,
-                    # self._install_path,  # ----zip will be downloaded here
+                    path=Path(
+                        self.input_data_dir
+                    ).parent,  # zip will be downloaded here
                     progressbar=True,
                     processor=pooch.Unzip(
                         extract_dir=Path(self.input_data_dir).stem,
@@ -266,7 +300,7 @@ class CellfinderConfig:
                     for f in list_files_archive
                     if f.startswith(
                         str(Path(self._signal_dir_path).resolve()),
-                    )  # if str(self.signal_dir_path) in f
+                    )
                 ]
 
                 # Add background files to config
@@ -285,7 +319,9 @@ class CellfinderConfig:
                 )
 
 
-def read_cellfinder_config(input_config_path: str) -> CellfinderConfig:
+def read_cellfinder_config(
+    input_config_path: str, log_on: bool = False
+) -> CellfinderConfig:
     """Instantiate a CellfinderConfig from the input json file.
 
     Assumes config is json serializable.
@@ -300,24 +336,25 @@ def read_cellfinder_config(input_config_path: str) -> CellfinderConfig:
     CellfinderConfig:
         The cellfinder config object, populated with data from the input
     """
+    logger = logging.getLogger(LOGGER_NAME)
+
     # read input config
     with open(input_config_path) as cfg:
         config_dict = json.load(cfg)
     config = CellfinderConfig(**config_dict)
 
+    # log config origin
+    if log_on:
+        logger = logging.getLogger(LOGGER_NAME)
+        logger.info(f"Input config read from {input_config_path}")
+        if input_config_path == DEFAULT_JSON_CONFIG_PATH_CELLFINDER:
+            logger.info("Using default config file")
+
     return config
 
 
-def setup_workflow(input_config_path: str) -> CellfinderConfig:
+def setup(input_config_path: str) -> CellfinderConfig:
     """Run setup steps prior to executing the workflow
-
-    These setup steps include:
-    - instantiating a CellfinderConfig object with the required parameters,
-    - checking if the input data exists locally, and fetching from
-    GIN repository otherwise,
-    - adding the path to the input data files to the config, and
-    - creating a timestamped directory for the output of the workflow if
-    it doesn't exist and adding its path to the config
 
     Parameters
     ----------
@@ -326,43 +363,17 @@ def setup_workflow(input_config_path: str) -> CellfinderConfig:
 
     Returns
     -------
-    config : CellfinderConfig
+    CellfinderConfig
         a dataclass whose attributes are the parameters
         for running cellfinder.
     """
-    # Fetch logger
-    logger = logging.getLogger(LOGGER_NAME)
-
-    # Check config file exists
     assert Path(input_config_path).exists()
 
-    # Instantiate a CellfinderConfig from the input json file
-    # (assumes config is json serializable)
-    config = read_cellfinder_config(input_config_path)
-
-    # Print info logs for status
-    logger.info(f"Input config read from {input_config_path}")
-    if input_config_path == DEFAULT_JSON_CONFIG_PATH_CELLFINDER:
-        logger.info("Using default config file")
-
-    # # Add lists of input data files to the config,
-    # # ----> should this go in the class?
-    # # if these are not defined yet
-    # if not (config._list_signal_files and config._list_background_files):
-    #     config.add_signal_and_background_files()
-
-    # # Create timestamped output directory if it doesn't exist
-    # config.add_output_timestamped()
-
-    return config
-
-
-def setup(input_config_path: str) -> CellfinderConfig:
     # setup logger
     _ = setup_logger()
 
-    # run setup steps and return config
-    cfg = setup_workflow(input_config_path)
+    # read config
+    cfg = read_cellfinder_config(input_config_path)
 
     return cfg
 
