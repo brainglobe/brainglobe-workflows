@@ -23,23 +23,18 @@ def config_force_GIN_dict(
 
     import pooch
 
-    # read config as dict
+    # read GIN config as dict
     config_dict = config_GIN_dict.copy()
 
-    # modify
-    # - add url
-    # - add data hash
-    # config_dict["data_url"] = cellfinder_GIN_data["url"]
-    # config_dict["data_hash"] = cellfinder_GIN_data["hash"]
-
-    # - point to a temporary directory in input_data_dir
+    # point to a temporary directory in input_data_dir
     config_dict["input_data_dir"] = str(tmp_path)
 
-    # monkeypatch pooch.retrieve!
+    # monkeypatch pooch.retrieve
     # when called: copy GIN downloaded data, instead of re-downloading
     def mock_pooch_download(
         url="", known_hash="", path="", progressbar="", processor=""
     ):
+        # GIN downloaded data default location
         GIN_default_location = (
             Path.home()
             / ".brainglobe"
@@ -48,25 +43,26 @@ def config_force_GIN_dict(
             / "cellfinder_test_data"
         )
 
+        # Copy destination
         GIN_copy_destination = tmp_path
 
-        # for subdir in ["signal", "background"]:
-        shutil.copytree(
-            GIN_default_location,  # src
-            GIN_copy_destination,  # dest
-            dirs_exist_ok=True,
-        )
+        # copy only relevant subdirectories
+        for subdir in ["signal", "background"]:
+            shutil.copytree(
+                GIN_default_location / subdir,  # src
+                GIN_copy_destination / subdir,  # dest
+                dirs_exist_ok=True,
+            )
 
+        # List of files in destination
         list_of_files = [
-            str(f)
-            for f in GIN_copy_destination.glob("**/*")  # 495
-            if f.is_file()
+            str(f) for f in GIN_copy_destination.glob("**/*") if f.is_file()
         ]
-
         list_of_files.sort()
 
-        return list_of_files  # return list of files in archive
+        return list_of_files
 
+    # monkeypatch pooch.retreive with mock_pooch_download()
     monkeypatch.setattr(pooch, "retrieve", mock_pooch_download)
 
     return config_dict
