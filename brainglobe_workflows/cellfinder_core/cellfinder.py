@@ -168,9 +168,7 @@ class CellfinderConfig:
 
         # Fill in output directory if not specified
         if self.output_parent_dir is None:
-            self.output_parent_dir = (
-                Path(self._install_path) / self.output_dir_basename
-            )
+            self.output_parent_dir = Path(self._install_path)
 
         # Add output paths that are derived from 'output_parent_dir'
         self.add_output_timestamped()
