@@ -1,109 +1,154 @@
 [project]
 name = "brainglobe-workflows"
-authors = [{name = "BrainGlobe developers", email= "a.felder@ucl.ac.uk"}]
-description = "A place to keep scripts to use as benchmarks, user-examples end-to-end tests and for tutorials"
+authors = [
+    { name = "Adam Tyson", email = "code@adamltyson.com" },
+    { name = "BrainGlobe developers", email = "code@adamltyson.com" },
+    { name = "Christian Niedworok" },
+    { name = "Charly Rousseau" },
+]
+description = "A collection of end-to-end data analysis workflows executed using BrainGlobe tools."
 readme = "README.md"
-requires-python = ">=3.8.0"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
 dynamic = ["version"]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+
+# Below the dependenciess for the cellfinder CLI tool only
+# (i.e., only what users will need for the CLI)
 dependencies = [
+    "brainreg>=1.0.0",
+    "cellfinder-core>=0.2.4,<1.0.0",
+    "configobj",
+    "fancylog>=0.0.7",
+    "imio",
+    "brainglobe-utils>=0.2.5",
+    "multiprocessing-logging>=0.3.4",
+    "natsort",
+    "numpy",
+    "pandas",
+    "packaging",
+    "pooch",
+    "scikit-image",
+    "tifffile",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+# Below, everything developers need to contribute
+# to the workflows (i.e., run tests, run benchmarks, etc)
+dev = [
+    "black",
+    "pytest-cov",
+    "pytest",
+    "gitpython",
+    "coverage>=5.0.3",
+    "pre-commit",
+    "setuptools_scm",
+    "asv",
+    "pooch",
+]
+# Below, all the dependencies asv needs to run the benchmarks
+# (i.e., everything needed to install this package without the CLI tool)
+# Once the cellfinder CLI tool is deprecated, these will move to the
+# default dependencies.
+asv_version = [
     "asv",
     "pooch",
     "cellfinder-core",
 ]
-license = {text = "BSD-3-Clause"}
 
-classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Operating System :: OS Independent",
-    "License :: OSI Approved :: BSD License",
+napari = [
+    "napari[pyqt5]",
+    "brainglobe-napari-io",
+    "cellfinder-napari<1.0.0",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/brainglobe/brainglobe-scripts"
-"Bug Tracker" = "https://github.com/brainglobe/brainglobe-scripts/issues"
-"Documentation" = "https://github.com/brainglobe/brainglobe-scripts"
-"Source Code" = "https://github.com/brainglobe/brainglobe-scripts"
-"User Support" = "https://github.com/brainglobe/brainglobe-scripts/issues"
-
-[project.optional-dependencies]
-dev = [
-  "pytest",
-  "pytest-cov",
-  "coverage",
-  "tox",
-  "black",
-  "mypy",
-  "pre-commit",
-  "ruff",
-  "setuptools_scm",
-]
+"Bug Tracker" = "https://github.com/brainglobe/brainglobe-workflows/issues"
+"Documentation" = "https://brainglobe.info/documentation/brainglobe-workflows"
+"Homepage" = "https://brainglobe.info"
+"Source Code" = "https://github.com/brainglobe/brainglobe-workflows"
 
 [project.scripts]
-cellfinder-workflow = "brainglobe_workflows.cellfinder:main_app_wrapper"
+cellfinder-core-workflow = "brainglobe_workflows.cellfinder_core.cellfinder:main_app_wrapper"
+cellfinder = "brainglobe_workflows.cellfinder_brainreg.main:main"
 
 [build-system]
-requires = [
-    "setuptools>=45",
-    "wheel",
-    "setuptools_scm[toml]>=6.2",
-]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 include-package-data = true
+zip-safe = false
 
 [tool.setuptools.packages.find]
-include = ["brainglobe_workflows*"]
-exclude = ["tests*"]
+include = ["brainglobe_workflows"]
+exclude = ["brainglobe_workflows.cellfinder_core","tests", "resources", "benchmarks"] # it's not excluding "brainglobe_workflows.cellfinder_core"!
 
 [tool.black]
-target-version = ['py38', 'py39', 'py310']
+target-version = ["py39", "py310"]
 skip-string-normalization = false
 line-length = 79
-
-[tool.setuptools_scm]
-
-[tool.check-manifest]
-ignore = [
-  ".yaml",
-  "tox.ini",
-  "tests/",
-  "tests/test_unit/",
-  "tests/test_integration/",
-]
-
-[tool.ruff]
-line-length = 79
-exclude = ["__init__.py","build",".eggs"]
-select = ["I", "E", "F"]
-fix = true
+ignore = ["*.yaml"]
 
 [tool.cibuildwheel]
-build = "cp38-* cp39-* cp310-*"
+build = "cp39-* cp310-*"
 
 [tool.cibuildwheel.macos]
 archs = ["x86_64", "arm64"]
 
+[tool.check-manifest]
+
+[tool.pytest.ini_options]
+addopts = "--cov=brainglobe-workflows"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "serial",
+]
+[tool.ruff]
+line-length = 79
+exclude = ["__init__.py", "build", ".eggs"]
+select = ["I", "E", "F"]
+fix = true
+
+[tool.setuptools_scm]
+
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{38,39,310}
+envlist = py{39,310}-{coredev}
 isolated_build = True
 
 [gh-actions]
 python =
-    3.8: py38
     3.9: py39
     3.10: py310
+
+[gh-actions:env]
+# This runs the coredev environment if the "coredev" github actions input
+# is set to "true"
+INPUT_COREDEV =
+    true: coredev
 
 [testenv]
 extras =
     dev
+deps =
+    coredev: git+https://github.com/brainglobe/cellfinder-core.git
 commands =
-    pytest -v --color=yes --cov=brainglobe_workflows --cov-report=xml
+    pytest {toxinidir} -v --color=yes --cov=./ --cov-report=xml
+description =
+    Run tests
+    coredev: Run tests with the development version of cellfinder-core
 """
