@@ -7,9 +7,23 @@ import pooch
 import pytest
 
 from brainglobe_workflows.utils import (
-    DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
     setup_logger,
 )
+
+
+@pytest.fixture()
+def default_input_config_cellfinder() -> Path:
+    """Return path to default input config for cellfinder workflow
+
+    Returns
+    -------
+    Path
+        Path to default input config
+
+    """
+    from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
+
+    return DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
 
 @pytest.fixture(scope="session")
@@ -28,14 +42,16 @@ def cellfinder_GIN_data() -> dict:
 
 
 @pytest.fixture()
-def config_GIN_dict(cellfinder_GIN_data: dict) -> dict:
+def config_GIN_dict(
+    cellfinder_GIN_data: dict, default_input_config_cellfinder: Path
+) -> dict:
     """
     Return a config pointing to the location where GIN would be by default,
     and download the data
     """
 
     # read default config as a dictionary
-    with open(DEFAULT_JSON_CONFIG_PATH_CELLFINDER) as cfg:
+    with open(default_input_config_cellfinder) as cfg:
         config_dict = json.load(cfg)
 
     # modify
@@ -63,7 +79,11 @@ def config_GIN_dict(cellfinder_GIN_data: dict) -> dict:
 
 
 @pytest.fixture()
-def config_force_GIN_dict(cellfinder_GIN_data: dict, tmp_path: Path) -> dict:
+def config_force_GIN_dict(
+    cellfinder_GIN_data: dict,
+    default_input_config_cellfinder: Path,
+    tmp_path: Path,
+) -> dict:
     """
     Return a config pointing to a temporary directory where to download GIN
     data, without downloading the data first.
@@ -72,7 +92,7 @@ def config_force_GIN_dict(cellfinder_GIN_data: dict, tmp_path: Path) -> dict:
     will be triggered
     """
     # read default config as dict
-    with open(DEFAULT_JSON_CONFIG_PATH_CELLFINDER) as cfg:
+    with open(default_input_config_cellfinder) as cfg:
         config_dict = json.load(cfg)
 
     # modify
@@ -87,14 +107,16 @@ def config_force_GIN_dict(cellfinder_GIN_data: dict, tmp_path: Path) -> dict:
 
 
 @pytest.fixture()
-def config_local_dict(cellfinder_GIN_data: dict) -> dict:
+def config_local_dict(
+    cellfinder_GIN_data: dict, default_input_config_cellfinder: Path
+) -> dict:
     """
     Return a config pointing to a local dataset,
     and ensure the data is downloaded there
     """
 
     # read default config as dict
-    with open(DEFAULT_JSON_CONFIG_PATH_CELLFINDER) as cfg:
+    with open(default_input_config_cellfinder) as cfg:
         config_dict = json.load(cfg)
 
     # modify dict
@@ -188,6 +210,18 @@ def config_not_GIN_nor_local_dict(config_local_dict):
     return config_dict
 
 
+@pytest.fixture()
+def config_local_json(config_local_dict: dict, tmp_path: Path) -> Path:
+    # define location of input config file
+    config_file_path = tmp_path / "input_config.json"
+
+    # write config dict to that location
+    with open(config_file_path, "w") as js:
+        json.dump(config_local_dict, js)
+
+    return config_file_path
+
+
 @pytest.mark.parametrize(
     "input_config_dict, message_pattern",
     [
@@ -250,8 +284,8 @@ def test_add_signal_and_background_files(
 @pytest.mark.parametrize(
     "input_config_path, message",
     [
-        (DEFAULT_JSON_CONFIG_PATH_CELLFINDER, "Using default config file"),
-        # ("config_GIN", "Input config read from"),
+        ("default_input_config_cellfinder", "Using default config file"),
+        ("config_local_json", "Input config read from"),
     ],
 )
 def test_read_cellfinder_config(
@@ -272,7 +306,9 @@ def test_read_cellfinder_config(
     _ = setup_logger()
 
     # read Cellfinder config
-    config = read_cellfinder_config(input_config_path, log_on=True)
+    config = read_cellfinder_config(
+        request.getfixturevalue(input_config_path), log_on=True
+    )
 
     # read json as dict
     with open(input_config_path) as cfg:
@@ -315,14 +351,13 @@ def test_read_cellfinder_config(
 @pytest.mark.parametrize(
     "input_config",
     [
-        DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
+        "default_input_config_cellfinder",
         # "input_config_fetch_GIN",
         # "input_config_fetch_local",
     ],
 )
 def test_setup(
-    input_config: str,
-    custom_logger_name: str,
+    input_config: str, custom_logger_name: str, request: pytest.FixtureRequest
 ):
     """Test full setup for cellfinder workflow, using the default config
     and passing a specific config file.
@@ -348,7 +383,7 @@ def test_setup(
     )
 
     # run setup on default configuration
-    cfg = setup_full(input_config)  # (request.getfixturevalue(input_config))
+    cfg = setup_full(str(request.getfixturevalue(input_config)))
 
     # check logger exists
     logger = logging.getLogger(custom_logger_name)
@@ -362,13 +397,13 @@ def test_setup(
 @pytest.mark.parametrize(
     "input_config",
     [
-        DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
+        "default_input_config_cellfinder",
         # "input_config_fetch_GIN",
         # "input_config_fetch_local",
     ],
 )
 def test_run_workflow_from_cellfinder_run(
-    input_config: str,
+    input_config: str, request: pytest.FixtureRequest
 ):
     """Test running cellfinder workflow with default input config
     (fetches data from GIN) and local input config
@@ -392,9 +427,7 @@ def test_run_workflow_from_cellfinder_run(
     )
 
     # run setup
-    cfg = setup_full(
-        input_config
-    )  # str(request.getfixturevalue(input_config)))
+    cfg = setup_full(str(request.getfixturevalue(input_config)))
 
     # run workflow
     run_workflow_from_cellfinder_run(cfg)
