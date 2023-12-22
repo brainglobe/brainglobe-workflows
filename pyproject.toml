@@ -81,7 +81,7 @@ napari = [
 "Source Code" = "https://github.com/brainglobe/brainglobe-workflows"
 
 [project.scripts]
-cellfinder-workflow = "brainglobe_workflows.cellfinder_core.cellfinder:main_app_wrapper"
+cellfinder-core-workflow = "brainglobe_workflows.cellfinder_core.cellfinder:main_app_wrapper"
 cellfinder = "brainglobe_workflows.cellfinder_brainreg.main:main"
 
 [build-system]
