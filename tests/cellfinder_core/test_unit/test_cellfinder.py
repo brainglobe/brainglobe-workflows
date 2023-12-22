@@ -3,9 +3,63 @@ import logging
 import re
 from pathlib import Path
 
+import pooch
 import pytest
 
 from brainglobe_workflows.utils import setup_logger
+
+
+@pytest.fixture(scope="session")
+def cellfinder_GIN_data() -> dict:
+    """Return the URL and hash to the GIN repository with the input data
+
+    Returns
+    -------
+    dict
+        URL and hash of the GIN repository with the cellfinder test data
+    """
+    return {
+        "url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
+        "hash": "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914",  # noqa
+    }
+
+
+@pytest.fixture()
+def config_local(cellfinder_GIN_data, default_input_config_cellfinder):
+    """ """
+
+    from brainglobe_workflows.cellfinder_core.cellfinder import (
+        CellfinderConfig,
+    )
+
+    # read default config as dict
+    # as dict because some paths are computed derived from input_data_dir
+    with open(default_input_config_cellfinder) as cfg:
+        config_dict = json.load(cfg)
+
+    # modify location of data?
+    # - remove url
+    # - remove data hash
+    # - add input_data_dir
+    config_dict["data_url"] = None
+    config_dict["data_hash"] = None
+    config_dict["input_data_dir"] = Path.home() / "local_cellfinder_data"
+
+    # instantiate object
+    config = CellfinderConfig(**config_dict)
+
+    # fetch data from GIN and download locally to local location?
+    pooch.retrieve(
+        url=cellfinder_GIN_data["url"],
+        known_hash=cellfinder_GIN_data["hash"],
+        path=Path(config.input_data_dir).parent,  # path to download zip to
+        progressbar=True,
+        processor=pooch.Unzip(
+            extract_dir=Path(config.input_data_dir).stem
+            # path to unzipped dir, *relative*  to 'path'
+        ),
+    )
+    return config
 
 
 @pytest.mark.parametrize(
