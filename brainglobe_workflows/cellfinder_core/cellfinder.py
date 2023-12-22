@@ -91,23 +91,30 @@ class CellfinderConfig:
 
     # Optional parameters
     # they have a default value if not specified in json
+
+    # install path: default path for downloaded and output data
     _install_path: Pathlike = (
         Path.home() / ".brainglobe" / "workflows" / "cellfinder_core"
     )
 
-    # input data
-    # for default value of `input_data_dir`, see __post_init__ method
+    # input data path:
+    # if not specified, the are assumed to be "signal" and
+    # "background" dirs under _install_path/cellfinder_test_data/
+    # (see __post_init__ method)
     input_data_dir: Optional[Pathlike] = None
     signal_subdir: Pathlike = "signal"
     background_subdir: Pathlike = "background"
 
-    # output data
-    # for default value of `output_parent_dir`, see __post_init__ method
+    # output data path:
+    # if not specified, it is assumed to be under
+    # _install_path/output_dir_basename
+    # (see __post_init__ method)
     output_dir_basename: str = "cellfinder_output_"
     detected_cells_filename: str = "detected_cells.xml"
     output_parent_dir: Optional[Pathlike] = None
 
     # source of data to download
+    # if not specified in JSON, it is set to None
     data_url: Optional[str] = None
     data_hash: Optional[str] = None
 
@@ -119,6 +126,7 @@ class CellfinderConfig:
     _list_signal_files: Optional[list] = None
     _list_background_files: Optional[list] = None
     _detected_cells_path: Pathlike = ""
+    _output_path: Pathlike = ""
 
     def __post_init__(self: "CellfinderConfig"):
         """Executed after __init__ function.
@@ -170,17 +178,17 @@ class CellfinderConfig:
         # Add path to timestamped output directory to config
         timestamp = datetime.datetime.now()
         timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
-        self.output_path = Path(self.output_parent_dir) / (
+        self._output_path = Path(self.output_parent_dir) / (
             str(self.output_dir_basename) + timestamp_formatted
         )
-        self.output_path.mkdir(
+        self._output_path.mkdir(
             parents=True,  # create any missing parents
             exist_ok=True,  # ignore FileExistsError exceptions
         )
 
         # Add paths to output file to config
         self._detected_cells_path = (
-            self.output_path / self.detected_cells_filename
+            self._output_path / self.detected_cells_filename
         )
 
     def add_input_paths(self):
@@ -369,8 +377,8 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
         the cellfinder workflow
     """
     # Read input data as Dask arrays
-    signal_array = read_with_dask(cfg._signal_dir_path)
-    background_array = read_with_dask(cfg._background_dir_path)
+    signal_array = read_with_dask(str(cfg._signal_dir_path))
+    background_array = read_with_dask(str(cfg._background_dir_path))
 
     # Run main analysis using `cellfinder_run`
     detected_cells = cellfinder_run(

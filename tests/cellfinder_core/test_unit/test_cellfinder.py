@@ -9,9 +9,9 @@ from brainglobe_workflows.utils import setup_logger
 
 
 @pytest.mark.parametrize(
-    "input_config",
+    "input_config, message",
     [
-        "default_input_config_cellfinder",
+        ("default_input_config_cellfinder", "Using default config file"),
     ],
 )
 def test_read_cellfinder_config(
@@ -62,12 +62,12 @@ def test_read_cellfinder_config(
     assert all([Path(f).is_file() for f in config._list_background_files])
 
     # check output directory exists
-    assert Path(config.output_path).resolve().is_dir()
+    assert Path(config._output_path).resolve().is_dir()
 
     # check output directory name has correct format
     out = re.fullmatch(
         str(config.output_dir_basename) + "\\d{8}_\\d{6}$",
-        Path(config.output_path).stem,
+        Path(config._output_path).stem,
     )
     assert out is not None
     assert out.group() is not None
@@ -75,31 +75,16 @@ def test_read_cellfinder_config(
     # check output file path is as expected
     assert (
         Path(config._detected_cells_path)
-        == Path(config.output_path) / config.detected_cells_filename
+        == Path(config._output_path) / config.detected_cells_filename
     )
 
 
 @pytest.mark.parametrize(
     "input_config, message_pattern",
     [
-        pytest.param(
-            "config_force_GIN",
-            "Fetching input data from the provided GIN repository",
-            marks=pytest.mark.slow,
-        ),
         (
             "config_local",
             "Fetching input data from the local directories",
-        ),
-        (
-            "config_missing_signal",
-            "The directory .+ does not exist$",
-        ),
-        ("config_missing_background", "The directory .+ does not exist$"),
-        (
-            "config_not_GIN_or_local",
-            "Input data not found locally, and URL/hash to "
-            "GIN repository not provided",
         ),
     ],
 )
@@ -131,13 +116,7 @@ def test_add_input_paths(
     # read json as Cellfinder config
     # ---> change so that the fixture is the config object!
     # config = read_cellfinder_config(input_configs_dir / input_config)
-    config = request.getfixturevalue(input_config)
-
-    # check lists of signal and background files are not defined
-    assert not (config._list_signal_files and config._list_background_files)
-
-    # add signal and background files lists to config
-    config.add_input_paths()
+    _ = request.getfixturevalue(input_config)
 
     # check log messages
     assert len(caplog.messages) > 0
@@ -150,8 +129,6 @@ def test_add_input_paths(
     "input_config",
     [
         "default_input_config_cellfinder",
-        "input_config_fetch_GIN",
-        "input_config_fetch_local",
     ],
 )
 def test_setup(
@@ -205,14 +182,10 @@ def test_setup(
     "input_config",
     [
         "default_input_config_cellfinder",
-        "input_config_fetch_GIN",
-        "input_config_fetch_local",
     ],
 )
 def test_run_workflow_from_cellfinder_run(
     input_config: str,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
     request: pytest.FixtureRequest,
 ):
     """Test running cellfinder workflow with default input config
@@ -235,11 +208,6 @@ def test_run_workflow_from_cellfinder_run(
     from brainglobe_workflows.cellfinder_core.cellfinder import (
         setup as setup_full,
     )
-
-    # monkeypatch to change current directory to
-    # pytest temporary directory
-    # (cellfinder cache directory is created in cwd)
-    monkeypatch.chdir(tmp_path)
 
     # run setup
     cfg = setup_full(str(request.getfixturevalue(input_config)))

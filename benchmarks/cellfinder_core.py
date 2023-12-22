@@ -146,7 +146,7 @@ class TimeBenchmarkPrepGIN:
         The input data is kept for all repeats of the same benchmark,
         to avoid repeated downloads from GIN.
         """
-        shutil.rmtree(Path(self.cfg.output_path).resolve())
+        shutil.rmtree(Path(self.cfg._output_path).resolve())
 
 
 class TimeFullWorkflow(TimeBenchmarkPrepGIN):
