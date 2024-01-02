@@ -3,7 +3,7 @@ import os
 import pytest
 from brainglobe_utils.general.exceptions import CommandLineInputError
 
-from brainglobe_workflows.cellfinder_brainreg.tools import prep
+from brainglobe_workflows.brainmapper.tools import prep
 
 # import shutil
 

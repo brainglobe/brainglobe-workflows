@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from imio.load import load_any
 
-from brainglobe_workflows.cellfinder_brainreg.main import (
+from brainglobe_workflows.brainmapper.main import (
     main as cellfinder_run,
 )
 
