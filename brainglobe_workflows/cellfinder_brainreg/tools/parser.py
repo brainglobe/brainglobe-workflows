@@ -18,11 +18,11 @@ from brainglobe_utils.general.numerical import (
 )
 from brainreg.core.cli import atlas_parse, geometry_parser, niftyreg_parse
 from brainreg.core.cli import backend_parse as brainreg_backend_parse
-from cellfinder_core.download.cli import (
+from cellfinder.core.download.cli import (
     download_directory_parser,
     model_parser,
 )
-from cellfinder_core.tools.source_files import source_custom_config_cellfinder
+from cellfinder.core.tools.source_files import source_custom_config_cellfinder
 
 from brainglobe_workflows import __version__
 

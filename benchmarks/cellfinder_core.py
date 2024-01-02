@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pooch
 from brainglobe_utils.IO.cells import save_cells
-from cellfinder_core.main import main as cellfinder_run
-from cellfinder_core.tools.IO import read_with_dask
+from cellfinder.core.main import main as cellfinder_run
+from cellfinder.core.tools.IO import read_with_dask
 
 from brainglobe_workflows.cellfinder_core.cellfinder import (
     CellfinderConfig,

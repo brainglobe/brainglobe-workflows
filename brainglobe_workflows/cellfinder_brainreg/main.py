@@ -17,7 +17,7 @@ import tifffile
 from brainglobe_utils.cells.cells import MissingCellsError
 from brainglobe_utils.general.system import ensure_directory_exists
 from brainglobe_utils.IO.cells import get_cells, save_cells
-from cellfinder_core.main import suppress_tf_logging, tf_suppress_log_messages
+from cellfinder.core.main import suppress_tf_logging, tf_suppress_log_messages
 
 BRAINREG_PRE_PROCESSING_ARGS = None
 
@@ -100,10 +100,10 @@ def main():
 
 
 def run_all(args, what_to_run, atlas):
-    from cellfinder_core.classify import classify
-    from cellfinder_core.detect import detect
-    from cellfinder_core.tools import prep
-    from cellfinder_core.tools.IO import read_with_dask
+    from cellfinder.core.classify import classify
+    from cellfinder.core.detect import detect
+    from cellfinder.core.tools import prep
+    from cellfinder.core.tools.IO import read_with_dask
 
     from brainglobe_workflows.cellfinder_brainreg.analyse import analyse
     from brainglobe_workflows.cellfinder_brainreg.figures import figures
