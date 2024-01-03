@@ -154,8 +154,7 @@ def run_all(args, what_to_run, atlas):
         points = get_cells(args.paths.detected_points)
 
     if what_to_run.classify:
-        model_weights = prep.prep_classification(
-            args.trained_model,
+        model_weights = prep.prep_model_weights(
             args.model_weights,
             args.install_path,
             args.model,
