@@ -18,9 +18,9 @@ from brainreg.core.paths import Paths as BrainRegPaths
 from fancylog import fancylog
 
 import brainglobe_workflows as program_for_log
-import brainglobe_workflows.cellfinder_brainreg.tools.parser as parser
-from brainglobe_workflows.cellfinder_brainreg.tools import system, tools
-from brainglobe_workflows.cellfinder_brainreg.tools.parser import (
+import brainglobe_workflows.brainmapper.tools.parser as parser
+from brainglobe_workflows.brainmapper.tools import system, tools
+from brainglobe_workflows.brainmapper.tools.parser import (
     cellfinder_parser,
 )
 

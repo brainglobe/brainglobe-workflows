@@ -17,7 +17,7 @@ import tifffile
 from brainglobe_utils.cells.cells import MissingCellsError
 from brainglobe_utils.general.system import ensure_directory_exists
 from brainglobe_utils.IO.cells import get_cells, save_cells
-from cellfinder_core.main import suppress_tf_logging, tf_suppress_log_messages
+from cellfinder.core.main import suppress_tf_logging, tf_suppress_log_messages
 
 BRAINREG_PRE_PROCESSING_ARGS = None
 
@@ -44,7 +44,7 @@ def main():
     suppress_tf_logging(tf_suppress_log_messages)
     from brainreg.core.main import main as register
 
-    from brainglobe_workflows.cellfinder_brainreg.tools import prep
+    from brainglobe_workflows.brainmapper.tools import prep
 
     start_time = datetime.now()
     args, arg_groups, what_to_run, atlas = prep.prep_cellfinder_general()
@@ -100,14 +100,14 @@ def main():
 
 
 def run_all(args, what_to_run, atlas):
-    from cellfinder_core.classify import classify
-    from cellfinder_core.detect import detect
-    from cellfinder_core.tools import prep
-    from cellfinder_core.tools.IO import read_with_dask
+    from cellfinder.core.classify import classify
+    from cellfinder.core.detect import detect
+    from cellfinder.core.tools import prep
+    from cellfinder.core.tools.IO import read_with_dask
 
-    from brainglobe_workflows.cellfinder_brainreg.analyse import analyse
-    from brainglobe_workflows.cellfinder_brainreg.figures import figures
-    from brainglobe_workflows.cellfinder_brainreg.tools.prep import (
+    from brainglobe_workflows.brainmapper.analyse import analyse
+    from brainglobe_workflows.brainmapper.figures import figures
+    from brainglobe_workflows.brainmapper.tools.prep import (
         prep_candidate_detection,
         prep_channel_specific_general,
     )

@@ -18,7 +18,7 @@ from bg_atlasapi import BrainGlobeAtlas
 from brainglobe_utils.general.system import ensure_directory_exists
 from brainglobe_utils.pandas.misc import safe_pandas_concat, sanitise_df
 
-from brainglobe_workflows.cellfinder_brainreg.export.export import (
+from brainglobe_workflows.brainmapper.export.export import (
     export_points,
 )
 

@@ -1,7 +1,7 @@
-from brainglobe_workflows.cellfinder_brainreg.export.abc4d import (
+from brainglobe_workflows.brainmapper.export.abc4d import (
     export_points as abc4d_export,
 )
-from brainglobe_workflows.cellfinder_brainreg.export.brainrender import (
+from brainglobe_workflows.brainmapper.export.brainrender import (
     export_points as brainrender_export,
 )
 

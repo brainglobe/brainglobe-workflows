@@ -6,7 +6,7 @@ from pathlib import Path
 import brainglobe_utils.IO.cells as cell_io
 import pytest
 
-from brainglobe_workflows.cellfinder_brainreg.main import (
+from brainglobe_workflows.brainmapper.main import (
     main as cellfinder_run,
 )
 

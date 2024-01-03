@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from brainglobe_workflows.cellfinder_brainreg.analyse.analyse import (
+from brainglobe_workflows.brainmapper.analyse.analyse import (
     Point,
     get_region_totals,
 )

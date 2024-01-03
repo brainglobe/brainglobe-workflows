@@ -8,11 +8,6 @@ on:
       - "*"
   pull_request:
   workflow_dispatch:
-    inputs:
-      coredev:
-        description: 'Tests with development version of cellfinder-core'
-        required: true
-        default: 'false'
 
 env:
   REGISTRY: ghcr.io
@@ -35,8 +30,6 @@ jobs:
     needs: [linting, manifest]
     name: ${{ matrix.os }} py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
-    env:
-      INPUT_COREDEV: ${{ github.event.inputs.coredev }}
     strategy:
       fail-fast: false
       matrix:
