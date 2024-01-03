@@ -62,7 +62,7 @@ Basic usage:
 brainmapper -s signal_images -b background_images -o output_dir --metadata metadata
 ```
 
-Full documentation can be found [here](https://brainglobe.info/documentation/cellfinder/index.html).
+Full documentation can be found [here](https://brainglobe.info/documentation/brainglobe-workflows/brainmapper/index.html).
 
 NOTE: The `brainmapper` workflow previously used the name "cellfinder", but this has been discontinued following the release of the [unified `cellfinder`](https://github.com/brainglobe/cellfinder) backend package to avoid conflation of terms.
 See our [blog post](https://brainglobe.info/blog/version1/cellfinder-core-and-plugin-merge.html) from the release for more information.
