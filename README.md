@@ -39,7 +39,7 @@ pip install brainglobe-workflows
 ```
 
 `brainglobe-workflows` is built using BrainGlobe tools, and it will automatically fetch the tools that it needs and install them into your environment.
-Once BrainGlobe version 1 is available, this package will fetch all BrainGlobe tools and handle their install into your environment, to prevent potential conflicts from partial-installs.
+Once BrainGlobe version 1 is available, this package will fetch all BrainGlobe tools and handle their install into your environment, to prevent potential conflicts from partial installs.
 
 See the sections below for more information about the workflows and command-line tools provided.
 
@@ -48,7 +48,6 @@ See the sections below for more information about the workflows and command-line
 Whole-brain cell detection, registration and analysis.
 
 If you want to just use the cell detection part of `brainmapper`, please see the standalone [cellfinder](https://github.com/brainglobe/cellfinder) package and its [`napari`](https://napari.org/) plugin.
-`cellfinder` is a collection of tools developed by [Adam Tyson](https://github.com/adamltyson), [Charly Rousseau](https://github.com/crousseau) and [Christian Niedworok](https://github.com/cniedwor) in the [Margrie Lab](https://www.sainsburywellcome.org/web/groups/margrie-lab), generously supported by the [Sainsbury Wellcome Centre](https://www.sainsburywellcome.org/web/).
 
 `brainmapper` is a workflow designed for the analysis of whole-brain imaging data such as [serial-section imaging](https://sainsburywellcomecentre.github.io/OpenSerialSection/) and lightsheet imaging in cleared tissue.
 The aim is to provide a single solution for:
