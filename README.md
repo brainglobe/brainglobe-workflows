@@ -81,10 +81,10 @@ Please see the [developer guide](https://brainglobe.info/developers/index.html).
 
 ## Citing `brainglobe-workflows`
 
-**If you use any tools in the [brainglobe suite](https://brainglobe.info/documentation/index.html), please [let us know](mailto:code@adamltyson.com?subject=cellfinder), and we'd be happy to promote your paper/talk etc.**
+**If you use any tools in the [brainglobe suite](https://brainglobe.info/documentation/index.html), please [let us know](mailto:code@adamltyson.com?subject=BrainGlobe), and we'd be happy to promote your paper/talk etc.**
 
-If you find [`cellfinder`](#cellfinder) useful, and use it in your research, please cite the paper outlining the cell detection algorithm:
+If you find `brainmapper` useful, and use it in your research, please cite the paper outlining the cell detection algorithm:
 > Tyson, A. L., Rousseau, C. V., Niedworok, C. J., Keshavarzi, S., Tsitoura, C., Cossell, L., Strom, M. and Margrie, T. W. (2021) “A deep learning algorithm for 3D cell detection in whole mouse brain image datasets’ PLOS Computational Biology, 17(5), e1009074
 [https://doi.org/10.1371/journal.pcbi.1009074](https://doi.org/10.1371/journal.pcbi.1009074)
 >
-If you use any of the image registration functions in `cellfinder`, please also cite [`brainreg`](https://github.com/brainglobe/brainreg#citing-brainreg).
+If you use any of the image registration functions in `brainmapper`, please also cite [`brainreg`](https://github.com/brainglobe/brainreg#citing-brainreg).
