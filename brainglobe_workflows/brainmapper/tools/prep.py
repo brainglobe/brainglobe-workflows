@@ -81,7 +81,6 @@ class Paths:
         self.brainrender_points = os.path.join(
             self.points_directory, "points.npy"
         )
-        self.abc4d_points = os.path.join(self.points_directory, "abc4d.npy")
 
         self.tmp__cubes_output_dir = os.path.join(self.output_dir, "cubes")
 

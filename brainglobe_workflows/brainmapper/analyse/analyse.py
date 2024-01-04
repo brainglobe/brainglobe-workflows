@@ -18,10 +18,6 @@ from bg_atlasapi import BrainGlobeAtlas
 from brainglobe_utils.general.system import ensure_directory_exists
 from brainglobe_utils.pandas.misc import safe_pandas_concat, sanitise_df
 
-from brainglobe_workflows.brainmapper.export.export import (
-    export_points,
-)
-
 
 class Point:
     def __init__(
@@ -310,11 +306,18 @@ def run(args, cells, atlas, downsampled_space):
         args.paths.downsampled_points,
         args.paths.atlas_points,
         args.paths.brainrender_points,
-        args.paths.abc4d_points,
         args.brainreg_paths.volume_csv_path,
         args.paths.all_points_csv,
         args.paths.summary_csv,
     )
+
+
+def export_points_to_brainrender(
+    points,
+    resolution,
+    output_filename,
+):
+    np.save(output_filename, points * resolution)
 
 
 def run_analysis(
@@ -328,7 +331,6 @@ def run_analysis(
     downsampled_points_path,
     atlas_points_path,
     brainrender_points_path,
-    abc4d_points_path,
     volume_csv_path,
     all_points_csv_path,
     summary_csv_path,
@@ -363,11 +365,7 @@ def run_analysis(
         all_points_csv_path,
         summary_csv_path,
     )
-    logging.info("Exporting data")
-    export_points(
-        points,
-        transformed_cells,
-        atlas.resolution[0],
-        brainrender_points_path,
-        abc4d_points_path,
+    logging.info("Exporting data to brainrender")
+    export_points_to_brainrender(
+        transformed_cells, atlas.resolution[0], brainrender_points_path
     )
