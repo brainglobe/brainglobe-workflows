@@ -102,8 +102,6 @@ def summarise_points(
         points, structures_with_points, volume_csv_path, summary_filename
     )
 
-    return points
-
 
 def create_all_cell_csv(points, all_points_filename):
     df = pd.DataFrame(
@@ -357,7 +355,7 @@ def run_analysis(
     )
 
     logging.info("Summarising cell positions")
-    points = summarise_points(
+    summarise_points(
         cells,
         transformed_cells,
         atlas,
