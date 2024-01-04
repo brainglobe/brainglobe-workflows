@@ -54,7 +54,7 @@ def valid_model_depth(depth):
         )
 
 
-def cellfinder_parser():
+def brainmapper_parser():
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser = main_parse(parser)
     parser = config_parse(parser)
@@ -161,7 +161,7 @@ def pixel_parser(parser):
 
 def run_parse(parser):
     run_parser = parser.add_argument_group(
-        "Options to disable part of cellfinder"
+        "Options to disable part of brainmapper"
     )
     run_parser.add_argument(
         "--no-detection",
@@ -432,7 +432,7 @@ def misc_parse(parser):
         type=check_positive_float,
         default=None,
         help="Maximum amount of RAM to use (in GB) - not currently fully "
-        "implemented for all parts of cellfinder",
+        "implemented for all parts of brainmapper",
     )
     misc_parser.add_argument(
         "--save-csv",
