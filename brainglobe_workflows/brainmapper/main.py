@@ -13,9 +13,11 @@ import os
 from datetime import datetime
 
 import bg_space as bgs
+import pandas as pd
 import tifffile
 from brainglobe_utils.cells.cells import MissingCellsError
 from brainglobe_utils.general.system import ensure_directory_exists
+from brainglobe_utils.image.heatmap import heatmap_from_points
 from brainglobe_utils.IO.cells import get_cells, save_cells
 from cellfinder.core.main import suppress_tf_logging, tf_suppress_log_messages
 
@@ -106,7 +108,6 @@ def run_all(args, what_to_run, atlas):
     from cellfinder.core.tools.IO import read_with_dask
 
     from brainglobe_workflows.brainmapper.analyse import analyse
-    from brainglobe_workflows.brainmapper.figures import figures
     from brainglobe_workflows.brainmapper.tools.prep import (
         prep_candidate_detection,
         prep_channel_specific_general,
@@ -222,8 +223,27 @@ def run_all(args, what_to_run, atlas):
         if len(points) == 0:
             logging.info("No cells detected, skipping")
         else:
-            logging.info("Generating figures")
-            figures.run(args, atlas, downsampled_space.shape)
+            logging.info("Generating heatmap")
+
+            if args.mask_figures:
+                mask_image = tifffile.imread(
+                    args.brainreg_paths.registered_atlas
+                )
+            else:
+                mask_image = None
+
+            downsampled_points = pd.read_hdf(
+                args.paths.downsampled_points
+            ).values
+
+            heatmap_from_points(
+                downsampled_points,
+                atlas.resolution[0],  # assumes isotropic atlas
+                downsampled_space.shape,
+                output_filename=args.paths.heatmap,
+                smoothing=args.heatmap_smooth,
+                mask_image=mask_image,
+            )
     else:
         logging.info("Skipping figure generation")
 
