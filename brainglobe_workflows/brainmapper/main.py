@@ -2,7 +2,7 @@
 main
 ===============
 
-Runs each part of the cellfinder pipeline in turn.
+Runs each part of the brainmapper pipeline in turn.
 
 N.B imports are within functions to prevent tensorflow being imported before
 it's warnings are silenced
@@ -47,7 +47,7 @@ def main():
     from brainglobe_workflows.brainmapper.tools import prep
 
     start_time = datetime.now()
-    args, arg_groups, what_to_run, atlas = prep.prep_cellfinder_general()
+    args, arg_groups, what_to_run, atlas = prep.prep_brainmapper_general()
 
     if what_to_run.register:
         # TODO: add register_part_brain option
