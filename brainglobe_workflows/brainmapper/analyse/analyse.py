@@ -1,15 +1,10 @@
-"""
-Cell position analysis (based on atlas registration).
-
-Based on https://github.com/SainsburyWellcomeCentre/cell_count_analysis by
-Charly Rousseau (https://github.com/crousseau).
-"""
 import logging
 
 import numpy as np
 from brainglobe_utils.brainmapper.analysis import (
     summarise_points_by_atlas_region,
 )
+from brainglobe_utils.brainmapper.export import export_points_to_brainrender
 from brainglobe_utils.brainreg.transform import transform_points_to_atlas_space
 
 
@@ -40,14 +35,6 @@ def run(args, cells, atlas, downsampled_space):
         args.paths.all_points_csv,
         args.paths.summary_csv,
     )
-
-
-def export_points_to_brainrender(
-    points,
-    resolution,
-    output_filename,
-):
-    np.save(output_filename, points * resolution)
 
 
 def run_analysis(
