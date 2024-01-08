@@ -5,16 +5,11 @@ Based on https://github.com/SainsburyWellcomeCentre/cell_count_analysis by
 Charly Rousseau (https://github.com/crousseau).
 """
 import logging
-import os
 from pathlib import Path
-from typing import List, Optional
 
-import bg_space as bgs
-import imio
 import numpy as np
 import pandas as pd
-import tifffile
-from bg_atlasapi import BrainGlobeAtlas
+from brainglobe_utils.brainreg.transform import transform_points_to_atlas_space
 from brainglobe_utils.general.system import ensure_directory_exists
 from brainglobe_utils.pandas.misc import safe_pandas_concat, sanitise_df
 
@@ -173,128 +168,6 @@ def get_region_totals(
     df.to_csv(output_filename, index=False)
 
 
-def transform_points_to_downsampled_space(
-    points: np.ndarray,
-    target_space: bgs.AnatomicalSpace,
-    source_space: bgs.AnatomicalSpace,
-    output_filename: Optional[os.PathLike] = None,
-) -> np.ndarray:
-    """
-    Parameters
-    ----------
-    points :
-        Points in the original space.
-    target_space :
-        Target anatomical space.
-    source_space :
-        Source anatomical space of ``points``.
-    output_filename :
-        File to save downsampled points to. Points are saved as a HDF file
-        using pandas.
-
-    Returns
-    -------
-    downsampled_points
-        Points transformed to the downsampled space.
-    """
-    points = source_space.map_points_to(target_space, points)
-    if output_filename is not None:
-        df = pd.DataFrame(points)
-        df.to_hdf(output_filename, key="df", mode="w")
-    return points
-
-
-def transform_points_to_atlas_space(
-    points: np.ndarray,
-    source_space: bgs.AnatomicalSpace,
-    atlas: BrainGlobeAtlas,
-    deformation_field_paths: List[os.PathLike],
-    downsampled_space: bgs.AnatomicalSpace,
-    downsampled_points_path: Optional[os.PathLike] = None,
-    atlas_points_path: Optional[os.PathLike] = None,
-) -> np.ndarray:
-    """
-    Transform points to an atlas space.
-
-    The points are first downsampled to the atlas resolution, and then
-    transformed to the atlas space.
-    """
-    downsampled_points = transform_points_to_downsampled_space(
-        points,
-        downsampled_space,
-        source_space,
-        output_filename=downsampled_points_path,
-    )
-    return transform_points_downsampled_to_atlas_space(
-        downsampled_points,
-        atlas,
-        deformation_field_paths,
-        output_filename=atlas_points_path,
-    )
-
-
-def transform_points_downsampled_to_atlas_space(
-    downsampled_points: np.ndarray,
-    atlas: BrainGlobeAtlas,
-    deformation_field_paths: List[os.PathLike],
-    output_filename: Optional[os.PathLike] = None,
-) -> np.ndarray:
-    """
-    Parameters
-    ----------
-    downsampled_points :
-        Points already downsampled to the atlas resolution.
-    atlas :
-        Target atlas.
-    deformation_field_paths :
-        File paths to the deformation fields.
-    output_filename :
-        File to save transformed points to. Points are saved as a HDF file
-        using pandas.
-
-    Returns
-    -------
-    transformed_points
-        Points transformed to the atlas space.
-    """
-    field_scales = [int(1000 / resolution) for resolution in atlas.resolution]
-    points: List[List] = [[], [], []]
-    points_out_of_bounds = []
-    for axis, deformation_field_path in enumerate(deformation_field_paths):
-        deformation_field = tifffile.imread(deformation_field_path)
-        for point in downsampled_points:
-            try:
-                point = [int(round(p)) for p in point]
-                points[axis].append(
-                    int(
-                        round(
-                            field_scales[axis]
-                            * deformation_field[point[0], point[1], point[2]]
-                        )
-                    )
-                )
-            except IndexError:
-                if point not in points_out_of_bounds:
-                    points_out_of_bounds.append(point)
-                    logging.info(
-                        f"Ignoring point: {point} "
-                        f"as it falls outside the atlas."
-                    )
-
-    logging.warning(
-        f"{len(points_out_of_bounds)} points ignored due to falling outside "
-        f"of atlas. This may be due to inaccuracies with "
-        f"cell detection or registration. Please inspect the results."
-    )
-    transformed_points = np.array(points).T
-
-    if output_filename is not None:
-        df = pd.DataFrame(transformed_points)
-        df.to_hdf(output_filename, key="df", mode="w")
-
-    return transformed_points
-
-
 def run(args, cells, atlas, downsampled_space):
     deformation_field_paths = [
         args.brainreg_paths.deformation_field_0,
@@ -347,25 +220,22 @@ def run_analysis(
     all_points_csv_path,
     summary_csv_path,
 ):
-    source_shape = tuple(
-        imio.get_size_image_from_file_paths(signal_planes).values()
-    )
-    source_shape = (source_shape[2], source_shape[1], source_shape[0])
-
-    source_space = bgs.AnatomicalSpace(
-        orientation,
-        shape=source_shape,
-        resolution=[float(i) for i in voxel_sizes],
-    )
-
-    transformed_cells = transform_points_to_atlas_space(
+    logging.info("Transforming points to atlas space")
+    transformed_cells, points_out_of_bounds = transform_points_to_atlas_space(
         cells,
-        source_space,
+        signal_planes,
+        orientation,
+        voxel_sizes,
+        downsampled_space,
         atlas,
         deformation_field_paths,
-        downsampled_space,
         downsampled_points_path=downsampled_points_path,
         atlas_points_path=atlas_points_path,
+    )
+    logging.warning(
+        f"{len(points_out_of_bounds)} points ignored due to falling outside "
+        f"of atlas. This may be due to inaccuracies with "
+        f"cell detection or registration. Please inspect the results."
     )
 
     logging.info("Summarising cell positions")
