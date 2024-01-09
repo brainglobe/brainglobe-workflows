@@ -27,8 +27,9 @@ classifiers = [
 # Below the dependenciess for the cellfinder CLI tool only
 # (i.e., only what users will need for the CLI)
 dependencies = [
+    "brainglobe>=1.0.0",
     "brainreg>=1.0.0",
-    "cellfinder>=1.0.0",
+    "cellfinder>=1.1.0",
     "configobj",
     "fancylog>=0.0.7",
     "imio",
