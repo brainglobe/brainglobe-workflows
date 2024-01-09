@@ -29,9 +29,9 @@ from typing import Optional, Union
 
 import pooch
 from brainglobe_utils.IO.cells import save_cells
-from cellfinder_core.main import main as cellfinder_run
-from cellfinder_core.tools.IO import read_with_dask
-from cellfinder_core.train.train_yml import depth_type
+from cellfinder.core.main import main as cellfinder_run
+from cellfinder.core.tools.IO import read_with_dask
+from cellfinder.core.train.train_yml import depth_type
 
 from brainglobe_workflows.utils import (
     DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
@@ -359,7 +359,7 @@ def setup(input_config_path: str) -> CellfinderConfig:
 
 
 def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
-    """Run workflow based on the cellfinder_core.main.main()
+    """Run workflow based on the cellfinder.core.main.main()
     function.
 
     The steps are:
