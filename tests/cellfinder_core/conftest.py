@@ -40,7 +40,7 @@ def default_input_config_cellfinder() -> Path:
 
 @pytest.fixture(scope="session")
 def cellfinder_GIN_data() -> dict:
-    """Return the URL and hash to the GIN repository with the input data
+    """Return the data of the GIN repository with the input data
 
     Returns
     -------
@@ -59,7 +59,7 @@ def config_GIN_dict(
 ) -> dict:
     """
     Return a config pointing to the location where GIN would be by default,
-    and download the data
+    and download the data there
     """
 
     # read default config as a dictionary
@@ -102,7 +102,10 @@ def config_local_dict(
 ) -> dict:
     """
     Return a config pointing to a local dataset,
-    and ensure the data is downloaded there
+    and ensure the data exists there.
+
+    The data is copied to the local directory from the
+    default location used in the config_GIN_dict fixture.
     """
     import shutil
 
