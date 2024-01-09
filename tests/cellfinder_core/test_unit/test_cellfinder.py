@@ -28,7 +28,7 @@ def cellfinder_GIN_data() -> dict:
 def config_local(cellfinder_GIN_data, default_input_config_cellfinder):
     """ """
 
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         CellfinderConfig,
     )
 
@@ -83,7 +83,7 @@ def test_read_cellfinder_config(
     input_configs_dir : Path
         Test data directory path
     """
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         read_cellfinder_config,
     )
 
@@ -208,10 +208,10 @@ def test_setup(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         CellfinderConfig,
     )
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         setup as setup_full,
     )
 
@@ -256,10 +256,10 @@ def test_run_workflow_from_cellfinder_run(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         run_workflow_from_cellfinder_run,
     )
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         setup as setup_full,
     )
 

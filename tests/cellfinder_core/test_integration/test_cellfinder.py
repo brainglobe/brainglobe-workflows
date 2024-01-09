@@ -2,7 +2,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from brainglobe_workflows.cellfinder_core.cellfinder import main
+from brainglobe_workflows.cellfinder_core.cellfinder_core import main
 
 
 def test_main():
@@ -47,7 +47,7 @@ def test_script():
         Path(__file__).resolve().parents[3]
         / "brainglobe_workflows"
         / "cellfinder_core"
-        / "cellfinder.py"
+        / "cellfinder_core.py"
     )
     subprocess_input = [
         sys.executable,
@@ -79,7 +79,7 @@ def test_entry_point():
     """
 
     # define CLI input
-    subprocess_input = ["cellfinder-core-workflow"]
+    subprocess_input = ["cellfinder-workflow"]
 
     # run workflow with no CLI arguments,
     subprocess_output = subprocess.run(

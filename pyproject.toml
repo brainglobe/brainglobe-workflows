@@ -24,8 +24,8 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 
-# Below the dependenciess for the cellfinder CLI tool only
-# (i.e., only what users will need for the CLI)
+# Below the dependenciess for brainmapper (the cellfinder CLI tool) only
+# (i.e., only what users will need for brainmapper)
 dependencies = [
     "brainglobe>=1.0.0",
     "brainreg>=1.0.0",
@@ -88,11 +88,10 @@ zip-safe = false
 [tool.setuptools.packages.find]
 include = ["brainglobe_workflows"]
 exclude = [
-    "brainglobe_workflows.cellfinder_core",
     "tests",
     "resources",
     "benchmarks",
-] # it's not excluding "brainglobe_workflows.cellfinder_core"!
+]
 
 [tool.black]
 target-version = ["py39", "py310"]

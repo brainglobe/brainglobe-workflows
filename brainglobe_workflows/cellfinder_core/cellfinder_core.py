@@ -45,13 +45,12 @@ Pathlike = Union[str, os.PathLike]
 
 @dataclass
 class CellfinderConfig:
-    """Define input and output data locations, and the parameters for
-    the cellfinder preprocessing steps.
+    """Define the parameters for the cellfinder workflow.
 
-    We distinguish three types of fields:
-    - optional attributes: they have a default value
-    - required attributes: must be provided, they do not have a default value
-    - internal attributes: their names start with _ indicating these are
+    There are three types of fields:
+    - optional attributes: they have a default value;
+    - required attributes: must be provided, they do not have a default value;
+    - internal attributes: their names start with _, indicating these are
       private. Any functionality to update them should be a class method.
 
     Notes
@@ -405,7 +404,6 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
         cfg.cube_height,
         cfg.cube_depth,
         cfg.network_depth,
-        # *cfg,  # .voxel_sizes, ---> does this work?
     )
 
     # Save results to xml file
