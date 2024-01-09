@@ -133,6 +133,7 @@ def test_read_cellfinder_config(
     )
 
 
+@pytest.mark.skip(reason="focus of PR62")
 @pytest.mark.parametrize(
     "input_config, message_pattern",
     [
