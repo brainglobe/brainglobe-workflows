@@ -74,7 +74,7 @@ napari = ["napari[pyqt5]", "brainglobe-napari-io", "cellfinder[napari]>=1.0.0"]
 "Source Code" = "https://github.com/brainglobe/brainglobe-workflows"
 
 [project.scripts]
-cellfinder-workflow = "brainglobe_workflows.cellfinder_core.cellfinder:main_app_wrapper"
+cellfinder-workflow = "brainglobe_workflows.cellfinder_core.cellfinder_core:main_app_wrapper"
 brainmapper = "brainglobe_workflows.brainmapper.main:main"
 
 [build-system]
