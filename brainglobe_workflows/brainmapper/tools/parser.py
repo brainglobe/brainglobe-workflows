@@ -18,11 +18,11 @@ from brainglobe_utils.general.numerical import (
 )
 from brainreg.core.cli import atlas_parse, geometry_parser, niftyreg_parse
 from brainreg.core.cli import backend_parse as brainreg_backend_parse
-from cellfinder_core.download.cli import (
+from cellfinder.core.download.cli import (
     download_directory_parser,
     model_parser,
 )
-from cellfinder_core.tools.source_files import source_custom_config_cellfinder
+from cellfinder.core.tools.source_files import source_custom_config_cellfinder
 
 from brainglobe_workflows import __version__
 
@@ -54,7 +54,7 @@ def valid_model_depth(depth):
         )
 
 
-def cellfinder_parser():
+def brainmapper_parser():
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser = main_parse(parser)
     parser = config_parse(parser)
@@ -161,7 +161,7 @@ def pixel_parser(parser):
 
 def run_parse(parser):
     run_parser = parser.add_argument_group(
-        "Options to disable part of cellfinder"
+        "Options to disable part of brainmapper"
     )
     run_parser.add_argument(
         "--no-detection",
@@ -432,7 +432,7 @@ def misc_parse(parser):
         type=check_positive_float,
         default=None,
         help="Maximum amount of RAM to use (in GB) - not currently fully "
-        "implemented for all parts of cellfinder",
+        "implemented for all parts of brainmapper",
     )
     misc_parser.add_argument(
         "--save-csv",

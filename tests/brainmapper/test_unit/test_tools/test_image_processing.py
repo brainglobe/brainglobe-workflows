@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from brainglobe_workflows.cellfinder_brainreg.tools import (
+from brainglobe_workflows.brainmapper.tools import (
     image_processing as img_tools,
 )
 

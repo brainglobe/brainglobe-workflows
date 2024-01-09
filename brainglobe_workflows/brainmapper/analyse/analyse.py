@@ -18,10 +18,6 @@ from bg_atlasapi import BrainGlobeAtlas
 from brainglobe_utils.general.system import ensure_directory_exists
 from brainglobe_utils.pandas.misc import safe_pandas_concat, sanitise_df
 
-from brainglobe_workflows.cellfinder_brainreg.export.export import (
-    export_points,
-)
-
 
 class Point:
     def __init__(
@@ -105,8 +101,6 @@ def summarise_points(
     get_region_totals(
         points, structures_with_points, volume_csv_path, summary_filename
     )
-
-    return points
 
 
 def create_all_cell_csv(points, all_points_filename):
@@ -265,19 +259,33 @@ def transform_points_downsampled_to_atlas_space(
     """
     field_scales = [int(1000 / resolution) for resolution in atlas.resolution]
     points: List[List] = [[], [], []]
+    points_out_of_bounds = []
     for axis, deformation_field_path in enumerate(deformation_field_paths):
         deformation_field = tifffile.imread(deformation_field_path)
         for point in downsampled_points:
-            point = [int(round(p)) for p in point]
-            points[axis].append(
-                int(
-                    round(
-                        field_scales[axis]
-                        * deformation_field[point[0], point[1], point[2]]
+            try:
+                point = [int(round(p)) for p in point]
+                points[axis].append(
+                    int(
+                        round(
+                            field_scales[axis]
+                            * deformation_field[point[0], point[1], point[2]]
+                        )
                     )
                 )
-            )
+            except IndexError:
+                if point not in points_out_of_bounds:
+                    points_out_of_bounds.append(point)
+                    logging.info(
+                        f"Ignoring point: {point} "
+                        f"as it falls outside the atlas."
+                    )
 
+    logging.warning(
+        f"{len(points_out_of_bounds)} points ignored due to falling outside "
+        f"of atlas. This may be due to inaccuracies with "
+        f"cell detection or registration. Please inspect the results."
+    )
     transformed_points = np.array(points).T
 
     if output_filename is not None:
@@ -310,11 +318,18 @@ def run(args, cells, atlas, downsampled_space):
         args.paths.downsampled_points,
         args.paths.atlas_points,
         args.paths.brainrender_points,
-        args.paths.abc4d_points,
         args.brainreg_paths.volume_csv_path,
         args.paths.all_points_csv,
         args.paths.summary_csv,
     )
+
+
+def export_points_to_brainrender(
+    points,
+    resolution,
+    output_filename,
+):
+    np.save(output_filename, points * resolution)
 
 
 def run_analysis(
@@ -328,7 +343,6 @@ def run_analysis(
     downsampled_points_path,
     atlas_points_path,
     brainrender_points_path,
-    abc4d_points_path,
     volume_csv_path,
     all_points_csv_path,
     summary_csv_path,
@@ -355,7 +369,7 @@ def run_analysis(
     )
 
     logging.info("Summarising cell positions")
-    points = summarise_points(
+    summarise_points(
         cells,
         transformed_cells,
         atlas,
@@ -363,11 +377,7 @@ def run_analysis(
         all_points_csv_path,
         summary_csv_path,
     )
-    logging.info("Exporting data")
-    export_points(
-        points,
-        transformed_cells,
-        atlas.resolution[0],
-        brainrender_points_path,
-        abc4d_points_path,
+    logging.info("Exporting data to brainrender")
+    export_points_to_brainrender(
+        transformed_cells, atlas.resolution[0], brainrender_points_path
     )

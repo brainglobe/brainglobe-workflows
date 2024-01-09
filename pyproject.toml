@@ -27,8 +27,9 @@ classifiers = [
 # Below the dependenciess for the cellfinder CLI tool only
 # (i.e., only what users will need for the CLI)
 dependencies = [
+    "brainglobe>=1.0.0",
     "brainreg>=1.0.0",
-    "cellfinder-core>=0.2.4,<1.0.0",
+    "cellfinder>=1.1.0",
     "configobj",
     "fancylog>=0.0.7",
     "imio",
@@ -62,17 +63,9 @@ dev = [
 # (i.e., everything needed to install this package without the CLI tool)
 # Once the cellfinder CLI tool is deprecated, these will move to the
 # default dependencies.
-asv_version = [
-    "asv",
-    "pooch",
-    "cellfinder-core",
-]
+asv_version = ["asv", "pooch", "cellfinder-core"]
 
-napari = [
-    "napari[pyqt5]",
-    "brainglobe-napari-io",
-    "cellfinder-napari<1.0.0",
-]
+napari = ["napari[pyqt5]", "brainglobe-napari-io", "cellfinder[napari]>=1.0.0"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/brainglobe/brainglobe-workflows/issues"
@@ -81,8 +74,8 @@ napari = [
 "Source Code" = "https://github.com/brainglobe/brainglobe-workflows"
 
 [project.scripts]
-cellfinder-core-workflow = "brainglobe_workflows.cellfinder_core.cellfinder:main_app_wrapper"
-cellfinder = "brainglobe_workflows.cellfinder_brainreg.main:main"
+cellfinder-workflow = "brainglobe_workflows.cellfinder_core.cellfinder:main_app_wrapper"
+brainmapper = "brainglobe_workflows.brainmapper.main:main"
 
 [build-system]
 requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
@@ -94,7 +87,12 @@ zip-safe = false
 
 [tool.setuptools.packages.find]
 include = ["brainglobe_workflows"]
-exclude = ["brainglobe_workflows.cellfinder_core","tests", "resources", "benchmarks"] # it's not excluding "brainglobe_workflows.cellfinder_core"!
+exclude = [
+    "brainglobe_workflows.cellfinder_core",
+    "tests",
+    "resources",
+    "benchmarks",
+] # it's not excluding "brainglobe_workflows.cellfinder_core"!
 
 [tool.black]
 target-version = ["py39", "py310"]
