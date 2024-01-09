@@ -143,10 +143,10 @@ INPUT_COREDEV =
 extras =
     dev
 deps =
-    coredev: git+https://github.com/brainglobe/cellfinder-core.git
+    coredev: git+https://github.com/brainglobe/cellfinder.git
 commands =
     pytest {toxinidir} -v --color=yes --cov=./ --cov-report=xml
 description =
     Run tests
-    coredev: Run tests with the development version of cellfinder-core
+    coredev: Run tests with the development version of cellfinder
 """
