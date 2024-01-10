@@ -131,15 +131,6 @@ def config_GIN_dict(
     if "input_data_dir" in config_dict.keys():
         del config_dict["input_data_dir"]
 
-    # GIN downloaded data default location
-    # GIN_default_location = (
-    #     Path.home()
-    #     / ".brainglobe"
-    #     / "workflows"
-    #     / "cellfinder_core"
-    #     / "cellfinder_test_data"
-    # )
-
     # download GIN data to default location for GIN
     # if the file exists in the given path and the hash matches,
     # it will not be downloaded and the absolute path to the file is returned.
@@ -192,14 +183,6 @@ def config_local_dict(
     config_dict["input_data_dir"] = str(Path.home() / "local_cellfinder_data")
 
     # copy data from default GIN location to the local location
-    # GIN downloaded data default location
-    # GIN_default_location = (
-    #     Path.home()
-    #     / ".brainglobe"
-    #     / "workflows"
-    #     / "cellfinder_core"
-    #     / "cellfinder_test_data"
-    # )
     shutil.copytree(
         GIN_default_location,
         config_dict["input_data_dir"],

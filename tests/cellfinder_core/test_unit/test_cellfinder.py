@@ -58,15 +58,6 @@ def config_force_GIN_dict(
     def mock_pooch_download(
         url="", known_hash="", path="", progressbar="", processor=""
     ):
-        # GIN downloaded data default location
-        # GIN_default_location = (
-        #     Path.home()
-        #     / ".brainglobe"
-        #     / "workflows"
-        #     / "cellfinder_core"
-        #     / "cellfinder_test_data"
-        # )
-
         # Copy destination
         GIN_copy_destination = tmp_path
 
@@ -245,7 +236,8 @@ def test_read_cellfinder_config(
     caplog: pytest.LogCaptureFixture,
     request: pytest.FixtureRequest,
 ):
-    """Test reading a cellfinder config
+    """
+    Test reading a cellfinder config
 
     Parameters
     ----------
