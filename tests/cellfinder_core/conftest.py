@@ -1,5 +1,7 @@
 """Pytest fixtures shared across unit and integration tests"""
 
+
+import json
 from pathlib import Path
 
 import pooch
