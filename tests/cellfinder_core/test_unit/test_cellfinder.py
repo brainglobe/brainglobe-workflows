@@ -10,7 +10,10 @@ from brainglobe_workflows.utils import setup_logger
 
 @pytest.fixture()
 def config_force_GIN_dict(
-    config_GIN_dict: dict, tmp_path: Path, monkeypatch
+    config_GIN_dict: dict,
+    tmp_path: Path,
+    GIN_default_location: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> dict:
     """
     Fixture returning a config as a dictionary, which has a
@@ -28,6 +31,8 @@ def config_force_GIN_dict(
         GIN data
     tmp_path : Path
         path to pytest-generated temporary directory
+    GIN_default_location : Path
+        path to the default location where to download GIN data
     monkeypatch : pytest.MonkeyPatch
         a monkeypatch fixture
 
@@ -54,13 +59,13 @@ def config_force_GIN_dict(
         url="", known_hash="", path="", progressbar="", processor=""
     ):
         # GIN downloaded data default location
-        GIN_default_location = (
-            Path.home()
-            / ".brainglobe"
-            / "workflows"
-            / "cellfinder_core"
-            / "cellfinder_test_data"
-        )
+        # GIN_default_location = (
+        #     Path.home()
+        #     / ".brainglobe"
+        #     / "workflows"
+        #     / "cellfinder_core"
+        #     / "cellfinder_test_data"
+        # )
 
         # Copy destination
         GIN_copy_destination = tmp_path
