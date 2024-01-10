@@ -24,7 +24,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 
-# Below the dependenciess for brainmapper (the cellfinder CLI tool) only
+# Below the dependencies for brainmapper (the cellfinder CLI tool) only
 # (i.e., only what users will need for brainmapper)
 dependencies = [
     "brainglobe>=1.0.0",

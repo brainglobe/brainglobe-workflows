@@ -6,14 +6,14 @@ from typing import Optional
 
 
 def test_main():
-    """Test main function for setting up and running cellfinder workflow
-    with no inputs
-
     """
-
+    Test main function for setting up and running cellfinder workflow
+    with no inputs
+    """
+    # import inside the test function so that required functions are
+    # monkeypatched first
     from brainglobe_workflows.cellfinder_core.cellfinder_core import main
 
-    # otherwise imported before monkeypatching?
     # run main
     cfg = main()
 
@@ -32,17 +32,14 @@ def test_main_w_inputs(
     input_config: Optional[str],
     request: pytest.FixtureRequest,
 ):
-    """Test main function for setting up and running cellfinder workflow
+    """
+    Test main function for setting up and running cellfinder workflow
     with inputs
 
     Parameters
     ----------
     input_config : Optional[str]
-        Path to input config json file
-    monkeypatch : pytest.MonkeyPatch
-        Pytest fixture to use monkeypatching utils
-    tmp_path : Path
-        Pytest fixture providing a temporary path for each test
+        Path to input config JSON file
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
@@ -57,7 +54,8 @@ def test_main_w_inputs(
 
 @pytest.mark.skip()
 def test_script():
-    """Test running the cellfinder worklfow from the command line
+    """
+    Test running the cellfinder worklfow from the command line
     with no inputs
     """
     from brainglobe_workflows.cellfinder_core.cellfinder_core import (
@@ -74,7 +72,6 @@ def test_script():
     # Path.home() is not monkeypatched :(
     subprocess_output = subprocess.run(
         subprocess_input,
-        # input=Path.home()
     )
 
     # check returncode
@@ -93,7 +90,8 @@ def test_script_w_inputs(
     input_config: Optional[str],
     request: pytest.FixtureRequest,
 ):
-    """Test running the cellfinder worklfow from the command line with inputs
+    """
+    Test running the cellfinder worklfow from the command line with inputs
 
     Parameters
     ----------
@@ -130,7 +128,8 @@ def test_script_w_inputs(
 
 @pytest.mark.skip()
 def test_entry_point():
-    """Test running the cellfinder workflow via the predefined entry point
+    """
+    Test running the cellfinder workflow via the predefined entry point
     with no inputs
     """
 
@@ -158,7 +157,8 @@ def test_entry_point_w_inputs(
     input_config: Optional[str],
     request: pytest.FixtureRequest,
 ):
-    """Test running the cellfinder workflow via the predefined entry point
+    """
+    Test running the cellfinder workflow via the predefined entry point
     with inputs
 
     Parameters

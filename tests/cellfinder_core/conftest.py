@@ -8,11 +8,23 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def mock_home_directory(monkeypatch: pytest.MonkeyPatch):
+    """
+    Monkeypatch pathlib.Path.home()
+
+    Instead of returning the usual home path, the
+    monkeypatched version returns the path to
+    Path.home() / ".brainglobe-tests"
+
+    Parameters
+    ----------
+    monkeypatch : pytest.MonkeyPatch
+       a monkeypatch fixture
+    """
     # define mock home path
     home_path = Path.home()  # actual home path
     mock_home_path = home_path / ".brainglobe-tests"
 
-    # create directory if it doesn't exist
+    # create mock home directory if it doesn't exist
     if not mock_home_path.exists():
         mock_home_path.mkdir()
 
@@ -25,7 +37,9 @@ def mock_home_directory(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture()
 def default_input_config_cellfinder() -> Path:
-    """Return path to default input config for cellfinder workflow
+    """
+    Fixture for the path to the default input
+    configuration file for the cellfinder workflow
 
     Returns
     -------
@@ -40,7 +54,8 @@ def default_input_config_cellfinder() -> Path:
 
 @pytest.fixture(scope="session")
 def cellfinder_GIN_data() -> dict:
-    """Return the data of the GIN repository with the input data
+    """
+    Fixture for the location of the test data in the GIN repository
 
     Returns
     -------
@@ -58,15 +73,32 @@ def config_GIN_dict(
     cellfinder_GIN_data: dict, default_input_config_cellfinder: Path
 ) -> dict:
     """
-    Return a config pointing to the location where GIN would be by default,
-    and download the data there
+    Fixture that returns a config as a dictionary, pointing to the location
+    where the GIN data would be by default, and download the data there.
+
+    If the file exists in the given path and the hash matches, pooch.retrieve()
+    will not download the file and instead its path is returned.
+
+    Parameters
+    ----------
+    cellfinder_GIN_data : dict
+        dictionary with the location of the test data in the GIN repository
+    default_input_config_cellfinder : Path
+        path to the default input configuration file for the cellfinder
+        workflow
+
+    Returns
+    -------
+    dict
+        dictionary with the config for a workflow that uses the downloaded
+        GIN data
     """
 
     # read default config as a dictionary
     with open(default_input_config_cellfinder) as cfg:
         config_dict = json.load(cfg)
 
-    # modify
+    # modify the default config:
     # - add url
     # - add data hash
     # - remove input_data_dir if present
@@ -85,6 +117,8 @@ def config_GIN_dict(
     )
 
     # download GIN data to default location for GIN
+    # if the file exists in the given path and the hash matches,
+    # it will not be downloaded and the absolute path to the file is returned.
     pooch.retrieve(
         url=cellfinder_GIN_data["url"],
         known_hash=cellfinder_GIN_data["hash"],
@@ -101,21 +135,31 @@ def config_local_dict(
     config_GIN_dict,  # forces download to GIN default location
 ) -> dict:
     """
-    Return a config pointing to a local dataset,
-    and ensure the data exists there.
+    Fixture that returns a config as a dictionary, pointing to a local dataset.
 
     The data is copied to the local directory from the
     default location used in the config_GIN_dict fixture.
+
+    Parameters
+    ----------
+    config_GIN_dict : dict
+        dictionary with the config for a workflow that uses the downloaded
+        GIN data
+
+    Returns
+    -------
+    dict
+        dictionary with the config for a workflow that uses local data
     """
     import shutil
 
-    # copy GIN config as dict
+    # copy GIN config as a dictionary
     config_dict = config_GIN_dict.copy()
 
-    # modify dict
+    # modify the GIN config:
     # - remove url
     # - remove data hash
-    # - point to a local directory under home in input_data_dir
+    # - set input data directory to a local directory under home
     config_dict["data_url"] = None
     config_dict["data_hash"] = None
     config_dict["input_data_dir"] = str(Path.home() / "local_cellfinder_data")
@@ -140,6 +184,23 @@ def config_local_dict(
 
 @pytest.fixture()
 def config_GIN_json(config_GIN_dict: dict, tmp_path: Path) -> Path:
+    """
+    Fixture that returns a config as a JSON file path, that points to GIN
+    downloaded data as input
+
+    Parameters
+    ----------
+    config_GIN_dict : dict
+        dictionary with the config for a workflow that uses the downloaded
+        GIN data
+    tmp_path : Path
+        Pytest fixture providing a temporary path
+
+    Returns
+    -------
+    Path
+        path to a cellfinder config JSON file
+    """
     # define location of input config file
     config_file_path = tmp_path / "input_config.json"
 
@@ -152,6 +213,22 @@ def config_GIN_json(config_GIN_dict: dict, tmp_path: Path) -> Path:
 
 @pytest.fixture()
 def config_local_json(config_local_dict: dict, tmp_path: Path) -> Path:
+    """
+    Fixture that returns config as a JSON file path, that points to local data
+    as input
+
+    Parameters
+    ----------
+    config_local_dict : dict
+        _description_
+    tmp_path : Path
+        Pytest fixture providing a temporary path
+
+    Returns
+    -------
+    Path
+        path to a cellfinder config JSON file
+    """
     # define location of input config file
     config_file_path = tmp_path / "input_config.json"
 

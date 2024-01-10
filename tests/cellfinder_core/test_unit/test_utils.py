@@ -31,6 +31,13 @@ def test_setup_logger(custom_logger_name: str):
     [[], ["--config", str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)]],
 )
 def test_config_parser(list_input_args: List[str]):
+    """Test parser for config argument
+
+    Parameters
+    ----------
+    list_input_args : List[str]
+        a list with the command-line input arguments
+    """
     args = config_parser(
         list_input_args,
         str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER),
