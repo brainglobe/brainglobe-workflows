@@ -3,8 +3,7 @@
 [![Downloads](https://pepy.tech/badge/brainglobe-workflows)](https://pepy.tech/project/brainglobe-workflows)
 [![Wheel](https://img.shields.io/pypi/wheel/brainglobe-workflows.svg)](https://pypi.org/project/brainglobe-workflows)
 [![Development Status](https://img.shields.io/pypi/status/brainglobe-workflows.svg)](https://github.com/brainglobe/brainglobe-workflows)
-[![Tests](https://img.shields.io/github/workflow/status/brainglobe/brainglobe-workflows/tests)](
-    https://github.com/brainglobe/brainglobe-workflows/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/brainglobe/brainglobe-workflows/test_and_deploy.yml?branch=main)](https://github.com/brainglobe/brainglobe-workflows/actions)
 [![codecov](https://codecov.io/gh/brainglobe/brainglobe-workflows/branch/master/graph/badge.svg?token=s3MweEFPhl)](https://codecov.io/gh/brainglobe/brainglobe-workflows)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
