@@ -37,7 +37,7 @@ def config_local(cellfinder_GIN_data, default_input_config_cellfinder):
     with open(default_input_config_cellfinder) as cfg:
         config_dict = json.load(cfg)
 
-    # modify location of data?
+    # modify config:
     # - remove url
     # - remove data hash
     # - add input_data_dir
@@ -169,8 +169,6 @@ def test_add_input_paths(
     _ = setup_logger()
 
     # read json as Cellfinder config
-    # ---> change so that the fixture is the config object!
-    # config = read_cellfinder_config(input_configs_dir / input_config)
     _ = request.getfixturevalue(input_config)
 
     # check log messages
