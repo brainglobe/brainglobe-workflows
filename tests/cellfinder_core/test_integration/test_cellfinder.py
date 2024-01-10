@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from typing import Optional
 
+
 def test_main():
     """
     Test main function for setting up and running cellfinder workflow
@@ -50,54 +51,14 @@ def test_main_w_inputs(
     assert Path(cfg._detected_cells_path).is_file()
 
 
-@pytest.mark.skip()
-def test_entry_point():
+def test_entry_point_help():
     """
-    Test running the cellfinder workflow via the predefined entry point
-    with no inputs
-    """
-
-    # define CLI input
-    subprocess_input = ["cellfinder-workflow"]
-
-    # run workflow
-    subprocess_output = subprocess.run(
-        subprocess_input,
-    )
-
-    # check returncode
-    assert subprocess_output.returncode == 0
-
-
-@pytest.mark.skip()
-@pytest.mark.parametrize(
-    "input_config",
-    [
-        "config_local_json",
-        "config_GIN_json",
-    ],
-)
-def test_entry_point_w_inputs(
-    input_config: Optional[str],
-    request: pytest.FixtureRequest,
-):
-    """
-    Test running the cellfinder workflow via the predefined entry point
-    with inputs
-
-    Parameters
-    ----------
-    input_config : Optional[str]
-        Path to input config json file
-    request : pytest.FixtureRequest
-        Pytest fixture to enable requesting fixtures by name
+    Smoke test the cellfinder workflow entry point by checking
+    help is printed out successfully
     """
 
     # define CLI input
-    subprocess_input = ["cellfinder-workflow"]
-    # append config 
-    subprocess_input.append("--config")
-    subprocess_input.append(str(request.getfixturevalue(input_config)))
+    subprocess_input = ["cellfinder-workflow", "--help"]
 
     # run workflow
     subprocess_output = subprocess.run(
