@@ -10,8 +10,6 @@ def custom_logger_name() -> str:
     str
         Name of custom logger
     """
-    from brainglobe_workflows.utils import (
-        __name__ as logger_name,
-    )
+    from brainglobe_workflows.utils import __name__ as logger_name
 
     return logger_name

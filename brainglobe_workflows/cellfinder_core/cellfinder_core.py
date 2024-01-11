@@ -10,9 +10,9 @@ is used.
 Example usage:
  - to pass a custom configuration, run (from the cellfinder_main.py
    parent directory):
-    python cellfinder_main.py --config path/to/input/config.json
+    python cellfinder_core.py --config path/to/input/config.json
  - to use the default configuration, run
-    python cellfinder_main.py
+    python cellfinder_core.py
 
 
 """
