@@ -7,11 +7,11 @@ from brainglobe_utils.IO.cells import save_cells
 from cellfinder.core.main import main as cellfinder_run
 from cellfinder.core.tools.IO import read_with_dask
 
-from brainglobe_workflows.cellfinder_core.cellfinder import (
+from brainglobe_workflows.cellfinder_core.cellfinder_core import (
     CellfinderConfig,
     run_workflow_from_cellfinder_run,
 )
-from brainglobe_workflows.cellfinder_core.cellfinder import (
+from brainglobe_workflows.cellfinder_core.cellfinder_core import (
     setup as setup_cellfinder_workflow,
 )
 from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
@@ -112,14 +112,14 @@ class TimeBenchmarkPrepGIN:
         _ = pooch.retrieve(
             url=config.data_url,
             known_hash=config.data_hash,
-            path=config.install_path,
+            path=config._install_path,
             progressbar=True,
             processor=pooch.Unzip(extract_dir=config.data_dir_relative),
         )
 
         # Check paths to input data should now exist in config
-        assert Path(config.signal_dir_path).exists()
-        assert Path(config.background_dir_path).exists()
+        assert Path(config._signal_dir_path).exists()
+        assert Path(config._background_dir_path).exists()
 
     def setup(self):
         """
@@ -146,7 +146,7 @@ class TimeBenchmarkPrepGIN:
         The input data is kept for all repeats of the same benchmark,
         to avoid repeated downloads from GIN.
         """
-        shutil.rmtree(Path(self.cfg.output_path).resolve())
+        shutil.rmtree(Path(self.cfg._output_path).resolve())
 
 
 class TimeFullWorkflow(TimeBenchmarkPrepGIN):
@@ -177,10 +177,10 @@ class TimeReadInputDask(TimeBenchmarkPrepGIN):
     """
 
     def time_read_signal_with_dask(self):
-        read_with_dask(self.cfg.signal_dir_path)
+        read_with_dask(self.cfg._signal_dir_path)
 
     def time_read_background_with_dask(self):
-        read_with_dask(self.cfg.background_dir_path)
+        read_with_dask(self.cfg._background_dir_path)
 
 
 class TimeDetectCells(TimeBenchmarkPrepGIN):
@@ -199,8 +199,8 @@ class TimeDetectCells(TimeBenchmarkPrepGIN):
         TimeBenchmarkPrepGIN.setup(self)
 
         # add input data as arrays to config
-        self.signal_array = read_with_dask(self.cfg.signal_dir_path)
-        self.background_array = read_with_dask(self.cfg.background_dir_path)
+        self.signal_array = read_with_dask(self.cfg._signal_dir_path)
+        self.background_array = read_with_dask(self.cfg._background_dir_path)
 
     def time_cellfinder_run(self):
         cellfinder_run(
@@ -215,8 +215,8 @@ class TimeSaveCells(TimeBenchmarkPrepGIN):
         TimeBenchmarkPrepGIN.setup(self)
 
         # add input data as arrays to config
-        self.signal_array = read_with_dask(self.cfg.signal_dir_path)
-        self.background_array = read_with_dask(self.cfg.background_dir_path)
+        self.signal_array = read_with_dask(self.cfg._signal_dir_path)
+        self.background_array = read_with_dask(self.cfg._background_dir_path)
 
         # detect cells
         self.detected_cells = cellfinder_run(
@@ -224,4 +224,4 @@ class TimeSaveCells(TimeBenchmarkPrepGIN):
         )
 
     def time_save_cells(self):
-        save_cells(self.detected_cells, self.cfg.detected_cells_path)
+        save_cells(self.detected_cells, self.cfg._detected_cells_path)

@@ -24,11 +24,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 
-# Below the dependenciess for the cellfinder CLI tool only
-# (i.e., only what users will need for the CLI)
+# Below the dependencies for brainmapper (the cellfinder CLI tool) only
+# (i.e., only what users will need for brainmapper)
 dependencies = [
+    "brainglobe>=1.0.0",
     "brainreg>=1.0.0",
-    "cellfinder>=1.0.0",
+    "cellfinder>=1.1.0",
     "configobj",
     "fancylog>=0.0.7",
     "imio",
@@ -73,7 +74,7 @@ napari = ["napari[pyqt5]", "brainglobe-napari-io", "cellfinder[napari]>=1.0.0"]
 "Source Code" = "https://github.com/brainglobe/brainglobe-workflows"
 
 [project.scripts]
-cellfinder-workflow = "brainglobe_workflows.cellfinder_core.cellfinder:main_app_wrapper"
+cellfinder-workflow = "brainglobe_workflows.cellfinder_core.cellfinder_core:main_app_wrapper"
 brainmapper = "brainglobe_workflows.brainmapper.main:main"
 
 [build-system]
@@ -87,11 +88,10 @@ zip-safe = false
 [tool.setuptools.packages.find]
 include = ["brainglobe_workflows"]
 exclude = [
-    "brainglobe_workflows.cellfinder_core",
     "tests",
     "resources",
     "benchmarks",
-] # it's not excluding "brainglobe_workflows.cellfinder_core"!
+]
 
 [tool.black]
 target-version = ["py39", "py310"]
@@ -142,10 +142,10 @@ INPUT_COREDEV =
 extras =
     dev
 deps =
-    coredev: git+https://github.com/brainglobe/cellfinder-core.git
+    coredev: git+https://github.com/brainglobe/cellfinder.git
 commands =
     pytest {toxinidir} -v --color=yes --cov=./ --cov-report=xml
 description =
     Run tests
-    coredev: Run tests with the development version of cellfinder-core
+    coredev: Run tests with the development version of cellfinder
 """
