@@ -7,7 +7,7 @@ from asv import util
 
 
 @pytest.fixture()
-def asv_config_monkeypatched_path(tmp_path: Path) -> str:
+def asv_config_monkeypatched_path(tmp_path: Path) -> Path:
     """
     Create a monkeypatched asv.conf.json file
     in a Pytest-generated temporary directory
@@ -20,22 +20,27 @@ def asv_config_monkeypatched_path(tmp_path: Path) -> str:
 
     Returns
     -------
-    str
+    Path
         Path to monkeypatched asv config file
     """
     # read reference asv config
-    asv_original_path = Path(__file__).resolve().parents[3] / "asv.conf.json"
+    asv_original_path = Path(__file__).resolve().parents[2] / "asv.conf.json"
     asv_monkeypatched_dict = util.load_json(
         asv_original_path, js_comments=True
     )
 
-    # change directories
+    # point to benchmarks directory in config
+    asv_monkeypatched_dict["benchmark_dir"] = str(
+        Path(__file__).resolve().parents[2] / "benchmarks"
+    )
+
+    # change env, results and html directories
     for ky in ["env_dir", "results_dir", "html_dir"]:
         asv_monkeypatched_dict[ky] = str(
             Path(tmp_path) / asv_monkeypatched_dict[ky]
         )
 
-    # change repo to URL rather than local
+    # ensure repo points to URL
     asv_monkeypatched_dict[
         "repo"
     ] = "https://github.com/brainglobe/brainglobe-workflows.git"
@@ -50,56 +55,50 @@ def asv_config_monkeypatched_path(tmp_path: Path) -> str:
     # check json file exists
     assert asv_monkeypatched_path.is_file()
 
-    return str(asv_monkeypatched_path)
+    return asv_monkeypatched_path
 
 
-@pytest.mark.skip(reason="focus of PR32")
-def test_run_benchmarks(asv_config_monkeypatched_path):
-    # --- ideally monkeypatch an asv config so that results are in tmp_dir?
+def test_asv_run(asv_config_monkeypatched_path: Path):
+    asv_benchmark_output = subprocess.run(
+        [
+            "asv",
+            "run",
+            "--quick",  # each benchmark function is run only once
+            "--config",
+            str(asv_config_monkeypatched_path),
+        ],
+    )
+    assert asv_benchmark_output.returncode == 0
 
-    # set up machine (env_dir, results_dir, html_dir)
+
+def test_asv_run_machine_specific(
+    asv_config_monkeypatched_path: Path,
+):
+    # setup machine
+    asv_specific_machine_name = "CURRENT_MACHINE"
     asv_machine_output = subprocess.run(
         [
             "asv",
             "machine",
             "--machine",
-            "MACHINENAME",  # name of the machine
+            asv_specific_machine_name,  # name of the current machine
             "--yes",
             "--config",
-            asv_config_monkeypatched_path,
-            # use this config rather than default
+            str(asv_config_monkeypatched_path),  # use monkeypatched config
         ]
     )
     assert asv_machine_output.returncode == 0
 
-    # run benchmarks
+    # run benchmarks on machine
     asv_benchmark_output = subprocess.run(
         [
             "asv",
             "run",
+            "--quick",  # each benchmark function is run only once
             "--config",
-            asv_config_monkeypatched_path,
-            # "--machine",
-            # "MACHINENAME",
-            # "--dry-run",
-            # # Do not save any results to disk? not truly testing then
+            str(asv_config_monkeypatched_path),
+            "--machine",
+            asv_specific_machine_name,
         ],
-        cwd=str(
-            Path(asv_config_monkeypatched_path).parent
-        ),  # run from where asv config is
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        encoding="utf-8",
     )
-    # STDOUT: "· Cloning project\n· Fetching recent changes\n·
-    # Creating environments\n· No __init__.py file in 'benchmarks'\n"
-
-    # check returncode
     assert asv_benchmark_output.returncode == 0
-
-    # check logs?
-
-    # delete directories?
-    # check teardown after yield:
-    # https://docs.pytest.org/en/6.2.x/fixture.html#yield-fixtures-recommended
