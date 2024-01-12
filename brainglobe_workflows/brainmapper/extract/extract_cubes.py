@@ -22,10 +22,10 @@ from skimage import transform
 from tifffile import tifffile
 from tqdm import tqdm
 
-from brainglobe_workflows.cellfinder_brainreg.tools import (
+from brainglobe_workflows.brainmapper.tools import (
     image_processing as img_tools,
 )
-from brainglobe_workflows.cellfinder_brainreg.tools import system
+from brainglobe_workflows.brainmapper.tools import system
 
 
 class StackSizeError(Exception):

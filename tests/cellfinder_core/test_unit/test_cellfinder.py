@@ -10,15 +10,39 @@ from brainglobe_workflows.utils import setup_logger
 
 @pytest.fixture()
 def config_force_GIN_dict(
-    config_GIN_dict: dict, tmp_path: Path, monkeypatch
+    config_GIN_dict: dict,
+    tmp_path: Path,
+    GIN_default_location: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> dict:
     """
-    Return a config pointing to a temporary directory where to download GIN
-    data, without downloading the data first.
+    Fixture returning a config as a dictionary, which has a
+    Pytest-generated temporary directory as input data location,
+    and that monkeypatches pooch.retrieve()
 
     Since there is no data at the input_data_dir location, the GIN download
-    will be triggered
+    will be triggered, but the monkeypatched pooch.retrieve() will copy the
+    files rather than download them.
+
+    Parameters
+    ----------
+    config_GIN_dict : dict
+        dictionary with the config for a workflow that uses the downloaded
+        GIN data
+    tmp_path : Path
+        path to pytest-generated temporary directory
+    GIN_default_location : Path
+        path to the default location where to download GIN data
+    monkeypatch : pytest.MonkeyPatch
+        a monkeypatch fixture
+
+    Returns
+    -------
+    dict
+        dictionary with the config for a workflow that triggers the downloaded
+        GIN data
     """
+
     import shutil
 
     import pooch
@@ -29,20 +53,11 @@ def config_force_GIN_dict(
     # point to a temporary directory in input_data_dir
     config_dict["input_data_dir"] = str(tmp_path)
 
-    # monkeypatch pooch.retrieve
-    # when called: copy GIN downloaded data, instead of re-downloading
+    # monkeypatch pooch.retrieve()
+    # when called copy GIN downloaded data, instead of downloading it
     def mock_pooch_download(
         url="", known_hash="", path="", progressbar="", processor=""
     ):
-        # GIN downloaded data default location
-        GIN_default_location = (
-            Path.home()
-            / ".brainglobe"
-            / "workflows"
-            / "cellfinder_core"
-            / "cellfinder_test_data"
-        )
-
         # Copy destination
         GIN_copy_destination = tmp_path
 
@@ -71,18 +86,19 @@ def config_force_GIN_dict(
 @pytest.fixture()
 def config_missing_signal_dict(config_local_dict: dict) -> dict:
     """
-    Return a config pointing to a local dataset, whose signal directory
-    does not exist
+    Fixture that returns a config as a dictionary, pointing to a local dataset,
+    whose signal directory does not exist
 
     Parameters
     ----------
     config_local_dict : _type_
-        _description_
+        dictionary with the config for a workflow that uses local data
 
     Returns
     -------
     dict
-        _description_
+        dictionary with the config for a workflow that uses local data, but
+        whose signal directory does not exist.
     """
     config_dict = config_local_dict.copy()
     config_dict["signal_subdir"] = "_"
@@ -91,19 +107,21 @@ def config_missing_signal_dict(config_local_dict: dict) -> dict:
 
 
 @pytest.fixture()
-def config_missing_background_dict(config_local_dict):
-    """Return a config pointing to a local dataset, whose background directory
-    does not exist
+def config_missing_background_dict(config_local_dict: dict) -> dict:
+    """
+    Fixture that returns a config as a dictionary, pointing to a local dataset,
+    whose background directory does not exist
 
     Parameters
     ----------
-    config_local_dict : _type_
-        _description_
+    config_local_dict : dict
+        dictionary with the config for a workflow that uses local data
 
     Returns
     -------
-    _type_
-        _description_
+    dict
+        dictionary with the config for a workflow that uses local data, but
+        whose background directory does not exist.
     """
     config_dict = config_local_dict.copy()
     config_dict["background_subdir"] = "_"
@@ -112,19 +130,22 @@ def config_missing_background_dict(config_local_dict):
 
 
 @pytest.fixture()
-def config_not_GIN_nor_local_dict(config_local_dict):
-    """Return a config pointing to a local dataset whose input_data_dir
-    directory does not exist, and with no references to a GIN dataset.
+def config_not_GIN_nor_local_dict(config_local_dict: dict) -> dict:
+    """
+    Fixture that returns a config as a dictionary, whose input_data_dir
+    directory does not exist and with no references to a GIN dataset.
 
     Parameters
     ----------
-    config_local_dict : _type_
-        _description_
+    config_local_dict : dict
+        dictionary with the config for a workflow that uses local data
 
     Returns
     -------
-    _type_
-        _description_
+    dict
+        dictionary with the config for a workflow that uses local data, but
+        whose input_data_dir directory does not exist and with no references
+        to a GIN dataset.
     """
     config_dict = config_local_dict.copy()
     config_dict["input_data_dir"] = "_"
@@ -158,25 +179,28 @@ def config_not_GIN_nor_local_dict(config_local_dict):
         ),
     ],
 )
-def test_add_signal_and_background_files(
+def test_add_input_paths(
     caplog: pytest.LogCaptureFixture,
     input_config_dict: dict,
     message_pattern: str,
     request: pytest.FixtureRequest,
 ):
-    """Test signal and background files addition to the cellfinder config
+    """
+    Test the addition of signal and background files to the cellfinder config
 
     Parameters
     ----------
     caplog : pytest.LogCaptureFixture
         Pytest fixture to capture the logs during testing
-    input_config_dict : dicy
+    input_config_dict : dict
         input config as a dict
     message_pattern : str
         Expected pattern in the log
+    request : pytest.FixtureRequest
+        Pytest fixture to enable requesting fixtures by name
     """
 
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         CellfinderConfig,
     )
 
@@ -207,10 +231,21 @@ def test_read_cellfinder_config(
     request: pytest.FixtureRequest,
 ):
     """
-    Test for reading a cellfinder config file default
+    Test reading a cellfinder config
+
+    Parameters
+    ----------
+    input_config_path : str
+        path to input config file
+    message : str
+        Expected message in the log
+    caplog : pytest.LogCaptureFixture
+        Pytest fixture to capture the logs during testing
+    request : pytest.FixtureRequest
+        Pytest fixture to enable requesting fixtures by name
 
     """
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         read_cellfinder_config,
     )
 
@@ -243,12 +278,12 @@ def test_read_cellfinder_config(
     assert all([Path(f).is_file() for f in config._list_background_files])
 
     # check output directory exists
-    assert Path(config.output_path).resolve().is_dir()
+    assert Path(config._output_path).resolve().is_dir()
 
     # check output directory name has correct format
     out = re.fullmatch(
         str(config.output_dir_basename) + "\\d{8}_\\d{6}$",
-        Path(config.output_path).stem,
+        Path(config._output_path).stem,
     )
     assert out is not None
     assert out.group() is not None
@@ -256,7 +291,7 @@ def test_read_cellfinder_config(
     # check output file path is as expected
     assert (
         Path(config._detected_cells_path)
-        == Path(config.output_path) / config.detected_cells_filename
+        == Path(config._output_path) / config.detected_cells_filename
     )
 
 
@@ -271,8 +306,8 @@ def test_read_cellfinder_config(
 def test_setup(
     input_config: str, custom_logger_name: str, request: pytest.FixtureRequest
 ):
-    """Test full setup for cellfinder workflow, using the default config
-    and passing a specific config file.
+    """
+    Test the full setup for the cellfinder workflow.
 
     Parameters
     ----------
@@ -280,17 +315,13 @@ def test_setup(
         Path to input config file
     custom_logger_name : str
         Name of custom logger
-    monkeypatch : MonkeyPatch
-        Pytest fixture to use monkeypatching utils
-    tmp_path : Path
-        Pytest fixture providing a temporary path for each test
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         CellfinderConfig,
     )
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         setup as setup_workflow,
     )
 
@@ -317,24 +348,20 @@ def test_setup(
 def test_run_workflow_from_cellfinder_run(
     input_config: str, request: pytest.FixtureRequest
 ):
-    """Test running cellfinder workflow with default input config
-    (fetches data from GIN) and local input config
+    """
+    Test running cellfinder workflow
 
     Parameters
     ----------
     input_config : str
         Path to input config json file
-    monkeypatch : MonkeyPatch
-        Pytest fixture to use monkeypatching utils
-    tmp_path : Path
-        Pytest fixture providing a temporary path for each test
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         run_workflow_from_cellfinder_run,
     )
-    from brainglobe_workflows.cellfinder_core.cellfinder import (
+    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
         setup as setup_workflow,
     )
 

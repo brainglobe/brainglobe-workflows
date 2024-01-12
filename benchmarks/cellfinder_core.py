@@ -3,14 +3,14 @@ import shutil
 from pathlib import Path
 
 from brainglobe_utils.IO.cells import save_cells
-from cellfinder_core.main import main as cellfinder_run
-from cellfinder_core.tools.IO import read_with_dask
+from cellfinder.core.main import main as cellfinder_run
+from cellfinder.core.tools.IO import read_with_dask
 
-from brainglobe_workflows.cellfinder_core.cellfinder import (
+from brainglobe_workflows.cellfinder_core.cellfinder_core import (
     CellfinderConfig,
     run_workflow_from_cellfinder_run,
 )
-from brainglobe_workflows.cellfinder_core.cellfinder import (
+from brainglobe_workflows.cellfinder_core.cellfinder_core import (
     setup as setup_cellfinder_workflow,
 )
 from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
@@ -108,15 +108,13 @@ class TimeBenchmarkPrepGIN:
             config_dict = json.load(cfg)
         config = CellfinderConfig(**config_dict)
 
-        # Download data with pooch ---> should be dealt with when making config
+        # # Download data with pooch
         # _ = pooch.retrieve(
         #     url=config.data_url,
         #     known_hash=config.data_hash,
-        #     path=Path(config._install_path).parent,
+        #     path=config._install_path,
         #     progressbar=True,
-        #     processor=pooch.Unzip(
-        #         extract_dir=Path(config._install_path).stem
-        #     ),
+        #     processor=pooch.Unzip(extract_dir=config.data_dir_relative),
         # )
 
         # Check paths to input data should now exist in config
@@ -143,7 +141,7 @@ class TimeBenchmarkPrepGIN:
         The input data is kept for all repeats of the same benchmark,
         to avoid repeated downloads from GIN.
         """
-        shutil.rmtree(Path(self.cfg.output_path).resolve())
+        shutil.rmtree(Path(self.cfg._output_path).resolve())
 
 
 class TimeFullWorkflow(TimeBenchmarkPrepGIN):

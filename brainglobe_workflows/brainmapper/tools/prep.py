@@ -18,10 +18,10 @@ from brainreg.core.paths import Paths as BrainRegPaths
 from fancylog import fancylog
 
 import brainglobe_workflows as program_for_log
-import brainglobe_workflows.cellfinder_brainreg.tools.parser as parser
-from brainglobe_workflows.cellfinder_brainreg.tools import system, tools
-from brainglobe_workflows.cellfinder_brainreg.tools.parser import (
-    cellfinder_parser,
+import brainglobe_workflows.brainmapper.tools.parser as parser
+from brainglobe_workflows.brainmapper.tools import system, tools
+from brainglobe_workflows.brainmapper.tools.parser import (
+    brainmapper_parser,
 )
 
 
@@ -39,9 +39,9 @@ def get_arg_groups(args, parser):
 def check_input_arg_existance(args):
     """
     Does a simple check to ensure that input files/paths exist. Prevents a typo
-    from causing cellfinder to only run partway. Doesn't check for validity
-    etc, just existance.
-    :param args: Cellfinder input arguments
+    from causing brainmapper to only run partway. Doesn't check for validity
+    etc, just existence.
+    :param args: brainmapper input arguments
     """
     check_list = [args.background_planes_path[0]]
     check_list = check_list + args.signal_planes_paths
@@ -53,7 +53,7 @@ def check_input_arg_existance(args):
 
 class Paths:
     """
-    A single class to hold all file paths that cellfinder may need. Any paths
+    A single class to hold all file paths that brainmapper may need. Any paths
     prefixed with "tmp__" refer to internal intermediate steps, and will be
     deleted if "--debug" is not used.
     """
@@ -63,7 +63,7 @@ class Paths:
         self.registration_output_folder = os.path.join(
             self.output_dir, "registration"
         )
-        self.metadata_path = os.path.join(self.output_dir, "cellfinder.json")
+        self.metadata_path = os.path.join(self.output_dir, "brainmapper.json")
         self.registration_metadata_path = os.path.join(
             self.registration_output_folder, "brainreg.json"
         )
@@ -81,7 +81,6 @@ class Paths:
         self.brainrender_points = os.path.join(
             self.points_directory, "points.npy"
         )
-        self.abc4d_points = os.path.join(self.points_directory, "abc4d.npy")
 
         self.tmp__cubes_output_dir = os.path.join(self.output_dir, "cubes")
 
@@ -107,9 +106,9 @@ def log_metadata(file_path, args):
         json.dump(args, f, default=serialise)
 
 
-def prep_cellfinder_general():
-    args = parser.cellfinder_parser().parse_args()
-    arg_groups = get_arg_groups(args, cellfinder_parser())
+def prep_brainmapper_general():
+    args = parser.brainmapper_parser().parse_args()
+    arg_groups = get_arg_groups(args, brainmapper_parser())
 
     check_input_arg_existance(args)
 
@@ -123,7 +122,7 @@ def prep_cellfinder_general():
         program_for_log,
         variables=[args, args.paths],
         verbose=args.debug,
-        log_header="CELLFINDER LOG",
+        log_header="BRAINMAPPER LOG",
         multiprocessing_aware=True,
     )
 
@@ -153,7 +152,7 @@ def check_and_return_ch_ids(signal_ids, background_id, signal_channel_list):
     """
 
     # TODO: make this more general, so it gives informative error messages
-    #  when called from cellfinder.extract.cli
+    #  when called from brainmapper.extract.cli
 
     num_signal_channels = len(signal_channel_list)
 

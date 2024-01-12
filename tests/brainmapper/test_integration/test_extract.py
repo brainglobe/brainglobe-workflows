@@ -12,7 +12,7 @@ from brainglobe_utils.general.system import (
 from brainglobe_utils.IO.cells import get_cells
 from tifffile import tifffile
 
-from brainglobe_workflows.cellfinder_brainreg.extract import (
+from brainglobe_workflows.brainmapper.extract import (
     extract_cubes as extract_cubes,
 )
 
