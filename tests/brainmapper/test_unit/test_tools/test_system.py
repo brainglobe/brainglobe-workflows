@@ -1,5 +1,4 @@
 import os
-from math import isclose
 from pathlib import Path
 
 import pytest
@@ -10,22 +9,6 @@ import brainglobe_workflows.brainmapper.tools.system as system
 
 data_dir = Path(__file__).parents[4] / Path("tests", "data")
 background_im_dir = os.path.join(data_dir, "background")
-
-
-def test_get_subdirectories():
-    subdirs = system.get_subdirectories(data_dir)
-    assert len(subdirs) == 9
-    assert Path(data_dir / "cells") in subdirs
-    assert Path(data_dir / "brain") in subdirs
-
-    subdir_names = system.get_subdirectories(data_dir, names_only=True)
-    assert len(subdir_names) == 9
-    assert "cells" in subdir_names
-    assert "brain" in subdir_names
-
-
-def test_get_number_of_files_in_dir():
-    assert system.get_number_of_files_in_dir(background_im_dir) == 26
 
 
 def write_file_single_size(directory, file_size):
@@ -64,36 +47,3 @@ def test_ensure_directory_exists():
     ensure_directory_exists(exist_dir)
     assert os.path.exists(exist_dir)
     os.rmdir(exist_dir)
-
-
-def test_memory_in_bytes():
-    memory_detection_tolerance = 1  # byte
-
-    assert isclose(
-        system.memory_in_bytes(1, "kb"),
-        1000,
-        abs_tol=memory_detection_tolerance,
-    )
-    assert isclose(
-        system.memory_in_bytes(1.2, "MB"),
-        1200000,
-        abs_tol=memory_detection_tolerance,
-    )
-    assert isclose(
-        system.memory_in_bytes(0.00065, "gb"),
-        650000,
-        abs_tol=memory_detection_tolerance,
-    )
-    assert isclose(
-        system.memory_in_bytes(0.000000000234, "TB"),
-        234,
-        abs_tol=memory_detection_tolerance,
-    )
-    assert isclose(
-        system.memory_in_bytes(1000, "pb"),
-        10**18,
-        abs_tol=memory_detection_tolerance,
-    )
-
-    with pytest.raises(NotImplementedError):
-        system.memory_in_bytes(1000, "ab")
