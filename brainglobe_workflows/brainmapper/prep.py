@@ -13,14 +13,17 @@ from pathlib import PurePath
 
 from bg_atlasapi import BrainGlobeAtlas
 from brainglobe_utils.general.exceptions import CommandLineInputError
-from brainglobe_utils.general.system import ensure_directory_exists
+from brainglobe_utils.general.list import check_unique_list, common_member
+from brainglobe_utils.general.system import (
+    catch_input_file_error,
+    ensure_directory_exists,
+)
 from brainreg.core.paths import Paths as BrainRegPaths
 from fancylog import fancylog
 
 import brainglobe_workflows as program_for_log
-import brainglobe_workflows.brainmapper.tools.parser as parser
-from brainglobe_workflows.brainmapper.tools import system, tools
-from brainglobe_workflows.brainmapper.tools.parser import (
+import brainglobe_workflows.brainmapper.parser as parser
+from brainglobe_workflows.brainmapper.parser import (
     brainmapper_parser,
 )
 
@@ -48,7 +51,7 @@ def check_input_arg_existance(args):
 
     for path in check_list:
         if path is not None:
-            system.catch_input_file_error(path)
+            catch_input_file_error(path)
 
 
 class Paths:
@@ -193,7 +196,7 @@ def check_correct_number_signal_channels(signal_ids, num_signal_channels):
 
 
 def check_signal_overlap(signal_ids):
-    signal_unique, repeated_signal_ch = tools.check_unique_list(signal_ids)
+    signal_unique, repeated_signal_ch = check_unique_list(signal_ids)
     if not signal_unique:
         logging.error(
             "Non-unique values for '--signal-channel-ids' ({}) given. ID:"
@@ -206,9 +209,7 @@ def check_signal_overlap(signal_ids):
 
 
 def check_sig_bg_id_overlap(signal_ids, background_id):
-    common_id_result, intersection = tools.common_member(
-        signal_ids, background_id
-    )
+    common_id_result, intersection = common_member(signal_ids, background_id)
 
     if common_id_result:
         logging.error(

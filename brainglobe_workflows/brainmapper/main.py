@@ -46,7 +46,7 @@ def main():
     suppress_tf_logging(tf_suppress_log_messages)
     from brainreg.core.main import main as register
 
-    from brainglobe_workflows.brainmapper.tools import prep
+    from brainglobe_workflows.brainmapper import prep
 
     start_time = datetime.now()
     args, arg_groups, what_to_run, atlas = prep.prep_brainmapper_general()
@@ -107,8 +107,8 @@ def run_all(args, what_to_run, atlas):
     from cellfinder.core.tools import prep
     from cellfinder.core.tools.IO import read_with_dask
 
-    from brainglobe_workflows.brainmapper.analyse import analyse
-    from brainglobe_workflows.brainmapper.tools.prep import (
+    from brainglobe_workflows.brainmapper import analyse
+    from brainglobe_workflows.brainmapper.prep import (
         prep_candidate_detection,
         prep_channel_specific_general,
     )
