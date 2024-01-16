@@ -9,8 +9,10 @@ exclude *.ini
 
 recursive-include brainglobe_workflows *.py
 recursive-include brainglobe_workflows/configs *.json
+
 recursive-include benchmarks *.py
 recursive-exclude benchmarks/results *
+recursive-exclude .asv/ *
 include asv.conf.json
 
 recursive-exclude * __pycache__
