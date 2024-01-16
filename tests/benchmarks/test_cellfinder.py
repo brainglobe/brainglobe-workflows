@@ -59,6 +59,17 @@ def asv_config_monkeypatched_path(tmp_path: Path) -> Path:
 
 
 def test_asv_run(asv_config_monkeypatched_path: Path):
+    asv_machine_output = subprocess.run(
+        [
+            "asv",
+            "machine",
+            "--yes",
+            "--config",
+            str(asv_config_monkeypatched_path),  # use monkeypatched config
+        ]
+    )
+    assert asv_machine_output.returncode == 0
+
     asv_benchmark_output = subprocess.run(
         [
             "asv",
