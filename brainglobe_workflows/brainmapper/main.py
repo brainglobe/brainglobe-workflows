@@ -12,7 +12,7 @@ import logging
 import os
 from datetime import datetime
 
-import bg_space as bgs
+import brainglobe_space as bgs
 import pandas as pd
 import tifffile
 from brainglobe_utils.cells.cells import MissingCellsError
