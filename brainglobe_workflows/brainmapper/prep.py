@@ -11,7 +11,7 @@ import os
 from argparse import Namespace
 from pathlib import PurePath
 
-from bg_atlasapi import BrainGlobeAtlas
+from brainglobe_atlasapi import BrainGlobeAtlas
 from brainglobe_utils.general.exceptions import CommandLineInputError
 from brainglobe_utils.general.list import check_unique_list, common_member
 from brainglobe_utils.general.system import (
