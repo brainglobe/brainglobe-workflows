@@ -26,8 +26,17 @@ jobs:
     steps:
       - uses: neuroinformatics-unit/actions/check_manifest@v2
 
-  test:
+
+  tmate:
     needs: [linting, manifest]
+    name: Run tmate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up tmate
+        uses: mxschmitt/action-tmate@v3
+
+  test:
+    needs: [linting, manifest, tmate]
     name: ${{ matrix.os }} py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
