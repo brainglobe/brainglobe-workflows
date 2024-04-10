@@ -30,7 +30,7 @@ from typing import Optional, Union
 import pooch
 from brainglobe_utils.IO.cells import save_cells
 from cellfinder.core.main import main as cellfinder_run
-from cellfinder.core.tools.IO import read_with_dask
+from cellfinder.core.tools.IO import read_z_stack
 from cellfinder.core.train.train_yml import depth_type
 
 from brainglobe_workflows.utils import (
@@ -356,7 +356,7 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
 
     The steps are:
     1. Read the input signal and background data as two separate
-       Dask arrays.
+       Dask (or memory if single file stack) arrays.
     2. Run the main cellfinder pipeline on the input Dask arrays,
        with the parameters defined in the input configuration (cfg).
     3. Save the detected cells as an xml file to the location specified in
@@ -369,8 +369,8 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
         the cellfinder workflow
     """
     # Read input data as Dask arrays
-    signal_array = read_with_dask(str(cfg._signal_dir_path))
-    background_array = read_with_dask(str(cfg._background_dir_path))
+    signal_array = read_z_stack(str(cfg._signal_dir_path))
+    background_array = read_z_stack(str(cfg._background_dir_path))
 
     # Run main analysis using `cellfinder_run`
     detected_cells = cellfinder_run(

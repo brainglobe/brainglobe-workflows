@@ -105,7 +105,7 @@ def run_all(args, what_to_run, atlas):
     from cellfinder.core.classify import classify
     from cellfinder.core.detect import detect
     from cellfinder.core.tools import prep
-    from cellfinder.core.tools.IO import read_with_dask
+    from cellfinder.core.tools.IO import read_z_stack
 
     from brainglobe_workflows.brainmapper import analyse
     from brainglobe_workflows.brainmapper.prep import (
@@ -120,7 +120,7 @@ def run_all(args, what_to_run, atlas):
     if what_to_run.detect:
         logging.info("Detecting cell candidates")
         args = prep_candidate_detection(args)
-        signal_array = read_with_dask(
+        signal_array = read_z_stack(
             args.signal_planes_paths[args.signal_channel]
         )
 
@@ -165,11 +165,11 @@ def run_all(args, what_to_run, atlas):
             if points is None:
                 points = get_cells(args.paths.detected_points)
             if signal_array is None:
-                signal_array = read_with_dask(
+                signal_array = read_z_stack(
                     args.signal_planes_paths[args.signal_channel]
                 )
             logging.info("Running cell classification")
-            background_array = read_with_dask(args.background_planes_path[0])
+            background_array = read_z_stack(args.background_planes_path[0])
 
             points = classify.main(
                 points,
