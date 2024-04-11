@@ -22,7 +22,7 @@ from cellfinder.core.download.cli import (
     download_directory_parser,
     model_parser,
 )
-from cellfinder.core.tools.source_files import source_custom_config_cellfinder
+from cellfinder.core.tools.source_files import user_specific_configuration_path
 
 from brainglobe_workflows import __version__
 
@@ -388,7 +388,7 @@ def config_parse(parser):
         "--config",
         dest="registration_config",
         type=str,
-        default=source_custom_config_cellfinder(),
+        default=user_specific_configuration_path(),
         help="To supply your own, custom configuration file.",
     )
 
