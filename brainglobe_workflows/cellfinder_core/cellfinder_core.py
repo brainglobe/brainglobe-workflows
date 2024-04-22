@@ -434,30 +434,16 @@ def main(
     # run workflow
     run_workflow_from_cellfinder_run(cfg)  # only this will be benchmarked
 
-    return cfg
+    # return cfg # why return cfg? for tests?
 
 
-def main_app_wrapper():
-    """Parse command line arguments and
-    run cellfinder setup and workflow
+if __name__ == "__main__":
 
-    This function is used to define an entry-point,
-    that allows the user to run the cellfinder workflow
-    for a given input config file as:
-    `cellfinder-workflow --config <path-to-input-config>`.
-
-    If no input config file is provided, the default is used.
-
-    """
     # parse CLI arguments
     args = config_parser(
-        sys.argv[1:],  # sys.argv[0] is the script name
+        sys.argv[1:],
         str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER),
     )
 
     # run setup and workflow
     _ = main(args.config)
-
-
-if __name__ == "__main__":
-    main_app_wrapper()
