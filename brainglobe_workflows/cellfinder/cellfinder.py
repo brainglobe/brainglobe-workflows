@@ -3,17 +3,13 @@
 It receives as an (optional) command line input the path to a configuration
 json file, that holds the values of the required parameters for the workflow.
 
+    python brainglobe_workflows/cellfinder.py --config path/to/config.json
+
 If no input json file is passed as a configuration, the default
 configuration defined at brainglobe_workflows/cellfinder/default_config.json
 is used.
 
-Example usage:
- - to pass a custom configuration, run (from the cellfinder_main.py
-   parent directory):
-    python brainglobe_workflows/cellfinder.py --config path/to/input/config.json
- - to use the default configuration, run
     python brainglobe_workflows/cellfinder.py
-
 
 """
 
