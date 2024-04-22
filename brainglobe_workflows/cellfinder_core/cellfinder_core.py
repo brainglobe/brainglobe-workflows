@@ -438,7 +438,6 @@ def main(
 
 
 if __name__ == "__main__":
-
     # parse CLI arguments
     args = config_parser(
         sys.argv[1:],
