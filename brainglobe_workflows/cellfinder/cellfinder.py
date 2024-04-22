@@ -10,9 +10,9 @@ is used.
 Example usage:
  - to pass a custom configuration, run (from the cellfinder_main.py
    parent directory):
-    python cellfinder_core.py --config path/to/input/config.json
+    python brainglobe_workflows/cellfinder.py --config path/to/input/config.json
  - to use the default configuration, run
-    python cellfinder_core.py
+    python brainglobe_workflows/cellfinder.py
 
 
 """
@@ -81,7 +81,7 @@ class CellfinderConfig:
 
     # install path: default path for downloaded and output data
     _install_path: Pathlike = (
-        Path.home() / ".brainglobe" / "workflows" / "cellfinder_core"
+        Path.home() / ".brainglobe" / "workflows" / "cellfinder"
     )
 
     # input data paths
