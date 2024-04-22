@@ -134,4 +134,4 @@ pip-wheel-metadata/
 benchmarks/results/*
 benchmarks/html/*
 # ignore bare repository cloned by asv
-brainglobe-workflows  
+brainglobe-workflows
