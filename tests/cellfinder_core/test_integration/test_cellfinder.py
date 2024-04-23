@@ -1,4 +1,3 @@
-import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -50,21 +49,3 @@ def test_main_w_inputs(
 
     # check output files exist
     assert Path(cfg._detected_cells_path).is_file()
-
-
-def test_entry_point_help():
-    """
-    Smoke test the cellfinder workflow entry point by checking
-    help is printed out successfully
-    """
-
-    # define CLI input
-    subprocess_input = ["cellfinder-workflow", "--help"]
-
-    # run workflow
-    subprocess_output = subprocess.run(
-        subprocess_input,
-    )
-
-    # check returncode
-    assert subprocess_output.returncode == 0
