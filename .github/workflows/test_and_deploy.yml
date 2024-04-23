@@ -60,7 +60,12 @@ jobs:
       - uses: neuroinformatics-unit/actions/test@v2
         with:
           python-version: ${{ matrix.python-version }}
-          secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Check benchmarks
+        run: |
+            pip install --upgrade pip
+            pip install asv
+            asv check -v -E existing
 
   build_sdist_wheels:
     name: Build source distribution
