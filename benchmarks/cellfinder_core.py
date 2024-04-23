@@ -5,6 +5,7 @@ from pathlib import Path
 from brainglobe_utils.IO.cells import save_cells
 from cellfinder.core.main import main as cellfinder_run
 from cellfinder.core.tools.IO import read_with_dask
+from cellfinder.core.tools.prep import prep_models
 
 from brainglobe_workflows.cellfinder_core.cellfinder_core import (
     CellfinderConfig,
@@ -102,14 +103,21 @@ class TimeBenchmarkPrepGIN:
         assert Path(self.input_config_path).exists()
 
         # Instantiate a CellfinderConfig from the input json file
-        # (assumes config is json serializable)
+        # (fetches data from GIN if required)
         with open(self.input_config_path) as cfg:
             config_dict = json.load(cfg)
         config = CellfinderConfig(**config_dict)
 
-        # Check paths to input data should now exist in config
+        # Check paths to input data exist in config now
         assert Path(config._signal_dir_path).exists()
         assert Path(config._background_dir_path).exists()
+
+        # Ensure cellfinder model is downloaded to default path
+        _ = prep_models(
+            model_weights_path=config.model_weights,
+            install_path=None,  # Use default,
+            model_name=config.model,
+        )
 
     def setup(self):
         """
