@@ -63,7 +63,7 @@ dev = [
 # (i.e., everything needed to install this package without the CLI tool)
 # Once the cellfinder CLI tool is deprecated, these will move to the
 # default dependencies.
-asv_version = ["asv", "pooch", "cellfinder-core"]
+asv_version = ["asv", "pooch"]
 
 napari = ["napari[pyqt5]", "brainglobe-napari-io", "cellfinder[napari]>=1.0.0"]
 
