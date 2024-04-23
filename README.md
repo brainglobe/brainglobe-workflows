@@ -68,12 +68,18 @@ See our [blog post](https://brainglobe.info/blog/version1/cellfinder-core-and-pl
 
 ## Developer documentation
 
-This repository also includes workflow scripts that are benchmarked to support code development.
-These benchmarks are run regularly to ensure performance is stable, as the tools are developed and extended.
+This repository also includes code to benchmark typical workflows.
+These benchmarks are meant to be run regularly, to ensure performance is stable as the tools are developed and extended.
 
-- Developers can install these benchmarks locally via `pip install .[dev]`. By executing `asv run`, the benchmarks will run with default parameters on a small dataset that is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). See [the asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further details on how to run benchmarks.
-- Developers can also run these benchmarks on data they have stored locally, by specifying the relevant paths in an input (JSON) file.
-- We also maintain an internal runner that benchmarks the workflows over a large, exemplar dataset, of the scale we expect users to be handling. The result of these benchmarks are made publicly available.
+There are three main ways in which these benchmarks can be useful to developers:
+1. Developers can run the available benchmarks locally on a small test dataset.
+    To do so:
+    - Install the developer version of the package with `pip install .[dev]`.
+    - Run `asv run`. This will run the benchmarks with default parameters on a small dataset downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki).
+    - See [the asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further guidance on how to run benchmarks.
+1. Developers can also run these benchmarks on data they have stored locally.
+    - To do so, add an "input_data_dir" field in the default config pointing to the data of interest. The signal and background data are expected to be in "signal" and "background" subdirectories under "input_data_dir".
+1. We also plan to run the benchmarks on an internal runner using a larger dataset, of the scale we expect users to be handling. The result of these benchmarks will be made publicly available.
 
 Contributions to BrainGlobe are more than welcome.
 Please see the [developer guide](https://brainglobe.info/developers/index.html).
