@@ -24,3 +24,4 @@ prune resources
 
 prune .github
 prune .tox
+prune .asv
