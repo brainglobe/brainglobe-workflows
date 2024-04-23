@@ -17,7 +17,7 @@ from brainglobe_workflows.cellfinder_core.cellfinder_core import (
 from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
 
-class TimeBenchmarkPrepGIN:
+class TimeBenchmark:
     """
 
     A base class for timing benchmarks for the cellfinder workflow.
@@ -142,7 +142,7 @@ class TimeBenchmarkPrepGIN:
         shutil.rmtree(Path(self.cfg._output_path).resolve())
 
 
-class TimeFullWorkflow(TimeBenchmarkPrepGIN):
+class TimeFullWorkflow(TimeBenchmark):
     """
     Time the full cellfinder workflow.
 
@@ -151,7 +151,7 @@ class TimeFullWorkflow(TimeBenchmarkPrepGIN):
 
     Parameters
     ----------
-    TimeBenchmarkPrepGIN : _type_
+    TimeBenchmark : _type_
         A base class for timing benchmarks for the cellfinder workflow.
     """
 
@@ -159,13 +159,13 @@ class TimeFullWorkflow(TimeBenchmarkPrepGIN):
         run_workflow_from_cellfinder_run(self.cfg)
 
 
-class TimeReadInputDask(TimeBenchmarkPrepGIN):
+class TimeReadInputDask(TimeBenchmark):
     """
     Time the reading input data operations with dask
 
     Parameters
     ----------
-    TimeBenchmarkPrepGIN : _type_
+    TimeBenchmark : _type_
         A base class for timing benchmarks for the cellfinder workflow.
     """
 
@@ -176,20 +176,20 @@ class TimeReadInputDask(TimeBenchmarkPrepGIN):
         read_with_dask(str(self.cfg._background_dir_path))
 
 
-class TimeDetectCells(TimeBenchmarkPrepGIN):
+class TimeDetectAndClassifyCells(TimeBenchmark):
     """
     Time the cell detection main pipeline (`cellfinder_run`)
 
     Parameters
     ----------
-    TimeBenchmarkPrepGIN : _type_
+    TimeBenchmark : _type_
         A base class for timing benchmarks for the cellfinder workflow.
     """
 
     # extend basic setup function
     def setup(self):
         # basic setup
-        TimeBenchmarkPrepGIN.setup(self)
+        TimeBenchmark.setup(self)
 
         # add input data as arrays to the config
         self.signal_array = read_with_dask(str(self.cfg._signal_dir_path))
@@ -225,11 +225,11 @@ class TimeDetectCells(TimeBenchmarkPrepGIN):
         )
 
 
-class TimeSaveCells(TimeBenchmarkPrepGIN):
+class TimeSaveCells(TimeBenchmark):
     # extend basic setup function
     def setup(self):
         # basic setup
-        TimeBenchmarkPrepGIN.setup(self)
+        TimeBenchmark.setup(self)
 
         # add input data as arrays to config
         self.signal_array = read_with_dask(str(self.cfg._signal_dir_path))
