@@ -62,11 +62,22 @@ jobs:
           python-version: ${{ matrix.python-version }}
           secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Check benchmarks
+  benchmarks:
+    name: Check benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        shell: bash
         run: |
-            pip install --upgrade pip
-            pip install asv
-            asv check -v -E existing
+          python -mpip install --upgrade pip
+          python -mpip install asv
+      - name: Run asv check
+        shell: bash
+        run: asv check -v -E existing
 
   build_sdist_wheels:
     name: Build source distribution
