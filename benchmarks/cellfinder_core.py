@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 from pathlib import Path
 
@@ -78,8 +79,11 @@ class TimeBenchmark:
     sample_time = 0.01  # default: 10 ms = 0.01 s;
     min_run_count = 2  # default:2
 
-    # Custom attributes
-    input_config_path = str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)
+    # Input config file
+    # use environment variable CONFIG_PATH if exists, otherwise use default
+    input_config_path = os.getenv(
+        "CONFIG_PATH", default=str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)
+    )
 
     def setup_cache(self):
         """
