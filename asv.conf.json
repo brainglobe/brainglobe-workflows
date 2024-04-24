@@ -11,8 +11,8 @@
 
     // The URL or local path of the source code repository for the
     // project being benchmarked
-    // "repo": ".",
-    "repo": "https://github.com/brainglobe/brainglobe-workflows.git",
+    "repo": ".",
+    // "repo": "https://github.com/brainglobe/brainglobe-workflows.git",
 
     // The Python project's subdirectory in your repo.  If missing or
     // the empty string, the project is assumed to be located at the root
@@ -40,7 +40,7 @@
 
     // List of branches to benchmark. If not provided, defaults to "master"
     // (for git) or "default" (for mercurial).
-    "branches": ["main"], // for git
+    "branches": ["HEAD"], // for git
     // "branches": ["default"],    // for mercurial
 
     // The DVCS being used.  If not set, it will be automatically
