@@ -74,11 +74,20 @@ These benchmarks are meant to be run regularly, to ensure performance is stable 
 There are three main ways in which these benchmarks can be useful to developers:
 1. Developers can run the available benchmarks locally on a small test dataset.
     To do so:
-    - Install the developer version of the package with `pip install .[dev]`.
-    - Run `asv run`. This will run the benchmarks with default parameters on a small dataset downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki).
-    - See [the asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further guidance on how to run benchmarks.
+    - Install the developer version of the package:
+        ```
+        pip install .[dev]
+        ```
+        This is mostly for convenience: the `[dev]` specification includes `asv` as a dependency, but to run the benchmarks it would be sufficient to use an environment with `asv` only. This is because `asv` creates its own virtual environment for the benchmarks, building and installing the requested version of the package in it.
+    - Run the benchmarks:
+        ```
+        asv run
+        ```
+       This will run the locally defined benchmarks with the default parameters defined at `brainglobe_workflows/configs/cellfinder.json`, on a small dataset downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). See [the asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further guidance on how to run benchmarks.
 1. Developers can also run these benchmarks on data they have stored locally.
-    - To do so, add an "input_data_dir" field in the default config pointing to the data of interest. The signal and background data are expected to be in "signal" and "background" subdirectories under "input_data_dir".
+    To do so:
+    - Add an `input_data_dir` field in the default config at `brainglobe_workflows/configs/cellfinder.json` pointing to the data of interest.
+    - Edit the names of the signal and background directories if required.By default, they are assumed to be in `signal` and `background` subdirectories under `input_data_dir`. However, these defaults can be overwritten with the `signal_subdir` and `background_subdir` fields.
 1. We also plan to run the benchmarks on an internal runner using a larger dataset, of the scale we expect users to be handling. The result of these benchmarks will be made publicly available.
 
 Contributions to BrainGlobe are more than welcome.
