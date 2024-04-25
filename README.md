@@ -79,7 +79,7 @@ There are three main ways in which these benchmarks can be useful to developers:
         ```
         pip install .[dev]
         ```
-        This is mostly for convenience: the `[dev]` specification includes `asv` as a dependency, but to run the benchmarks it would be sufficient to use an environment with `asv` only. This is because `asv` creates its own virtual environment for the benchmarks, building and installing the relevant version of the `brainglobe-workflows` package in it. By default, the version at the tip of main is installed.
+        This is mostly for convenience: the `[dev]` specification includes `asv` as a dependency, but to run the benchmarks it would be sufficient to use an environment with `asv` only. This is because `asv` creates its own virtual environment for the benchmarks, building and installing the relevant version of the `brainglobe-workflows` package in it. By default, the version at the tip of the currently checked out branch is installed.
     - Run the benchmarks:
         ```
         asv run
