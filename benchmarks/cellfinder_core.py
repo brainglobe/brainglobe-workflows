@@ -82,7 +82,7 @@ class TimeBenchmark:
     # Input config file
     # use environment variable CONFIG_PATH if exists, otherwise use default
     input_config_path = os.getenv(
-        "CONFIG_PATH", default=str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)
+        "CELLFINDER_CONFIG_PATH", default=str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)
     )
 
     def setup_cache(self):
