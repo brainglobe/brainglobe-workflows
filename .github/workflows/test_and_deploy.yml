@@ -52,11 +52,10 @@ jobs:
           path: "~/.cellfinder"
           key: models-${{ hashFiles('~/.cellfinder/**') }}
       # install additional Macos dependencies
-      - name: install HDF5 libraries
+      - name: install HDF5 libraries (needed on M1 Macs only)
         if: matrix.os == 'macos-latest'
         run: |
           brew install hdf5
-          export PATH="/usr/local/opt/hdf5/bin:$PATH"
       # Run tests
       - uses: neuroinformatics-unit/actions/test@v2
         with:
