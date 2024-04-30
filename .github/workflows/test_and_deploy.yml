@@ -36,12 +36,14 @@ jobs:
         # Run tests on ubuntu across all supported versions
         python-version: ["3.9", "3.10"]
         os: [ubuntu-latest]
-        # Include at least one MacOS and Windows test
+        # Include a Windows test and old/new Mac runs
         include:
-        - os: macos-latest
-          python-version: "3.10"
-        - os: windows-latest
-          python-version: "3.10"
+          - os: macos-13
+            python-version: "3.10"
+          - os: macos-latest
+            python-version: "3.10"
+          - os: windows-latest
+            python-version: "3.10"
     steps:
       # Cache the tensorflow model so we don't have to remake it every time
       - name: Cache tensorflow model
@@ -49,7 +51,11 @@ jobs:
         with:
           path: "~/.cellfinder"
           key: models-${{ hashFiles('~/.cellfinder/**') }}
-
+      # install additional Macos dependencies
+      - name: install HDF5 libraries (needed on M1 Macs only)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install hdf5
       # Run tests
       - uses: neuroinformatics-unit/actions/test@v2
         with:
