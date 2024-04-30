@@ -62,6 +62,8 @@ jobs:
         with:
           path: "~/.brainglobe-tests"
           key: cellfinder-test-data
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
       # Run tests
       - uses: neuroinformatics-unit/actions/test@v2
         with:
