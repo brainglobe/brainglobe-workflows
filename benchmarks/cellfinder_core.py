@@ -9,7 +9,7 @@ from cellfinder.core.tools.IO import read_with_dask
 
 from brainglobe_workflows.cellfinder_core.cellfinder_core import (
     CellfinderConfig,
-    run_workflow_from_cellfinder_run,
+    run_workflow,
 )
 from brainglobe_workflows.cellfinder_core.cellfinder_core import (
     setup as setup_cellfinder_workflow,
@@ -163,7 +163,7 @@ class TimeFullWorkflow(TimeBenchmarkPrepGIN):
     """
 
     def time_workflow_from_cellfinder_run(self):
-        run_workflow_from_cellfinder_run(self.cfg)
+        run_workflow(self.cfg)
 
 
 class TimeReadInputDask(TimeBenchmarkPrepGIN):
