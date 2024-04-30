@@ -57,13 +57,12 @@ dev = [
     "pre-commit",
     "setuptools_scm",
     "asv",
-    "pooch",
 ]
 # Below, all the dependencies asv needs to run the benchmarks
 # (i.e., everything needed to install this package without the CLI tool)
 # Once the cellfinder CLI tool is deprecated, these will move to the
 # default dependencies.
-asv_version = ["asv", "pooch", "cellfinder-core"]
+asv_version = ["asv"]
 
 napari = ["napari[pyqt5]", "brainglobe-napari-io", "cellfinder[napari]>=1.0.0"]
 
@@ -86,11 +85,7 @@ zip-safe = false
 
 [tool.setuptools.packages.find]
 include = ["brainglobe_workflows"]
-exclude = [
-    "tests",
-    "resources",
-    "benchmarks",
-]
+exclude = ["tests", "resources", "benchmarks"]
 
 [tool.black]
 target-version = ["py39", "py310"]
@@ -112,6 +107,11 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "serial",
 ]
+
+[tool.coverage.run]
+source = ["./*"]
+omit = ["benchmarks/*"]
+
 [tool.ruff]
 line-length = 79
 exclude = ["__init__.py", "build", ".eggs"]
@@ -136,6 +136,10 @@ python =
 # is set to "true"
 INPUT_COREDEV =
     true: coredev
+
+[coverage:run]
+source = ./*
+omit = benchmarks/*
 
 [testenv]
 extras =
