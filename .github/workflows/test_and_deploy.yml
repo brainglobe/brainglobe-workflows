@@ -60,7 +60,7 @@ jobs:
       - name: Cache data for cellfinder workflow tests
         uses: actions/cache@v3
         with:
-          path: ~/.brainglobe-tests
+          path: "~/.brainglobe-tests"
           key: cellfinder-test-data
       # Run tests
       - uses: neuroinformatics-unit/actions/test@v2
