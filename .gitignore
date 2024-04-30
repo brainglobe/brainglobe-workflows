@@ -130,6 +130,6 @@ pip-wheel-metadata/
 **/_version.py
 
 # Benchmarking with ASV
-.asv/
+benchmarks/.asv/*
 benchmarks/results/*
 benchmarks/html/*
