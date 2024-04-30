@@ -1,8 +1,7 @@
 import datetime
 import logging
 import os
-import pdb
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Union
 
@@ -48,14 +47,10 @@ class CellfinderConfig:
     cube_depth: int
     network_depth: depth_type
 
+    # --------------------------------------
     # Optional parameters
-
-    # install path: default path for downloaded and output data
-    _install_path: Pathlike = (
-        Path.home() / ".brainglobe" / "workflows" / "cellfinder_core"
-    )
-
-    # input data paths
+    # --------------------------------------
+    # Input data paths
     # Note: if not specified, the signal and background data
     # are assumed to be under "signal" and "background"
     # dirs under _install_path/cellfinder_test_data/
@@ -64,22 +59,31 @@ class CellfinderConfig:
     signal_subdir: Pathlike = "signal"
     background_subdir: Pathlike = "background"
 
-    # output data paths
+    # Output data paths
     # Note: if output_parent_dir is not specified,
     # it is assumed to be under _install_path
-    # (see __post_init__ method)
+    # (see __post_init__ method).
     output_dir_basename: str = "cellfinder_output_"
     detected_cells_filename: str = "detected_cells.xml"
     output_parent_dir: Optional[Pathlike] = None
 
-    # source of data to download
-    # if not specified in JSON, it is set to None
+    # Source of data to download
+    # default None values are overwritten by
+    # values specified in json if they exist
+    # (see __post_init__ method).
     data_url: Optional[str] = None
     data_hash: Optional[str] = None
 
+    # --------------------------------------
     # Internal parameters
+    # --------------------------------------
     # even though these are optional we don't expect users to
     # change them
+
+    # install path: default path for downloaded and output data
+    _install_path: Pathlike = (
+        Path.home() / ".brainglobe" / "workflows" / "cellfinder_core"
+    )
     _signal_dir_path: Optional[Pathlike] = None
     _background_dir_path: Optional[Pathlike] = None
     _list_signal_files: Optional[list] = None
@@ -91,10 +95,10 @@ class CellfinderConfig:
         """Executed after __init__ function.
 
         We use this method to define attributes of the data class
-        as a function of other attributes.
-        See https://peps.python.org/pep-0557/#post-init-processing
+        as a function of other attributes.The attributes added are
+        input and output data paths.
 
-        The attributes added are input and output data paths
+        See https://peps.python.org/pep-0557/#post-init-processing
 
         Parameters
         ----------
@@ -122,11 +126,11 @@ class CellfinderConfig:
             a cellfinder config
         """
 
-        # Fill in output directory if not specified
+        # Fill in output_parent_dir if not specified
         if self.output_parent_dir is None:
             self.output_parent_dir = Path(self._install_path)
 
-        # Add to config the path to timestamped output directory
+        # Add the path to timestamped output subdirectory
         timestamp = datetime.datetime.now()
         timestamp_formatted = timestamp.strftime("%Y%m%d_%H%M%S")
         self._output_path = Path(self.output_parent_dir) / (
@@ -137,7 +141,7 @@ class CellfinderConfig:
             exist_ok=True,  # ignore FileExistsError exceptions
         )
 
-        # Add to config the path to the output file
+        # Add the path to the output XML file
         self._detected_cells_path = (
             self._output_path / self.detected_cells_filename
         )
@@ -176,7 +180,7 @@ class CellfinderConfig:
         # Fetch logger
         logger = logging.getLogger(LOGGER_NAME)
 
-        # Fill in input data directory if not specified
+        # Add the input data directory to the config if not specified
         if self.input_data_dir is None:
             self.input_data_dir = (
                 Path(self._install_path) / "cellfinder_test_data"
@@ -188,9 +192,20 @@ class CellfinderConfig:
             self.background_subdir
         )
 
-        # Check if input data directories (signal and background) exist
-        # locally.
-        # If both directories exist, get list of signal and background files
+        # Add list of input files to config
+        self.add_input_files_to_config(logger)
+
+    def add_input_files_to_config(self, logger):
+        """_summary_
+
+        Parameters
+        ----------
+        logger : _type_
+            _description_
+        """
+
+        # If both input data directories exist locally,
+        # get list of signal and background files
         if (
             Path(self._signal_dir_path).exists()
             and Path(self._background_dir_path).exists()
@@ -208,7 +223,7 @@ class CellfinderConfig:
                 if f.is_file()
             ]
 
-        # If exactly one of the input data directories is missing, print error
+        # If exactly one of the input data directories is missing: log error
         elif (
             Path(self._signal_dir_path).resolve().exists()
             or Path(self._background_dir_path).resolve().exists()
@@ -223,10 +238,10 @@ class CellfinderConfig:
                     "does not exist",
                 )
 
-        # If neither of the input data directories exist,
-        # retrieve data from GIN repository and add list of files to config
+        # If neither of the input data directories exists,
+        # try to retrieve data from GIN repository
         else:
-            # Check if GIN URL and hash are defined (log error otherwise)
+            # Check if GIN URL and hash are defined
             if self.data_url and self.data_hash:
                 # get list of files in GIN archive with pooch.retrieve
                 list_files_archive = pooch.retrieve(
@@ -238,8 +253,6 @@ class CellfinderConfig:
                     progressbar=True,
                     processor=pooch.Unzip(
                         extract_dir=Path(self.input_data_dir).stem,
-                        # files are unpacked here, a dir
-                        # *relative* to the path set in 'path'
                     ),
                 )
                 logger.info(
@@ -267,13 +280,10 @@ class CellfinderConfig:
                         str(Path(self._background_dir_path).resolve()),
                     )
                 ]
-            # If one of URL/hash to GIN repo not defined, throw an error
+            # If one of URL/hash to GIN repository is not defined,
+            # throw an error
             else:
                 logger.error(
                     "Input data not found locally, and URL/hash to "
                     "GIN repository not provided",
                 )
-
-    def dict(self):
-        pdb.set_trace()
-        return {k: str(v) for k, v in asdict(self).items()}
