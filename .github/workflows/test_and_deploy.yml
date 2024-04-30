@@ -55,8 +55,9 @@ jobs:
       - name: Cache atlases
         uses: actions/cache@v3
         with:
-          path: ~/.brainglobe
+          path: "~/.brainglobe"
           key: atlases
+          fail-on-cache-miss: true
       # install additional Macos dependencies
       - name: install HDF5 libraries (needed on M1 Macs only)
         if: matrix.os == 'macos-latest'
