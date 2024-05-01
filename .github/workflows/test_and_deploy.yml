@@ -64,6 +64,14 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           brew install hdf5
+      # Cache cellfinder workflow data
+      - name: Cache data for cellfinder workflow tests
+        uses: actions/cache@v3
+        with:
+          path: "~/.brainglobe-tests"
+          key: cellfinder-test-data
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
       # Run tests
       - uses: neuroinformatics-unit/actions/test@v2
         with:
