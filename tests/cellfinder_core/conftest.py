@@ -85,7 +85,7 @@ def GIN_default_location() -> Path:
         Path.home()
         / ".brainglobe"
         / "workflows"
-        / "cellfinder_core"
+        / "cellfinder"
         / "cellfinder_test_data"
     )
 

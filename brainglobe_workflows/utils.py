@@ -74,7 +74,7 @@ def config_parser(
             To launch the cellfinder workflow with default parameters, run:
                 `cellfinder-workflow`.
             The default parameters are those specifed in brainglobe_workflows/
-            cellfinder_core/configs/cellfinder.json.
+            cellfinder/configs/cellfinder.json.
 
 
             To launch the cellfinder workflow with a specific set of input
