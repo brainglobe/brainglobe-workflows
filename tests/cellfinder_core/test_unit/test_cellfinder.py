@@ -200,7 +200,7 @@ def test_add_input_paths(
         Pytest fixture to enable requesting fixtures by name
     """
 
-    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+    from brainglobe_workflows.cellfinder.cellfinder import (
         CellfinderConfig,
     )
 
@@ -245,7 +245,7 @@ def test_read_cellfinder_config(
         Pytest fixture to enable requesting fixtures by name
 
     """
-    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+    from brainglobe_workflows.cellfinder.cellfinder import (
         read_cellfinder_config,
     )
 
@@ -318,10 +318,10 @@ def test_setup(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
-    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+    from brainglobe_workflows.cellfinder.cellfinder import (
         CellfinderConfig,
     )
-    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+    from brainglobe_workflows.cellfinder.cellfinder import (
         setup as setup_workflow,
     )
 
@@ -358,10 +358,10 @@ def test_run_workflow_from_cellfinder_run(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
-    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+    from brainglobe_workflows.cellfinder.cellfinder import (
         run_workflow_from_cellfinder_run,
     )
-    from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+    from brainglobe_workflows.cellfinder.cellfinder import (
         setup as setup_workflow,
     )
 

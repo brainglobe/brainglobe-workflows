@@ -1,4 +1,3 @@
-import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -12,7 +11,7 @@ def test_main():
     """
     # import inside the test function so that required functions are
     # monkeypatched first
-    from brainglobe_workflows.cellfinder_core.cellfinder_core import main
+    from brainglobe_workflows.cellfinder.cellfinder import main
 
     # run main
     cfg = main()
@@ -43,28 +42,10 @@ def test_main_w_inputs(
     request : pytest.FixtureRequest
         Pytest fixture to enable requesting fixtures by name
     """
-    from brainglobe_workflows.cellfinder_core.cellfinder_core import main
+    from brainglobe_workflows.cellfinder.cellfinder import main
 
     # run main
     cfg = main(str(request.getfixturevalue(input_config)))
 
     # check output files exist
     assert Path(cfg._detected_cells_path).is_file()
-
-
-def test_entry_point_help():
-    """
-    Smoke test the cellfinder workflow entry point by checking
-    help is printed out successfully
-    """
-
-    # define CLI input
-    subprocess_input = ["cellfinder-workflow", "--help"]
-
-    # run workflow
-    subprocess_output = subprocess.run(
-        subprocess_input,
-    )
-
-    # check returncode
-    assert subprocess_output.returncode == 0

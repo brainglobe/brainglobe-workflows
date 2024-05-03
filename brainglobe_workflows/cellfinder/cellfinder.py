@@ -3,17 +3,13 @@
 It receives as an (optional) command line input the path to a configuration
 json file, that holds the values of the required parameters for the workflow.
 
+    python brainglobe_workflows/cellfinder.py --config path/to/config.json
+
 If no input json file is passed as a configuration, the default
 configuration defined at brainglobe_workflows/cellfinder/default_config.json
 is used.
 
-Example usage:
- - to pass a custom configuration, run (from the cellfinder_main.py
-   parent directory):
-    python cellfinder_core.py --config path/to/input/config.json
- - to use the default configuration, run
-    python cellfinder_core.py
-
+    python brainglobe_workflows/cellfinder.py
 
 """
 
@@ -81,7 +77,7 @@ class CellfinderConfig:
 
     # install path: default path for downloaded and output data
     _install_path: Pathlike = (
-        Path.home() / ".brainglobe" / "workflows" / "cellfinder_core"
+        Path.home() / ".brainglobe" / "workflows" / "cellfinder"
     )
 
     # input data paths
@@ -437,27 +433,12 @@ def main(
     return cfg
 
 
-def main_app_wrapper():
-    """Parse command line arguments and
-    run cellfinder setup and workflow
-
-    This function is used to define an entry-point,
-    that allows the user to run the cellfinder workflow
-    for a given input config file as:
-    `cellfinder-workflow --config <path-to-input-config>`.
-
-    If no input config file is provided, the default is used.
-
-    """
+if __name__ == "__main__":
     # parse CLI arguments
     args = config_parser(
-        sys.argv[1:],  # sys.argv[0] is the script name
+        sys.argv[1:],
         str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER),
     )
 
     # run setup and workflow
     _ = main(args.config)
-
-
-if __name__ == "__main__":
-    main_app_wrapper()

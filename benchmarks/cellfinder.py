@@ -1,23 +1,24 @@
 import json
+import os
 import shutil
 from pathlib import Path
 
-import pooch
 from brainglobe_utils.IO.cells import save_cells
 from cellfinder.core.main import main as cellfinder_run
 from cellfinder.core.tools.IO import read_with_dask
+from cellfinder.core.tools.prep import prep_models
 
-from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+from brainglobe_workflows.cellfinder.cellfinder import (
     CellfinderConfig,
     run_workflow_from_cellfinder_run,
 )
-from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+from brainglobe_workflows.cellfinder.cellfinder import (
     setup as setup_cellfinder_workflow,
 )
 from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
 
 
-class TimeBenchmarkPrepGIN:
+class TimeBenchmark:
     """
 
     A base class for timing benchmarks for the cellfinder workflow.
@@ -78,21 +79,25 @@ class TimeBenchmarkPrepGIN:
     sample_time = 0.01  # default: 10 ms = 0.01 s;
     min_run_count = 2  # default:2
 
-    # Custom attributes
-    input_config_path = str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER)
+    # Input config file
+    # use environment variable CONFIG_PATH if exists, otherwise use default
+    input_config_path = os.getenv(
+        "CELLFINDER_CONFIG_PATH",
+        default=str(DEFAULT_JSON_CONFIG_PATH_CELLFINDER),
+    )
 
-    def setup_cache(
-        self,
-    ):
+    def setup_cache(self):
         """
         Download the input data from the GIN repository to the local
-        directory specified in the default_config.json
+        directory specified in the default_config.json.
 
         Notes
         -----
         The `setup_cache` method only performs the computations once
         per benchmark round and then caches the result to disk [1]_. It cannot
-        be parametrised [2]_.
+        be parametrised [2]_. Therefore, if we sweep across different input
+        JSON files, we need to ensure all data for all configs is made
+        available with this setup function.
 
 
         [1] https://asv.readthedocs.io/en/latest/writing_benchmarks.html#setup-and-teardown-functions
@@ -103,23 +108,21 @@ class TimeBenchmarkPrepGIN:
         assert Path(self.input_config_path).exists()
 
         # Instantiate a CellfinderConfig from the input json file
-        # (assumes config is json serializable)
+        # (fetches data from GIN if required)
         with open(self.input_config_path) as cfg:
             config_dict = json.load(cfg)
         config = CellfinderConfig(**config_dict)
 
-        # Download data with pooch
-        _ = pooch.retrieve(
-            url=config.data_url,
-            known_hash=config.data_hash,
-            path=config._install_path,
-            progressbar=True,
-            processor=pooch.Unzip(extract_dir=config.data_dir_relative),
-        )
-
-        # Check paths to input data should now exist in config
+        # Check paths to input data exist in config now
         assert Path(config._signal_dir_path).exists()
         assert Path(config._background_dir_path).exists()
+
+        # Ensure cellfinder model is downloaded to default path
+        _ = prep_models(
+            model_weights_path=config.model_weights,
+            install_path=None,  # Use default,
+            model_name=config.model,
+        )
 
     def setup(self):
         """
@@ -129,12 +132,7 @@ class TimeBenchmarkPrepGIN:
         """
 
         # Run setup
-        cfg = setup_cellfinder_workflow(
-            [
-                "--config",
-                self.input_config_path,
-            ]
-        )
+        cfg = setup_cellfinder_workflow(self.input_config_path)
 
         # Save configuration as attribute
         self.cfg = cfg
@@ -149,7 +147,7 @@ class TimeBenchmarkPrepGIN:
         shutil.rmtree(Path(self.cfg._output_path).resolve())
 
 
-class TimeFullWorkflow(TimeBenchmarkPrepGIN):
+class TimeFullWorkflow(TimeBenchmark):
     """
     Time the full cellfinder workflow.
 
@@ -158,69 +156,117 @@ class TimeFullWorkflow(TimeBenchmarkPrepGIN):
 
     Parameters
     ----------
-    TimeBenchmarkPrepGIN : _type_
+    TimeBenchmark : _type_
         A base class for timing benchmarks for the cellfinder workflow.
     """
 
-    def time_workflow_from_cellfinder_run(self):
+    def time_workflow(self):
         run_workflow_from_cellfinder_run(self.cfg)
 
 
-class TimeReadInputDask(TimeBenchmarkPrepGIN):
+class TimeReadInputDask(TimeBenchmark):
     """
     Time the reading input data operations with dask
 
     Parameters
     ----------
-    TimeBenchmarkPrepGIN : _type_
+    TimeBenchmark : _type_
         A base class for timing benchmarks for the cellfinder workflow.
     """
 
     def time_read_signal_with_dask(self):
-        read_with_dask(self.cfg._signal_dir_path)
+        read_with_dask(str(self.cfg._signal_dir_path))
 
     def time_read_background_with_dask(self):
-        read_with_dask(self.cfg._background_dir_path)
+        read_with_dask(str(self.cfg._background_dir_path))
 
 
-class TimeDetectCells(TimeBenchmarkPrepGIN):
+class TimeDetectAndClassifyCells(TimeBenchmark):
     """
     Time the cell detection main pipeline (`cellfinder_run`)
 
     Parameters
     ----------
-    TimeBenchmarkPrepGIN : _type_
+    TimeBenchmark : _type_
         A base class for timing benchmarks for the cellfinder workflow.
     """
 
     # extend basic setup function
     def setup(self):
         # basic setup
-        TimeBenchmarkPrepGIN.setup(self)
+        TimeBenchmark.setup(self)
 
-        # add input data as arrays to config
-        self.signal_array = read_with_dask(self.cfg._signal_dir_path)
-        self.background_array = read_with_dask(self.cfg._background_dir_path)
+        # add input data as arrays to the config
+        self.signal_array = read_with_dask(str(self.cfg._signal_dir_path))
+        self.background_array = read_with_dask(
+            str(self.cfg._background_dir_path)
+        )
 
     def time_cellfinder_run(self):
         cellfinder_run(
-            self.signal_array, self.background_array, self.cfg.voxel_sizes
+            self.signal_array,
+            self.background_array,
+            self.cfg.voxel_sizes,
+            self.cfg.start_plane,
+            self.cfg.end_plane,
+            self.cfg.trained_model,
+            self.cfg.model_weights,
+            self.cfg.model,
+            self.cfg.batch_size,
+            self.cfg.n_free_cpus,
+            self.cfg.network_voxel_sizes,
+            self.cfg.soma_diameter,
+            self.cfg.ball_xy_size,
+            self.cfg.ball_z_size,
+            self.cfg.ball_overlap_fraction,
+            self.cfg.log_sigma_size,
+            self.cfg.n_sds_above_mean_thresh,
+            self.cfg.soma_spread_factor,
+            self.cfg.max_cluster_size,
+            self.cfg.cube_width,
+            self.cfg.cube_height,
+            self.cfg.cube_depth,
+            self.cfg.network_depth,
         )
 
 
-class TimeSaveCells(TimeBenchmarkPrepGIN):
+class TimeSaveCells(TimeBenchmark):
     # extend basic setup function
     def setup(self):
         # basic setup
-        TimeBenchmarkPrepGIN.setup(self)
+        TimeBenchmark.setup(self)
 
         # add input data as arrays to config
-        self.signal_array = read_with_dask(self.cfg._signal_dir_path)
-        self.background_array = read_with_dask(self.cfg._background_dir_path)
+        self.signal_array = read_with_dask(str(self.cfg._signal_dir_path))
+        self.background_array = read_with_dask(
+            str(self.cfg._background_dir_path)
+        )
 
         # detect cells
         self.detected_cells = cellfinder_run(
-            self.signal_array, self.background_array, self.cfg.voxel_sizes
+            self.signal_array,
+            self.background_array,
+            self.cfg.voxel_sizes,
+            self.cfg.start_plane,
+            self.cfg.end_plane,
+            self.cfg.trained_model,
+            self.cfg.model_weights,
+            self.cfg.model,
+            self.cfg.batch_size,
+            self.cfg.n_free_cpus,
+            self.cfg.network_voxel_sizes,
+            self.cfg.soma_diameter,
+            self.cfg.ball_xy_size,
+            self.cfg.ball_z_size,
+            self.cfg.ball_overlap_fraction,
+            self.cfg.log_sigma_size,
+            self.cfg.n_sds_above_mean_thresh,
+            self.cfg.soma_spread_factor,
+            self.cfg.max_cluster_size,
+            self.cfg.cube_width,
+            self.cfg.cube_height,
+            self.cfg.cube_depth,
+            self.cfg.network_depth,
         )
 
     def time_save_cells(self):
