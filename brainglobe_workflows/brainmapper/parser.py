@@ -18,10 +18,7 @@ from brainglobe_utils.general.numerical import (
 )
 from brainreg.core.cli import atlas_parse, geometry_parser, niftyreg_parse
 from brainreg.core.cli import backend_parse as brainreg_backend_parse
-from cellfinder.core.download.cli import (
-    download_directory_parser,
-    model_parser,
-)
+from cellfinder.core.download.cli import download_parser
 from cellfinder.core.tools.source_files import user_specific_configuration_path
 
 from brainglobe_workflows import __version__
@@ -65,9 +62,8 @@ def brainmapper_parser():
     parser = classification_parse(parser)
     parser = cube_extract_parse(parser)
     parser = misc_parse(parser)
-    parser = model_parser(parser)
     parser = figures_parse(parser)
-    parser = download_directory_parser(parser)
+    parser = download_parser(parser)
 
     # brainreg options
     parser = atlas_parse(parser)
