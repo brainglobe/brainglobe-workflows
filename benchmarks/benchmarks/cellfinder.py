@@ -8,11 +8,11 @@ from cellfinder.core.main import main as cellfinder_run
 from cellfinder.core.tools.IO import read_with_dask
 from cellfinder.core.tools.prep import prep_models
 
-from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+from brainglobe_workflows.cellfinder.cellfinder import (
     CellfinderConfig,
     run_workflow_from_cellfinder_run,
 )
-from brainglobe_workflows.cellfinder_core.cellfinder_core import (
+from brainglobe_workflows.cellfinder.cellfinder import (
     setup as setup_cellfinder_workflow,
 )
 from brainglobe_workflows.utils import DEFAULT_JSON_CONFIG_PATH_CELLFINDER
