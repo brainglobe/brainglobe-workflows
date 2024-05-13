@@ -86,11 +86,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-      - name: Install dependencies
+      - name: Install asv
         shell: bash
         run: |
           python -mpip install --upgrade pip
-          python -mpip install .[asv_version]
+          python -mpip install asv
       - name: Run asv check
         shell: bash
         run: |
