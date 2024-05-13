@@ -25,8 +25,8 @@ from typing import Optional, Union
 
 import pooch
 from brainglobe_utils.IO.cells import save_cells
+from brainglobe_utils.IO.image.load import read_z_stack
 from cellfinder.core.main import main as cellfinder_run
-from cellfinder.core.tools.IO import read_z_stack
 from cellfinder.core.train.train_yml import depth_type
 
 from brainglobe_workflows.utils import (

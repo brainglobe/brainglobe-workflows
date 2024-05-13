@@ -4,8 +4,8 @@ import shutil
 from pathlib import Path
 
 from brainglobe_utils.IO.cells import save_cells
+from brainglobe_utils.IO.image.load import read_with_dask
 from cellfinder.core.main import main as cellfinder_run
-from cellfinder.core.tools.IO import read_with_dask
 from cellfinder.core.tools.prep import prep_models
 
 from brainglobe_workflows.cellfinder.cellfinder import (
