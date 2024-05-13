@@ -1,7 +1,7 @@
 # README
 
 ## Overview
-We use `asv` to benchmark some representative brainglobe workflows. The `asv` workflow is roughly as follows:
+We use [`asv`](https://asv.readthedocs.io) to benchmark some representative brainglobe workflows. The `asv` workflow is roughly as follows:
 1. `asv` creates a virtual environment (as defined in the `asv.conf.json` file).
 1. It installs the version of the `brainglobe-workflows` software package corresponding to the tip of the locally checked-out branch.
 1. It runs the benchmarks defined (locally) under `brainglobe-workflows/benchmarks/benchmarks` and saves the results to `brainglobe-workflows/benchmarks/results` as json files.
@@ -15,12 +15,11 @@ There are three main ways in which these benchmarks can be useful to developers:
 1. We also plan to run the benchmarks internally on a large dataset, and make the results publicly available.
 
 ## Installation
-To [install asv](https://asv.readthedocs.io/en/stable/installing.html):
+
+To run the benchmarks, [install asv](https://asv.readthedocs.io/en/stable/installing.html) in your current environment:
 ```
 pip install asv
 ```
-Note that to run the benchmarks you only need to have `asv` in your virtual environment. You _do not_ need to install a development version of `brainglobe-workflows`, since `asv` will create a separate Python virtual environment to run the benchmarks on it. However, for convenience we include `asv` as part of the `[asv]` dependencies, so an environment with `brainglobe-workflows[dev]` can be used to run the benchmarks.
-
 
 ## Running benchmarks on a default small dataset
 
@@ -29,16 +28,11 @@ Note that to run the benchmarks you only need to have `asv` in your virtual envi
     ```
     git clone https://github.com/brainglobe/brainglobe-workflows.git
     ```
-2. Install the `asv` version of the `brainglobe-workflows` package:
-    ```
-    pip install .[asv]
-    ```
-    This is mostly for convenience: the `[asv]` specification includes `asv` as a dependency, but to run the benchmarks it would be sufficient to use an environment with `asv` only. `asv` creates its own virtual environment for the benchmarks, where it builds and installs the relevant version of the `brainglobe-workflows` package. By default, the version at the tip of the currently checked out branch is installed.
-3. Launch the benchmarks, by running from the directory where `asv.conf.json` is at:
+1. Launch the benchmarks, by running from the directory where `asv.conf.json` is at:
     ```
     asv run
     ```
-    This will run the local benchmarks, with the default config at `brainglobe_workflows/configs/cellfinder.json`, on a small dataset downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki).
+    This will run the local benchmarks, with the default config at `brainglobe_workflows/configs/cellfinder.json`, on a small dataset downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). `asv` creates its own virtual environment for the benchmarks, where it builds and installs the relevant version of the `brainglobe-workflows` package. By default, the version at the tip of the currently checked out branch is installed.
 
     See the [asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further details on the `asv run` command and others.
 
