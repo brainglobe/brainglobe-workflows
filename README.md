@@ -76,7 +76,7 @@ There are three main ways in which these benchmarks can be useful to developers:
 1. Developers can also run these benchmarks on data they have stored locally.
 1. We also plan to run the benchmarks on an internal runner using a larger dataset, of the scale we expect users to be handling. The result of these benchmarks will be made publicly available.
 
-For further details on how to run the benchmarks, see the [benchmarks README file](benchmarks/README.md)
+For further details on how to run the benchmarks, see the [benchmarks README](benchmarks/README.md).
 
 Contributions to BrainGlobe are more than welcome.
 Please see the [developer guide](https://brainglobe.info/developers/index.html).

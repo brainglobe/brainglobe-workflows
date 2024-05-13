@@ -99,7 +99,7 @@ jobs:
         run: |
           cd benchmarks
 
-          # With 'existing', the benchmarked project must be already installed, including all dependencies.
+          # With `existing`, the benchmarked project must be already installed, including all dependencies.
           # see https://asv.readthedocs.io/en/v0.6.3/commands.html#asv-check
           asv check -v -E existing
 
