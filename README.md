@@ -73,30 +73,10 @@ These benchmarks are meant to be run regularly, to ensure performance is stable 
 
 There are three main ways in which these benchmarks can be useful to developers:
 1. Developers can run the available benchmarks locally on a small test dataset.
-
-    To do so:
-    - Install the developer version of the package:
-        ```
-        pip install .[dev]
-        ```
-        This is mostly for convenience: the `[dev]` specification includes `asv` as a dependency, but to run the benchmarks it would be sufficient to use an environment with `asv` only. This is because `asv` creates its own virtual environment for the benchmarks, building and installing the relevant version of the `brainglobe-workflows` package in it. By default, the version at the tip of the currently checked out branch is installed.
-    - Run the benchmarks:
-        ```
-        asv run
-        ```
-       This will run the locally defined benchmarks with the default parameters defined at `brainglobe_workflows/configs/cellfinder.json`, on a small dataset downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). See the [asv docs](https://asv.readthedocs.io/en/v0.6.1/using.html#running-benchmarks) for further guidance on how to run benchmarks.
 1. Developers can also run these benchmarks on data they have stored locally.
-
-    To do so:
-    - Define a config file for the workflow to benchmark. You can use the default one at `brainglobe_workflows/configs/cellfinder.json` for reference.
-    - Ensure your config file includes an `input_data_dir` field pointing to the data of interest.
-    - Edit the names of the signal and background directories if required. By default, they are assumed to be in `signal` and `background` subdirectories under `input_data_dir`. However, these defaults can be overwritten with the `signal_subdir` and `background_subdir` fields.
-    - Run the benchmarks, passing the path to your config file as an environment variable `CONFIG_PATH`. In Unix systems:
-        ```
-        CONFIG_PATH=/path/to/your/config/file asv run
-        ```
-
 1. We also plan to run the benchmarks on an internal runner using a larger dataset, of the scale we expect users to be handling. The result of these benchmarks will be made publicly available.
+
+For further details on how to run the benchmarks, see the [benchmarks README](benchmarks/README.md).
 
 Contributions to BrainGlobe are more than welcome.
 Please see the [developer guide](https://brainglobe.info/developers/index.html).
