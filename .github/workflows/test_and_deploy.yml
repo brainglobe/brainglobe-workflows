@@ -90,11 +90,17 @@ jobs:
         shell: bash
         run: |
           python -mpip install --upgrade pip
+
+          # We install the project to benchmark because we run `asv check` with the `existing` flag.
+          python -mpip install .
           python -mpip install asv
       - name: Run asv check
         shell: bash
         run: |
           cd benchmarks
+
+          # With 'existing', the benchmarked project must be already installed, including all dependencies.
+          # see https://asv.readthedocs.io/en/v0.6.3/commands.html#asv-check
           asv check -v -E existing
 
   build_sdist_wheels:
