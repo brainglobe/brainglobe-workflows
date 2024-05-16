@@ -33,7 +33,7 @@ dependencies = [
     "configobj",
     "fancylog>=0.0.7",
     "imio",
-    "brainglobe-utils>=0.2.5",
+    "brainglobe-utils>=0.5.0",
     "multiprocessing-logging>=0.3.4",
     "natsort",
     "numpy",

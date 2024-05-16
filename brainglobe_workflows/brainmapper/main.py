@@ -19,6 +19,7 @@ from brainglobe_utils.cells.cells import MissingCellsError
 from brainglobe_utils.general.system import ensure_directory_exists
 from brainglobe_utils.image.heatmap import heatmap_from_points
 from brainglobe_utils.IO.cells import get_cells, save_cells
+from brainglobe_utils.IO.image.load import read_z_stack
 from cellfinder.core.main import suppress_tf_logging, tf_suppress_log_messages
 
 BRAINREG_PRE_PROCESSING_ARGS = None
@@ -105,7 +106,6 @@ def run_all(args, what_to_run, atlas):
     from cellfinder.core.classify import classify
     from cellfinder.core.detect import detect
     from cellfinder.core.tools import prep
-    from cellfinder.core.tools.IO import read_z_stack
 
     from brainglobe_workflows.brainmapper import analyse
     from brainglobe_workflows.brainmapper.prep import (
