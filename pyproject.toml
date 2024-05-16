@@ -58,11 +58,7 @@ dev = [
     "setuptools_scm",
     "asv",
 ]
-# Below, all the dependencies asv needs to run the benchmarks
-# (i.e., everything needed to install this package without the CLI tool)
-# Once the cellfinder CLI tool is deprecated, these will move to the
-# default dependencies.
-asv_version = ["asv"]
+
 
 napari = ["napari[pyqt5]", "brainglobe-napari-io", "cellfinder[napari]>=1.0.0"]
 
