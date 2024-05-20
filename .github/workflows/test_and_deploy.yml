@@ -46,7 +46,7 @@ jobs:
             python-version: "3.10"
     steps:
       # Cache atlases
-      - name: Cache atlases
+      - name: Cache brainglobe directory
         uses: actions/cache@v3
         with:
           path: | # ensure we don't cache any interrupted atlas download and extraction, if e.g. we cancel the workflow manually
