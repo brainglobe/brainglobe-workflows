@@ -45,18 +45,14 @@ jobs:
           - os: windows-latest
             python-version: "3.10"
     steps:
-      # Cache the tensorflow model so we don't have to remake it every time
-      - name: Cache tensorflow model
-        uses: actions/cache@v3
-        with:
-          path: "~/.cellfinder"
-          key: models-${{ hashFiles('~/.brainglobe/**') }}
       # Cache atlases
       - name: Cache atlases
         uses: actions/cache@v3
         with:
-          path: "~/.brainglobe"
-          key: atlases
+          path: | # ensure we don't cache any interrupted atlas download and extraction, if e.g. we cancel the workflow manually
+            ~/.brainglobe
+            !~/.brainglobe/atlas.tar.gz
+          key: atlases-models
           fail-on-cache-miss: true
           enableCrossOsArchive: true
       # install additional Macos dependencies
