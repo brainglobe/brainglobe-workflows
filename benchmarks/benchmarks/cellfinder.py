@@ -69,7 +69,7 @@ class TimeBenchmark:
     """
 
     # Timing attributes
-    timeout = 600  # default: 60 s
+    timeout = 3600  # default: 60 s
     version = (
         None  # benchmark version. Default:None (i.e. hash of source code)
     )
