@@ -96,7 +96,9 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install asv
 
-          # install (pip) dependencies from pyproject.toml
+          # install brainglobe-worfklows with (pip) dependencies
+          # (because we are using `existing` flag in asv check command)
+          # https://asv.readthedocs.io/en/v0.6.3/commands.html#asv-check
           python -m pip install .
 
       - name: Run asv check with pip dependencies and existing flag
@@ -129,7 +131,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install asv
 
-          # install latest-github dependencies
+          # install brainglobe-workflows project
+          # (because we are using `existing` flag in asv check command)
+          # https://asv.readthedocs.io/en/v0.6.3/commands.html#asv-check
+          python -m pip install .
+
+          # overwrite latest-github dependencies
           python -m pip install -r $GITHUB_WORKSPACE/benchmarks/latest-github-requirements.txt
 
       - name: Run asv check with latest-github dependencies and existing flag
