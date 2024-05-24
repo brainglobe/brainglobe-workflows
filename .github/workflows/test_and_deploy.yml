@@ -91,11 +91,12 @@ jobs:
       - name: Checkout brainglobe-workflows repository
         uses: actions/checkout@v4
 
-      - name: Create and activate conda environment
-        uses: conda-incubator/setup-miniconda@v2  # we need conda for asv env management
+      - name: Create and activate conda environment  # we need conda for asv management of environments
+        uses: conda-incubator/setup-miniconda@v2.1.1 # see https://github.com/conda-incubator/setup-miniconda/issues/261
         with:
+          miniconda-version: py310_24.1.2-0  # we need conda<24.3, see https://github.com/airspeed-velocity/asv/pull/1397
           python-version: ${{ matrix.python-version }}
-          activate-environment: asv-only  # will activate this conda environment
+          activate-environment: asv-only
 
       - name: Install asv
         shell: bash -l {0}
