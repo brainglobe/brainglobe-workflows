@@ -95,7 +95,7 @@ jobs:
           cd benchmarks
 
           # check benchmarks with pip dependencies
-          asv check -v -E existing --config $GITHUB_WORKSPACE/benchmarks/asv.pip.conf.json
+          asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.pip.conf.json
 
           # check benchmarks with latest-github dependencies
           asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.latest-github.conf.json
