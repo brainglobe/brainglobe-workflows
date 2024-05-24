@@ -82,13 +82,16 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2  # we need conda for asv env management
         with:
           activate-environment: asv-only  # will activate this conda environment
-      - name: Install asv 
+
+      - name: Install asv
         shell: bash -l {0}
         run: |
-          python -mpip install --upgrade pip
+          conda activate asv-only
 
           # install asv
+          python -mpip install --upgrade pip
           python -mpip install asv
+
       - name: Run asv check
         shell: bash -l {0}
         run: |
