@@ -74,9 +74,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
           secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
 
-  benchmarks-pip:
-    name: Check benchmarks using pip dependencies
+  benchmarks:
+    name: Check benchmarks
     runs-on: ubuntu-latest
+
+    # Set shell in login mode as global setting for the job
+    defaults:
+      run:
+        shell: bash -l {0}
 
     strategy:
       matrix:
@@ -86,65 +91,32 @@ jobs:
       - name: Checkout brainglobe-workflows repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Create and activate conda environment  # we need conda for asv management of environments
+        uses: conda-incubator/setup-miniconda@v2.1.1 # see https://github.com/conda-incubator/setup-miniconda/issues/261
         with:
+          miniconda-version: py310_24.1.2-0  # we need conda<24.3, see https://github.com/airspeed-velocity/asv/pull/1397
           python-version: ${{ matrix.python-version }}
+          activate-environment: asv-only
 
-      - name: Install asv and define asv environment
+      - name: Install asv
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install asv
+          pip install --upgrade pip
+          pip install asv
 
-          # install brainglobe-worfklows with (pip) dependencies
-          # (because we are using `existing` flag in asv check command)
-          # https://asv.readthedocs.io/en/v0.6.3/commands.html#asv-check
-          python -m pip install .
-
-      - name: Run asv check with pip dependencies and existing flag
+      - name: Run asv check with pip dependencies
         working-directory: ${{ github.workspace }}/benchmarks
         run: |
 
-          # check benchmarks with pip dependencies and existing flag
-          asv check -v -E existing --config $GITHUB_WORKSPACE/benchmarks/asv.pip.conf.json
+          # check benchmarks with pip dependencies
+          asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.pip.conf.json
 
-
-  benchmarks-latest-github:
-    name: Check benchmarks using latest-github dependencies
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        python-version: ["3.10"]
-
-    steps:
-      - name: Checkout brainglobe-workflows repository
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install asv and define asv environment
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install asv
-
-          # install brainglobe-workflows project
-          # (because we are using `existing` flag in asv check command)
-          # https://asv.readthedocs.io/en/v0.6.3/commands.html#asv-check
-          python -m pip install .
-
-          # overwrite latest-github dependencies
-          python -m pip install -r $GITHUB_WORKSPACE/benchmarks/latest-github-requirements.txt
-
-      - name: Run asv check with latest-github dependencies and existing flag
+      - name: Run asv check with latest-github dependencies
         working-directory: ${{ github.workspace }}/benchmarks
         run: |
 
-          # check benchmarks with latest-github dependencies and existing flag
-          asv check -v -E existing --config $GITHUB_WORKSPACE/benchmarks/asv.latest-github.conf.json
+          # check benchmarks with latest-github dependencies
+          asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.latest-github.conf.json
+
 
   build_sdist_wheels:
     name: Build source distribution
