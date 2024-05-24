@@ -79,18 +79,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: conda-incubator/setup-miniconda@v2  # we need conda for asv env management
         with:
-          python-version: "3.10"
+          activate-environment: asv-only  # will activate this conda environment
       - name: Install asv 
-        shell: bash
+        shell: bash -l {0}
         run: |
           python -mpip install --upgrade pip
 
           # install asv
           python -mpip install asv
       - name: Run asv check
-        shell: bash
+        shell: bash -l {0}
         run: |
           cd benchmarks
 
