@@ -91,31 +91,32 @@ jobs:
       - name: Checkout brainglobe-workflows repository
         uses: actions/checkout@v4
 
-      - name: Create and activate conda environment  # we need conda for asv management of environments
-        uses: conda-incubator/setup-miniconda@v2.1.1 # see https://github.com/conda-incubator/setup-miniconda/issues/261
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          miniconda-version: py310_24.1.2-0  # we need conda<24.3, see https://github.com/airspeed-velocity/asv/pull/1397
           python-version: ${{ matrix.python-version }}
-          activate-environment: asv-only
 
-      - name: Install asv
+      - name: Install asv and define asv environment
         run: |
-          pip install --upgrade pip
-          pip install asv
+          python -m pip install --upgrade pip
+          python -m pip install asv
 
-      - name: Run asv check with pip dependencies
+          # install (pip) dependencies from pyproject.toml
+          python -m pip install .
+
+      - name: Run asv check with pip dependencies and existing flag
         working-directory: ${{ github.workspace }}/benchmarks
         run: |
 
-          # check benchmarks with pip dependencies
-          asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.pip.conf.json
+          # check benchmarks with pip dependencies and existing flag
+          asv check -v -E existing --config $GITHUB_WORKSPACE/benchmarks/asv.pip.conf.json
 
-      - name: Run asv check with latest-github dependencies
+      - name: Run asv check with latest-github dependencies and existing flag
         working-directory: ${{ github.workspace }}/benchmarks
         run: |
 
-          # check benchmarks with latest-github dependencies
-          asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.latest-github.conf.json
+          # check benchmarks with latest-github dependencies and existing flag
+          asv check -v -E existing --config $GITHUB_WORKSPACE/benchmarks/asv.latest-github.conf.json
 
 
   build_sdist_wheels:
