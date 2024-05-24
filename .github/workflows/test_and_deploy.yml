@@ -101,7 +101,7 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install --upgrade pip
-          mpip install asv
+          pip install asv
 
       - name: Run asv check
         shell: bash -l {0}
