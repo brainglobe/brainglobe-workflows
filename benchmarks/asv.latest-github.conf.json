@@ -36,7 +36,7 @@
     // Customizable commands for installing and uninstalling the project.
     // See asv.conf.json documentation.
     // overwrite dependencies from PyPi with latest `main` version from GitHub
-    "install_command": ["in-dir={env_dir} python -mpip install --force-reinstall '{wheel_file}'", "in-dir={env_dir} python -mpip install -r /Users/alessandrofelder/dev/brainglobe-workflows/benchmarks/dev-requirements.txt"],
+    "install_command": ["in-dir={env_dir} python -mpip install --force-reinstall '{wheel_file}'", "in-dir={env_dir} python -mpip install -r {conf_dir}/latest-github-requirements.txt"],
     "uninstall_command": ["return-code=any python -mpip uninstall -y {project}"],
 
     // List of branches to benchmark. If not provided, defaults to "master"
