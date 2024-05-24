@@ -97,7 +97,8 @@ jobs:
 
           # With `existing`, the benchmarked project must be already installed, including all dependencies.
           # see https://asv.readthedocs.io/en/v0.6.3/commands.html#asv-check
-          asv check -v -E existing
+          asv check -v -E existing --config $GITHUB_WORKSPACE/benchmarks/asv.pip.conf.json
+          asv check -v -E existing --config $GITHUB_WORKSPACE/benchmarks/asv.latest-github.conf.json
 
   build_sdist_wheels:
     name: Build source distribution
