@@ -99,21 +99,24 @@ jobs:
           activate-environment: asv-only
 
       - name: Install asv
-        shell: bash -l {0}
         run: |
           pip install --upgrade pip
           pip install asv
 
-      - name: Run asv check
-        shell: bash -l {0}
+      - name: Run asv check with pip dependencies
+        working-directory: ${{ github.workspace }}/benchmarks
         run: |
-          cd benchmarks
 
           # check benchmarks with pip dependencies
           asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.pip.conf.json
 
+      - name: Run asv check with latest-github dependencies
+        working-directory: ${{ github.workspace }}/benchmarks
+        run: |
+
           # check benchmarks with latest-github dependencies
           asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.latest-github.conf.json
+
 
   build_sdist_wheels:
     name: Build source distribution
