@@ -77,20 +77,31 @@ jobs:
   benchmarks:
     name: Check benchmarks
     runs-on: ubuntu-latest
+
+    # Set shell in login mode as global setting for the job
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: conda-incubator/setup-miniconda@v2  # we need conda for asv env management
+      - name: Checkout brainglobe-workflows repository
+        uses: actions/checkout@v4
+
+      - name: Create and activate conda environment
+        uses: conda-incubator/setup-miniconda@v2  # we need conda for asv env management
         with:
+          python-version: ${{ matrix.python-version }}
           activate-environment: asv-only  # will activate this conda environment
 
       - name: Install asv
         shell: bash -l {0}
         run: |
-          conda activate asv-only
-
-          # install asv
-          python -mpip install --upgrade pip
-          python -mpip install asv
+          pip install --upgrade pip
+          mpip install asv
 
       - name: Run asv check
         shell: bash -l {0}
