@@ -3,9 +3,6 @@ main
 ===============
 
 Runs each part of the brainmapper pipeline in turn.
-
-N.B imports are within functions to prevent tensorflow being imported before
-it's warnings are silenced
 """
 
 import logging
@@ -20,7 +17,6 @@ from brainglobe_utils.general.system import ensure_directory_exists
 from brainglobe_utils.image.heatmap import heatmap_from_points
 from brainglobe_utils.IO.cells import get_cells, save_cells
 from brainglobe_utils.IO.image.load import read_z_stack
-from cellfinder.core.main import suppress_tf_logging, tf_suppress_log_messages
 
 BRAINREG_PRE_PROCESSING_ARGS = None
 
@@ -44,7 +40,6 @@ def cells_exist(points_file):
 
 
 def main():
-    suppress_tf_logging(tf_suppress_log_messages)
     from brainreg.core.main import main as register
 
     from brainglobe_workflows.brainmapper import prep
