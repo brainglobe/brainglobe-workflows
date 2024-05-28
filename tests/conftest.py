@@ -1,8 +1,8 @@
 import os
 
+import keras.src.backend.common.global_state
 import pytest
 import torch.backends.mps
-import keras.src.backend.common.global_state
 
 
 @pytest.fixture(scope="session", autouse=True)
