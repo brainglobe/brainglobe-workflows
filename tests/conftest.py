@@ -1,6 +1,5 @@
 import os
 
-import keras.src.backend.common.global_state
 import pytest
 import torch.backends.mps
 
@@ -22,6 +21,8 @@ def set_device_arm_macos_ci():
         os.getenv("GITHUB_ACTIONS") == "true"
         and torch.backends.mps.is_available()
     ):
+        import keras.src.backend.common.global_state
+
         keras.src.backend.common.global_state.set_global_attribute(
             "torch_device", "cpu"
         )
