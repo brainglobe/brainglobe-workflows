@@ -26,3 +26,5 @@ def set_device_arm_macos_ci():
         keras.src.backend.common.global_state.set_global_attribute(
             "torch_device", "cpu"
         )
+
+        yield
