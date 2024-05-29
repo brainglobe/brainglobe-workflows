@@ -30,6 +30,8 @@ jobs:
     needs: [linting, manifest]
     name: ${{ matrix.os }} py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    env:
+      KERAS_BACKEND: torch
     strategy:
       fail-fast: false
       matrix:

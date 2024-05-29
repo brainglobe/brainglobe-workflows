@@ -154,7 +154,6 @@ def run_all(args, what_to_run, atlas):
             args.model_weights,
             args.install_path,
             args.model,
-            args.n_free_cpus,
         )
         if what_to_run.classify:
             if points is None:
