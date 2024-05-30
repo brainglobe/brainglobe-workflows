@@ -140,6 +140,7 @@ omit = benchmarks/*
 [testenv]
 extras =
     dev
+passenv = GITHUB_*
 deps =
     coredev: git+https://github.com/brainglobe/cellfinder.git
 commands =

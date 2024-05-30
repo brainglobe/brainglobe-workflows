@@ -18,7 +18,10 @@ def set_device_arm_macos_ci():
     GitHub runners. This is to avoid the following error:
     https://discuss.pytorch.org/t/mps-back-end-out-of-memory-on-github-action/189773/5
     """
-    if os.getenv("CI") == "true" and torch.backends.mps.is_available():
+    if (
+        os.getenv("GITHUB_ACTIONS") == "true"
+        and torch.backends.mps.is_available()
+    ):
         import keras
 
         keras.src.backend.common.global_state.set_global_attribute(
