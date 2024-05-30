@@ -23,8 +23,10 @@ def set_device_arm_macos_ci():
         and torch.backends.mps.is_available()
     ):
         import keras
+        import tensorflow
 
         keras.src.backend.common.global_state.set_global_attribute(
             "torch_device", "cpu"
         )
+        tensorflow.config.set_visible_devices([], "GPU")
         # force_cpu()
