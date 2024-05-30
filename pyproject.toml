@@ -140,7 +140,6 @@ omit = benchmarks/*
 [testenv]
 extras =
     dev
-passenv = GITHUB_*
 deps =
     coredev: git+https://github.com/brainglobe/cellfinder.git
 commands =
@@ -148,4 +147,5 @@ commands =
 description =
     Run tests
     coredev: Run tests with the development version of cellfinder
+passenv = GITHUB_*
 """
