@@ -1,8 +1,10 @@
 import os
 
+import keras
 import pytest
 import torch
-from cellfinder.core.tools.system import force_cpu
+
+# from cellfinder.core.tools.system import force_cpu
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -16,4 +18,7 @@ def set_device_arm_macos_ci():
         os.getenv("GITHUB_ACTIONS") == "true"
         and torch.backends.mps.is_available()
     ):
-        force_cpu()
+        keras.src.backend.common.global_state.set_global_attribute(
+            "torch_device", "cpu"
+        )
+        # force_cpu()
