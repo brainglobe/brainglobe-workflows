@@ -32,6 +32,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       KERAS_BACKEND: torch
+      GITHUB_ACTIONS: true
     strategy:
       fail-fast: false
       matrix:
