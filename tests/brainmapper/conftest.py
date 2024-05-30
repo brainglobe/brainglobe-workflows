@@ -1,32 +1,15 @@
-import os
 import pathlib
 import sys
 
 import pytest
-import torch
 from brainglobe_utils.general.config import get_config_obj
 from cellfinder.core.download.cli import main as cellfinder_download
-from cellfinder.core.tools.system import force_cpu
 
 test_data_dir = pathlib.Path(__file__) / ".." / ".." / "data"
 data_dir = test_data_dir / "brain"
 test_output_dir = test_data_dir / "registration_output"
 
 TEST_ATLAS = "allen_2017_100um"
-
-
-@pytest.fixture(scope="session", autouse=True)
-def set_device_arm_macos_ci():
-    """
-    Ensure that the device is set to CPU when running on arm based macOS
-    GitHub runners. This is to avoid the following error:
-    https://discuss.pytorch.org/t/mps-back-end-out-of-memory-on-github-action/189773/5
-    """
-    if (
-        os.getenv("GITHUB_ACTIONS") == "true"
-        and torch.backends.mps.is_available()
-    ):
-        force_cpu()
 
 
 def download_atlas(directory):
