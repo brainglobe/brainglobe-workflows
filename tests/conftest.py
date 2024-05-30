@@ -1,4 +1,5 @@
 import os
+import sys
 
 import pytest
 import torch
@@ -18,15 +19,10 @@ def set_device_arm_macos_ci():
     GitHub runners. This is to avoid the following error:
     https://discuss.pytorch.org/t/mps-back-end-out-of-memory-on-github-action/189773/5
     """
-    if (
-        os.getenv("GITHUB_ACTIONS") == "true"
-        and torch.backends.mps.is_available()
-    ):
+    if sys.platform == "darwin" and torch.backends.mps.is_available():
         import keras
-        import tensorflow
 
         keras.src.backend.common.global_state.set_global_attribute(
             "torch_device", "cpu"
         )
-        tensorflow.config.set_visible_devices([], "GPU")
         # force_cpu()
