@@ -2,23 +2,18 @@
     // The version of the config file format.  Do not change, unless
     // you know what you are doing.
     "version": 1,
-
     // The name of the project being benchmarked
     "project": "brainglobe-workflows",
-
     // The project's homepage
     "project_url": "https://github.com/brainglobe/brainglobe-workflows",
-
     // The URL or local path of the source code repository for the
     // project being benchmarked
     "repo": "..",
     // "repo": "https://github.com/brainglobe/brainglobe-workflows.git",
-
     // The Python project's subdirectory in your repo.  If missing or
     // the empty string, the project is assumed to be located at the root
     // of the repository.
     // "repo_subdir": "",
-
     // Customizable commands for building the project.
     // See asv.conf.json documentation.
     // To build the package using pyproject.toml (PEP518), uncomment the following lines
@@ -32,23 +27,26 @@
     //     "python setup.py build",
     //     "PIP_NO_BUILD_ISOLATION=false python -mpip wheel --no-deps --no-index -w {build_cache_dir} {build_dir}"
     // ],
-
     // Customizable commands for installing and uninstalling the project.
     // See asv.conf.json documentation.
-    "install_command": ["in-dir={env_dir} python -mpip install --force-reinstall '{wheel_file}'"],
-    "uninstall_command": ["return-code=any python -mpip uninstall -y {project}"],
-
+    "install_command": [
+        "in-dir={env_dir} python -mpip install --force-reinstall '{wheel_file}'",
+        "in-dir={env_dir} python -mpip list" // print dependencies' versions if asv ran with -v
+    ],
+    "uninstall_command": [
+        "return-code=any python -mpip uninstall -y {project}"
+    ],
     // List of branches to benchmark. If not provided, defaults to "master"
     // (for git) or "default" (for mercurial).
-    "branches": ["HEAD"], // for git
+    "branches": [
+        "HEAD"
+    ], // for git
     // "branches": ["default"],    // for mercurial
-
     // The DVCS being used.  If not set, it will be automatically
     // determined from "repo" by looking at the protocol in the URL
     // (if remote), or by looking for special directories, such as
     // ".git" (if local).
     // "dvcs": "git",
-
     // The tool to use to create environments.  May be "conda",
     // "virtualenv", "mamba" (above 3.8)
     // or other value depending on the plugins in use.
@@ -56,25 +54,24 @@
     // determined by looking for tools on the PATH environment
     // variable.
     "environment_type": "conda",
-
     // timeout in seconds for installing any dependencies in environment
     // defaults to 10 min
     //"install_timeout": 600,
-
     // the base URL to show a commit for the project.
     "show_commit_url": "https://github.com/brainglobe/brainglobe-workflows/commit/",
-
     // The Pythons you'd like to test against.  If not provided, defaults
     // to the current version of Python used to run `asv`.
-    "pythons": ["3.10"],
-
+    "pythons": [
+        "3.10"
+    ],
     // The list of conda channel names to be searched for benchmark
     // dependency packages in the specified order
-    "conda_channels": ["conda-forge", "defaults"],
-
+    "conda_channels": [
+        "conda-forge",
+        "defaults"
+    ],
     // A conda environment file that is used for environment creation.
     // "conda_environment_file": "environment.yml",
-
     // The matrix of dependencies to test.  Each key of the "req"
     // requirements dictionary is the name of a package (in PyPI) and
     // the values are version numbers.  An empty list or empty string
@@ -104,7 +101,6 @@
     //     "env": {"ENV_VAR_1": ["val1", "val2"]},
     //     "env_nobuild": {"ENV_VAR_2": ["val3", null]},
     // },
-
     // Combinations of libraries/python versions can be excluded/included
     // from the set to test. Each entry is a dictionary containing additional
     // key-value pairs to include/exclude.
@@ -144,31 +140,24 @@
     //     // additional env if run on windows+conda
     //     {"platform": "win32", "environment_type": "conda", "python": "2.7", "req": {"libpython": ""}},
     // ],
-
     // The directory (relative to the current directory) that benchmarks are
     // stored in.  If not provided, defaults to "benchmarks"
     "benchmark_dir": "benchmarks",
-
     // The directory (relative to the current directory) to cache the Python
     // environments in.  If not provided, defaults to "env"
     "env_dir": ".asv/env",
-
     // The directory (relative to the current directory) that raw benchmark
     // results are stored in.  If not provided, defaults to "results".
     "results_dir": "results",
-
     // The directory (relative to the current directory) that the html tree
     // should be written to.  If not provided, defaults to "html".
     "html_dir": "html",
-
     // The number of characters to retain in the commit hashes.
     // "hash_length": 8,
-
     // `asv` will cache results of the recent builds in each
     // environment, making them faster to install next time.  This is
     // the number of builds to keep, per environment.
     "build_cache_size": 2,
-
     // The commits after which the regression search in `asv publish`
     // should start looking for regressions. Dictionary whose keys are
     // regexps matching to benchmark names, and values corresponding to
@@ -181,7 +170,6 @@
     //    "some_benchmark": "352cdf",  // Consider regressions only after this commit
     //    "another_benchmark": null,   // Skip regression detection altogether
     // },
-
     // The thresholds for relative change in results, after which `asv
     // publish` starts reporting regressions. Dictionary of the same
     // form as in ``regressions_first_commits``, with values
