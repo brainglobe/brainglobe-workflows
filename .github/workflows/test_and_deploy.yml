@@ -79,27 +79,46 @@ jobs:
   benchmarks:
     name: Check benchmarks
     runs-on: ubuntu-latest
+
+    # Set shell in login mode as global setting for the job
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout brainglobe-workflows repository
+        uses: actions/checkout@v4
+
+      - name: Create and activate conda environment  # we need conda for asv management of environments
+        uses: conda-incubator/setup-miniconda@v2.1.1 # see https://github.com/conda-incubator/setup-miniconda/issues/261
         with:
-          python-version: "3.10"
+          miniconda-version: py310_24.1.2-0  # we need conda<24.3, see https://github.com/airspeed-velocity/asv/pull/1397
+          python-version: ${{ matrix.python-version }}
+          activate-environment: asv-only
+
       - name: Install asv
-        shell: bash
         run: |
-          python -mpip install --upgrade pip
+          pip install --upgrade pip
+          pip install asv
 
-          # We install the project to benchmark because we run `asv check` with the `existing` flag.
-          python -mpip install .
-          python -mpip install asv
-      - name: Run asv check
-        shell: bash
+      - name: Run asv check with pip dependencies
+        working-directory: ${{ github.workspace }}/benchmarks
         run: |
-          cd benchmarks
 
-          # With `existing`, the benchmarked project must be already installed, including all dependencies.
-          # see https://asv.readthedocs.io/en/v0.6.3/commands.html#asv-check
-          asv check -v -E existing
+          # check benchmarks with pip dependencies
+          asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.pip.conf.json
+
+      - name: Run asv check with latest-github dependencies
+        working-directory: ${{ github.workspace }}/benchmarks
+        run: |
+
+          # check benchmarks with latest-github dependencies
+          asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.latest-github.conf.json
+
 
   build_sdist_wheels:
     name: Build source distribution
