@@ -1,3 +1,7 @@
+import json
+import os
+from pathlib import Path
+
 from brainglobe_workflows.brainglobe_atlasapi.create_mouse_atlas import (
     create_mouse_atlas,
 )
@@ -6,14 +10,27 @@ from brainglobe_workflows.brainglobe_atlasapi.create_mouse_atlas import (
 class TimeBenchmark:
     # Timing attributes
     timeout = 3600  # default: 60 s
-    version = (
-        None  # benchmark version. Default:None (i.e. hash of source code)
-    )
-    warmup_time = 0.1  # seconds
-    rounds = 2
-    repeat = 0
-    sample_time = 0.01  # default: 10 ms = 0.01 s;
-    min_run_count = 2  # default:2
+
+    def setup(self):
+        # read input config: environment variable if it exists, else default
+        input_config_path = os.getenv(
+            "ATLAS_CONFIG_PATH",
+            default=str(
+                Path(__file__).parents[2]
+                / "brainglobe_workflows"
+                / "configs"
+                / "brainglobe_atlasapi_small.json"
+            ),
+        )
+
+        assert Path(input_config_path).exists()
+
+        # read as dict
+        with open(input_config_path) as cfg:
+            config_dict = json.load(cfg)
+
+        # pass dict to class
+        self.config = config_dict
 
     def time_create_mouse_atlas(self):
-        create_mouse_atlas()
+        create_mouse_atlas(**self.config)
