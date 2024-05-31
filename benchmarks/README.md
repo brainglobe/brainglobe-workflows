@@ -11,8 +11,9 @@ We use [`asv`](https://asv.readthedocs.io) to benchmark some representative Brai
 
 
 We include code to benchmark the workflows defined under `brainglobe_workflows`. There are three main ways in which these benchmarks can be useful to developers:
-1. Developers can run the available benchmarks locally [on a small test dataset](#running-benchmarks-locally-on-default-small-dataset).
-1. Developers can run these benchmarks locally on [data they have stored locally](#running-benchmarks-locally-on-custom-data).
+1. Developers can run the available benchmarks on their machine on either
+    - [a small test dataset](#running-benchmarks-on-a-small-default-dataset), or
+    - on [custom data](#running-benchmarks-on-custom-data).
 1. We also run the benchmarks internally on a large dataset, and make the results publicly available.
 
 Additionally, we ship two `asv` configuration files, which define two different environments for `asv` to create and run the benchmarks in. `brainglobe-workflows` depends on a number of BrainGlobe packages. The only difference between the two `asv`-defined environments is the version of the BrainGlobe packages. In `asv.pip.conf.json`, we install the packages from PyPI. In `asv.latest-github.conf.json`, we install the packages from their `main` branch on GitHub. Note that because of this all `asv` commands will need to specify the configuration file with the `--config` flag.
@@ -26,9 +27,9 @@ To run the benchmarks, [install asv](https://asv.readthedocs.io/en/stable/instal
 pip install asv
 ```
 
-## Running benchmarks on a default small dataset
+## Running benchmarks on a small default dataset
 
-To run the benchmarks on a default small dataset:
+To run the benchmarks on the default dataset:
 
 1. Git clone the `brainglobe-workflows` repository:
     ```
@@ -41,7 +42,7 @@ To run the benchmarks on a default small dataset:
     ```
     This will benchmark the workflows defined in `brainglobe_workflows/` using a default set of parameters and a default small dataset. The default parameters are defined as config files under `brainglobe_workflows/configs`. The default dataset is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki).
 
-## Running benchmarks on custom data available locally
+## Running benchmarks on custom data
 To run the benchmarks on a custom local dataset:
 
 1. Git clone the `brainglobe-workflows` repository
