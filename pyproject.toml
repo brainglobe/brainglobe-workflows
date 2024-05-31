@@ -147,5 +147,7 @@ commands =
 description =
     Run tests
     coredev: Run tests with the development version of cellfinder
-passenv = GITHUB_*
+passenv =
+    CI
+    GITHUB_*
 """
