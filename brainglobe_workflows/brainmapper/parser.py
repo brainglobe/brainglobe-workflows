@@ -337,7 +337,7 @@ def classification_parse(parser):
         "--batch-size",
         dest="batch_size",
         type=check_positive_int,
-        default=32,
+        default=64,
         help="Batch size for classification. Can be adjusted depending on "
         "GPU memory.",
     )
