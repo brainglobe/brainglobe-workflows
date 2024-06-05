@@ -9,7 +9,7 @@ authors = [
 description = "A collection of end-to-end data analysis workflows executed using BrainGlobe tools."
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dynamic = ["version"]
 
 classifiers = [
@@ -19,7 +19,8 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
@@ -84,16 +85,10 @@ include = ["brainglobe_workflows"]
 exclude = ["tests", "resources", "benchmarks"]
 
 [tool.black]
-target-version = ["py39", "py310"]
+target-version = ["py310", "py311", 'py312']
 skip-string-normalization = false
 line-length = 79
 ignore = ["*.yaml"]
-
-[tool.cibuildwheel]
-build = "cp39-* cp310-*"
-
-[tool.cibuildwheel.macos]
-archs = ["x86_64", "arm64"]
 
 [tool.check-manifest]
 
@@ -119,13 +114,15 @@ fix = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{39,310}-{coredev}
+envlist = py{310,311,312}-{coredev}
 isolated_build = True
 
 [gh-actions]
 python =
-    3.9: py39
     3.10: py310
+    3.11: py311
+    3.12: py312
+
 
 [gh-actions:env]
 # This runs the coredev environment if the "coredev" github actions input
