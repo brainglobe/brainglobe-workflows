@@ -29,12 +29,8 @@ classifiers = [
 # (i.e., only what users will need for brainmapper)
 dependencies = [
     "brainglobe>=1.2.0",
-    "brainreg>=1.0.0",
-    "cellfinder>=1.3.0",
     "configobj",
     "fancylog>=0.0.7",
-    "imio",
-    "brainglobe-utils>=0.5.0",
     "multiprocessing-logging>=0.3.4",
     "natsort",
     "numpy",
