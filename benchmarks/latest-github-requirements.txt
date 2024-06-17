@@ -1,3 +1,4 @@
+brainglobe-atlasapi @ git+https://github.com/brainglobe/brainglobe-atlasapi@main
 brainglobe-heatmap @ git+https://github.com/brainglobe/brainglobe-heatmap@main
 brainglobe-napari-io @ git+https://github.com/brainglobe/brainglobe-napari-io@main
 brainglobe-segmentation @ git+https://github.com/brainglobe/brainglobe-segmentation@main
