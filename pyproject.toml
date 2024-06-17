@@ -31,7 +31,6 @@ dependencies = [
     "brainglobe>=1.2.0",
     "configobj",
     "fancylog>=0.0.7",
-    "imio",
     "multiprocessing-logging>=0.3.4",
     "natsort",
     "numpy",
