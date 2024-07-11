@@ -78,8 +78,9 @@ There are three main ways in which these benchmarks can be useful to developers:
 
 For further details on how to run the benchmarks, see the [benchmarks README](benchmarks/README.md).
 
-Contributions to BrainGlobe are more than welcome.
-Please see the [developer guide](https://brainglobe.info/developers/index.html).
+
+## Seeking help or contributing
+We are always happy to help users of our tools, and welcome any contributions. If you would like to get in contact with us for any reason, please see the [contact page of our website](https://brainglobe.info/contact.html).
 
 ## Citing `brainglobe-workflows`
 
