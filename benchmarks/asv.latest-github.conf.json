@@ -31,7 +31,7 @@
     // See asv.conf.json documentation.
     // overwrite dependencies from PyPi with latest `main` version from GitHub
     "install_command": [
-        "in-dir={env_dir} python -mpip install --force-reinstall '{wheel_file}'",
+        "in-dir={env_dir} python -mpip install --force-reinstall --no-cache-dir '{wheel_file}'",
         "in-dir={env_dir} python -mpip install -r {conf_dir}/latest-github-requirements.txt",
         "in-dir={env_dir} python -mpip list" // print dependencies' versions if asv ran with -v
     ],
