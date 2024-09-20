@@ -5,7 +5,7 @@ import sys
 import numpy as np
 import pandas as pd
 import pytest
-from imio.load import load_any
+from brainglobe_utils.IO.image import load_any
 
 from brainglobe_workflows.brainmapper.main import (
     main as cellfinder_run,
