@@ -39,14 +39,14 @@ jobs:
       fail-fast: false
       matrix:
         # Run tests on ubuntu across all supported versions
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13"]
         os: [ubuntu-latest]
         # Include a Windows test and new Mac runs
         include:
           - os: macos-latest
-            python-version: "3.12"
+            python-version: "3.13"
           - os: windows-latest
-            python-version: "3.12"
+            python-version: "3.13"
     steps:
       # Cache atlases
       - name: Cache brainglobe directory
