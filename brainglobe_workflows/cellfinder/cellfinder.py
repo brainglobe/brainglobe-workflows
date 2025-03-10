@@ -27,7 +27,7 @@ import pooch
 from brainglobe_utils.IO.cells import save_cells
 from brainglobe_utils.IO.image.load import read_with_dask
 from cellfinder.core.main import main as cellfinder_run
-from cellfinder.core.train.train_yml import depth_type
+from cellfinder.core.train.train_yaml import depth_type
 
 from brainglobe_workflows.utils import (
     DEFAULT_JSON_CONFIG_PATH_CELLFINDER,
