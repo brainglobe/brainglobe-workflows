@@ -9,7 +9,7 @@ on:
   pull_request:
   schedule:
     # Runs at 6:10am UTC on Monday
-    - cron: '10 6 * * 1'
+    - cron: "10 6 * * 1"
   workflow_dispatch:
 
 env:
@@ -38,10 +38,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Run tests on ubuntu across all supported versions
         python-version: ["3.11", "3.12", "3.13"]
         os: [ubuntu-latest]
-        # Include a Windows test and new Mac runs
         include:
           - os: macos-latest
             python-version: "3.13"
@@ -94,7 +92,7 @@ jobs:
         uses: ravsamhq/notify-slack-action@v2
         with:
           status: ${{ job.status }}
-          notify_when: 'failure'
+          notify_when: "failure"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFYBOT_WEBHOOK_URL }} # required
 
@@ -148,11 +146,11 @@ jobs:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/download-artifact@v4
-      with:
-        name: artifact
-        path: dist
-    - uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.TWINE_API_KEY }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: artifact
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TWINE_API_KEY }}
