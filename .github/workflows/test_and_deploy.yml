@@ -89,7 +89,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
 
-      # Notify Slack on scheduled workflow failure
       - name: Notify slack on scheduled failure
         if: failure() && github.event_name == 'schedule'
         uses: ravsamhq/notify-slack-action@v2
