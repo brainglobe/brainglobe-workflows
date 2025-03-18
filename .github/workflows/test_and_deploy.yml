@@ -8,7 +8,7 @@ on:
       - "*"
   pull_request:
   schedule:
-  # Runs at 6:10am UTC on Monday
+    # Runs at 6:10am UTC on Monday
     - cron: '10 6 * * 1'
   workflow_dispatch:
 
@@ -48,22 +48,32 @@ jobs:
           - os: windows-latest
             python-version: "3.13"
     steps:
-      # Cache atlases
+      # Optimize Windows temporary file storage by moving to the faster D: drive
+      - name: Optimize Windows Temporary Storage
+        if: matrix.os == 'windows-latest'
+        run: |
+          mkdir "D:\\Temp"
+          echo "TEMP=D:\\Temp" >> $env:GITHUB_ENV
+          echo "TMP=D:\\Temp" >> $env:GITHUB_ENV
+
+      # Cache brainglobe directory to avoid re-downloading atlases
       - name: Cache brainglobe directory
         uses: actions/cache@v3
         with:
-          path: | # ensure we don't cache any interrupted atlas download and extraction, if e.g. we cancel the workflow manually
+          path: |
             ~/.brainglobe
             !~/.brainglobe/atlas.tar.gz
           key: atlases-models
           fail-on-cache-miss: true
           enableCrossOsArchive: true
-      # install additional Macos dependencies
-      - name: install HDF5 libraries (needed on M1 Macs only)
+
+      # Install additional dependencies on macOS
+      - name: Install HDF5 libraries (needed on M1 Macs only)
         if: matrix.os == 'macos-latest'
         run: |
           brew install hdf5
-      # Cache cellfinder workflow data
+
+      # Cache test data to speed up workflow tests
       - name: Cache data for cellfinder workflow tests
         uses: actions/cache@v3
         with:
@@ -71,47 +81,45 @@ jobs:
           key: cellfinder-test-data
           fail-on-cache-miss: true
           enableCrossOsArchive: true
-      # Run tests
+
+      # Run test suite across different environments
       - uses: neuroinformatics-unit/actions/test@v2
         with:
           python-version: ${{ matrix.python-version }}
           secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
 
+      # Notify Slack on scheduled workflow failure
       - name: Notify slack on scheduled failure
         if: failure() && github.event_name == 'schedule'
         uses: ravsamhq/notify-slack-action@v2
         with:
-          status: ${{ job.status }} # required
+          status: ${{ job.status }}
           notify_when: 'failure'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFYBOT_WEBHOOK_URL }} # required
 
-
   benchmarks:
     name: Check benchmarks
     runs-on: ubuntu-latest
-
     # Set shell in login mode as global setting for the job
     defaults:
       run:
         shell: bash -l {0}
-
     strategy:
       matrix:
         python-version: ["3.12"]
-
     steps:
       - name: Checkout brainglobe-workflows repository
         uses: actions/checkout@v4
 
-      - name: Create and activate conda environment  # we need conda for asv management of environments
-        uses: conda-incubator/setup-miniconda@v2.1.1 # see https://github.com/conda-incubator/setup-miniconda/issues/261
+      - name: Create and activate conda environment
+        uses: conda-incubator/setup-miniconda@v2.1.1
         with:
-          miniconda-version: py310_24.1.2-0  # we need conda<24.3, see https://github.com/airspeed-velocity/asv/pull/1397
+          miniconda-version: py310_24.1.2-0
           python-version: ${{ matrix.python-version }}
           activate-environment: asv-only
 
-      - name: Install asv
+      - name: Install asv (Air Speed Velocity) for benchmarking
         run: |
           pip install --upgrade pip
           pip install asv
@@ -119,17 +127,12 @@ jobs:
       - name: Run asv check with pip dependencies
         working-directory: ${{ github.workspace }}/benchmarks
         run: |
-
-          # check benchmarks with pip dependencies
           asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.pip.conf.json
 
       - name: Run asv check with latest-github dependencies
         working-directory: ${{ github.workspace }}/benchmarks
         run: |
-
-          # check benchmarks with latest-github dependencies
           asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.latest-github.conf.json
-
 
   build_sdist_wheels:
     name: Build source distribution
