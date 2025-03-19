@@ -115,7 +115,7 @@ jobs:
       - name: Create and activate conda environment # we need conda for asv management of environments
         uses: conda-incubator/setup-miniconda@v2.1.1
         with:
-          miniconda-version: py310_24.1.2-0
+          miniconda-version: py310_24.1.2-0 # we need conda<24.3, see https://github.com/airspeed-velocity/asv/pull/1397
           python-version: ${{ matrix.python-version }}
           activate-environment: asv-only
 
