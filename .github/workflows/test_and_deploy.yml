@@ -64,9 +64,9 @@ jobs:
             | # Ensure we don't cache any interrupted atlas download and extraction, for e.g. if we cancel the workflow manually
             ~/.brainglobe
             !~/.brainglobe/atlas.tar.gz
-          key: atlases-models
+          key: atlases-models-${{ runner.os }}
+          restore-keys: atlases-models
           fail-on-cache-miss: true
-          enableCrossOsArchive: true
 
       # Install additional dependencies on macOS
       - name: Install HDF5 libraries (needed on M1 Macs only)
@@ -79,9 +79,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.brainglobe-tests"
-          key: cellfinder-test-data
+          key: cellfinder-test-data-${{ runner.os }}
+          restore-keys: cellfinder-test-data
           fail-on-cache-miss: true
-          enableCrossOsArchive: true
 
       # Run test suite across different environments
       - uses: neuroinformatics-unit/actions/test@v2
