@@ -197,6 +197,34 @@ def run_parse(parser):
 def io_parse(parser):
     io_parser = parser.add_argument_group("Input & output options")
     io_parser.add_argument(
+        "--start-width",
+        dest="start_width",
+        type=check_positive_int,
+        default=0,
+        help="The first x dimension to process of the plane.",
+    )
+    io_parser.add_argument(
+        "--end-width",
+        dest="end_width",
+        type=int,
+        default=-1,
+        help="The last x dimension to process of the plane.",
+    )
+    io_parser.add_argument(
+        "--start-height",
+        dest="start_height",
+        type=check_positive_int,
+        default=0,
+        help="The first y dimension to process of the plane.",
+    )
+    io_parser.add_argument(
+        "--end-height",
+        dest="end_height",
+        type=int,
+        default=-1,
+        help="The last y dimension to process of the plane.",
+    )
+    io_parser.add_argument(
         "--start-plane",
         dest="start_plane",
         type=check_positive_int,

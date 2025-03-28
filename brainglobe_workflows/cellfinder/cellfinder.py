@@ -52,6 +52,10 @@ class CellfinderConfig:
 
     # Required parameters
     voxel_sizes: tuple[float, float, float]
+    start_width: int
+    end_width: int
+    start_height: int
+    end_height: int
     start_plane: int
     end_plane: int
     trained_model: Optional[os.PathLike]
@@ -373,6 +377,10 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
         signal_array,
         background_array,
         cfg.voxel_sizes,
+        cfg.start_width,
+        cfg.end_width,
+        cfg.start_height,
+        cfg.end_height,
         cfg.start_plane,
         cfg.end_plane,
         cfg.trained_model,
