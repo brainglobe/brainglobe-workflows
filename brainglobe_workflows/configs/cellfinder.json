@@ -6,6 +6,10 @@
     2,
     2
   ],
+  "start_width": 0,
+  "end_width": -1,
+  "start_height": 0,
+  "end_height": -1,
   "start_plane": 0,
   "end_plane": -1,
   "trained_model": null,

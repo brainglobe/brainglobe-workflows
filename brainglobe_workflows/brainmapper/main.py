@@ -121,6 +121,10 @@ def run_all(args, what_to_run, atlas):
 
         points = detect.main(
             signal_array,
+            args.start_width,
+            args.end_width,
+            args.start_height,
+            args.end_height,
             args.start_plane,
             args.end_plane,
             args.voxel_sizes,
