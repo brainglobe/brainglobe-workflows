@@ -4,7 +4,6 @@ prep
 Functions to prepare files and directories needed for other functions
 """
 
-
 import json
 import logging
 import os

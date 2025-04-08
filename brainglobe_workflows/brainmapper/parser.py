@@ -5,7 +5,6 @@ All the various arguments that may be needed by the various submodules.
 Defined together so they can also be called by any other entry points.
 """
 
-
 from argparse import (
     ArgumentDefaultsHelpFormatter,
     ArgumentParser,

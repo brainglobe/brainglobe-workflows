@@ -13,7 +13,6 @@ is used.
 
 """
 
-
 import datetime
 import json
 import logging
