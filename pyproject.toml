@@ -111,7 +111,7 @@ fix = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{311,312,313}-{coredev}
+envlist = py{311,312,313}-{coredev}, napari-dev
 isolated_build = True
 
 [gh-actions]
@@ -134,8 +134,10 @@ omit = benchmarks/*
 [testenv]
 extras =
     dev
+    napari
 deps =
     coredev: git+https://github.com/brainglobe/cellfinder.git
+    napari-dev: git+https://github.com/napari/napari
 commands =
     pytest {toxinidir} -v --color=yes --cov=./ --cov-report=xml
 description =
