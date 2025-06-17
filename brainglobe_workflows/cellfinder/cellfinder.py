@@ -56,21 +56,26 @@ class CellfinderConfig:
     trained_model: Optional[os.PathLike]
     model_weights: Optional[os.PathLike]
     model: str
-    batch_size: int
+    classification_batch_size: int
     n_free_cpus: int
-    network_voxel_sizes: tuple[int, int, int]
-    soma_diameter: int
-    ball_xy_size: int
-    ball_z_size: int
+    network_voxel_sizes: tuple[float, float, float]
+    soma_diameter: float
+    ball_xy_size: float
+    ball_z_size: float
     ball_overlap_fraction: float
     log_sigma_size: float
-    n_sds_above_mean_thresh: int
+    n_sds_above_mean_thresh: float
+    n_sds_above_mean_tiled_thresh: float
+    tiled_thresh_tile_size: float | None
     soma_spread_factor: float
-    max_cluster_size: int
+    max_cluster_size: float
     cube_width: int
     cube_height: int
     cube_depth: int
     network_depth: depth_type
+    detection_batch_size: Optional[int]
+    torch_device: Optional[str]
+    pin_memory: bool
 
     # Optional parameters
 
@@ -369,29 +374,34 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
 
     # Run main analysis using `cellfinder_run`
     detected_cells = cellfinder_run(
-        signal_array,
-        background_array,
-        cfg.voxel_sizes,
-        cfg.start_plane,
-        cfg.end_plane,
-        cfg.trained_model,
-        cfg.model_weights,
-        cfg.model,
-        cfg.batch_size,
-        cfg.n_free_cpus,
-        cfg.network_voxel_sizes,
-        cfg.soma_diameter,
-        cfg.ball_xy_size,
-        cfg.ball_z_size,
-        cfg.ball_overlap_fraction,
-        cfg.log_sigma_size,
-        cfg.n_sds_above_mean_thresh,
-        cfg.soma_spread_factor,
-        cfg.max_cluster_size,
-        cfg.cube_width,
-        cfg.cube_height,
-        cfg.cube_depth,
-        cfg.network_depth,
+        signal_array=signal_array,
+        background_array=background_array,
+        voxel_sizes=cfg.voxel_sizes,
+        start_plane=cfg.start_plane,
+        end_plane=cfg.end_plane,
+        trained_model=cfg.trained_model,
+        model_weights=cfg.model_weights,
+        model=cfg.model,
+        classification_batch_size=cfg.classification_batch_size,
+        n_free_cpus=cfg.n_free_cpus,
+        network_voxel_sizes=cfg.network_voxel_sizes,
+        soma_diameter=cfg.soma_diameter,
+        ball_xy_size=cfg.ball_xy_size,
+        ball_z_size=cfg.ball_z_size,
+        ball_overlap_fraction=cfg.ball_overlap_fraction,
+        log_sigma_size=cfg.log_sigma_size,
+        n_sds_above_mean_thresh=cfg.n_sds_above_mean_thresh,
+        n_sds_above_mean_tiled_thresh=cfg.n_sds_above_mean_tiled_thresh,
+        tiled_thresh_tile_size=cfg.tiled_thresh_tile_size,
+        soma_spread_factor=cfg.soma_spread_factor,
+        max_cluster_size=cfg.max_cluster_size,
+        cube_width=cfg.cube_width,
+        cube_height=cfg.cube_height,
+        cube_depth=cfg.cube_depth,
+        network_depth=cfg.network_depth,
+        detection_batch_size=cfg.detection_batch_size,
+        torch_device=cfg.torch_device,
+        pin_memory=cfg.pin_memory,
     )
 
     # Save results to xml file
