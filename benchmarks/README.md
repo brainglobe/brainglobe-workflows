@@ -16,7 +16,7 @@ We include code to benchmark the workflows defined under `brainglobe_workflows`.
     - on [custom data](#running-benchmarks-on-custom-data).
 1. We also run the benchmarks internally on a large dataset, and make the results publicly available.
 
-Additionally, we ship two `asv` configuration files, which define two different environments for `asv` to create and run the benchmarks in. `brainglobe-workflows` depends on a number of BrainGlobe packages. The only difference between the two `asv`-defined environments is the version of the BrainGlobe packages. In `asv.pip.conf.json`, we install the packages from PyPI. In `asv.latest-github.conf.json`, we install the packages from their `main` branch on GitHub. Note that because of this all `asv` commands will need to specify the configuration file with the `--config` flag.
+Additionally, we ship an `asv` configuration file, which defines an environment for `asv` to create and run the benchmarks in (`asv.bg-requirements.conf.json`). The BrainGlobe dependencies in that environment are specified in the `bg-requirements-main.txt` file. By default, they are all set to the GitHub `main` branch, but that can be modified in the file. Note that all `asv` commands will need to specify the configuration file with the `--config` flag.
 
 See the `asv` [reference docs](https://asv.readthedocs.io/en/stable/reference.html) for further details on the tool, and on [how to run benchmarks](https://asv.readthedocs.io/en/stable/using.html#running-benchmarks). The first time running benchmarks on a new machine, you will need to run `asv machine --yes` to set up the machine for benchmarking.
 
