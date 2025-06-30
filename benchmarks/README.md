@@ -41,9 +41,9 @@ To run the benchmarks on the default dataset:
 1. Run `asv` from the `benchmarks` directory:
     ```
     cd brainglobe-workflows/benchmarks
-    asv run --config <path-to-asv-config>  # dependencies from PyPI or GitHub, depending on the asv config file used
+    asv run --config asv.bg-requirements.conf.json  # brainglobe dependencies are as specified in bg-requirements-main.txt
     ```
-    This will benchmark the workflows defined in `brainglobe_workflows/` using a default set of parameters and a default small dataset. The default parameters are defined as config files under `brainglobe_workflows/configs`. The default dataset is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki).
+    This will benchmark the workflows defined in `brainglobe_workflows/` using a default set of parameters and a default small dataset. The default parameters are defined as config files under `brainglobe_workflows/configs`. The default dataset is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). By default, the brainglobe dependencies are installed from the tip of the `main` branches on GitHub. To use other versions of these dependencies, you can edit the `bg-requirements-main.txt` file.
 
 ## Running benchmarks on custom data
 To run the benchmarks on a custom local dataset:
