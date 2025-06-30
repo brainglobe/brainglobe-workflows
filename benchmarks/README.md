@@ -45,23 +45,28 @@ To run the benchmarks on the default dataset:
     ```
     This will benchmark the workflows defined in `brainglobe_workflows/` using a default set of parameters and a default small dataset. The default parameters are defined as config files under `brainglobe_workflows/configs`. The default dataset is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). By default, the brainglobe dependencies are installed from the tip of the `main` branches on GitHub. To use other versions of these dependencies, you can edit the `bg-requirements-main.txt` file.
 
-## Running benchmarks on custom data
-To run the benchmarks on a custom local dataset:
+## Running `cellfinder` benchmarks on custom data
+To benchmark the `cellfinder` workflow on a custom local dataset:
 
 1. Git clone the `brainglobe-workflows` repository
     ```
     git clone https://github.com/brainglobe/brainglobe-workflows.git
     ```
-1. Define a config file for the workflow to benchmark.
-    - You can use the default config files at `brainglobe_workflows/configs/` as reference.
+1. Define a new `cellfinder` workflow config file that points to the input data of interest.
+    - You can use config at `brainglobe_workflows/configs/cellfinder.json` as reference.
     - You will need to edit/add the fields pointing to the input data.
-        - For example, for the `cellfinder` workflow, the config file will need to include an `input_data_dir` field pointing to the data of interest. The signal and background data are assumed to be in `signal` and `background` directories, under the `input_data_dir` directory. If they are under directories with a different name, you can specify their names with the `signal_subdir` and `background_subdir` fields.
+        - For the `cellfinder` workflow, the config file will need to include an `input_data_dir` field pointing to the data of interest. The signal and background data are assumed to be in `signal` and `background` directories, under the `input_data_dir` directory. If they are under directories with a different name, you can specify their names with the `signal_subdir` and `background_subdir` fields.
 
 1. Benchmark the workflow, passing the path to your custom config file as an environment variable.
-    - For example, to benchmark the `cellfinder` workflow, you will need to prepend the environment variable definition to the `asv run` command (valid for Unix systems):
+    - To benchmark a `cellfinder` workflow, you will need to prepend the environment variable definition to the `asv run` command (valid for Unix systems):
     ```
     CELLFINDER_CONFIG_PATH=/path/to/your/config/file asv run --config <path-to-asv-config>
     ```
+
+## Defining a new workflow
+To define a new workflow, you can use the `brainglobe_workflows/cellfinder/cellfinder.py` module as a reference. Usually, a workflow will use a config file to define its input parameters. You may use the config file for the `cellfinder` workflow as reference `brainglobe_workflows/configs/cellfinder.json`.
+
+
 
 ## Running benchmarks in development
 The following flags to `asv run` are often useful in development:
