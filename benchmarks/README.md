@@ -2,7 +2,7 @@
 
 ## Overview
 We use [`asv`](https://asv.readthedocs.io) to benchmark some representative BrainGlobe workflows. The `asv` workflow is roughly as follows:
-1. `asv` creates a virtual environment to run the benchmarks on, as defined in the `asv.conf.json` file.
+1. `asv` creates a virtual environment to run the benchmarks on, as defined in the `asv.bg-requirements.conf.json` file.
 1. It installs the version of the `brainglobe-workflows` package corresponding to the tip of the locally checked-out branch.
 1. It runs the benchmarks as defined (locally) under `benchmarks/benchmarks` and saves the results to `benchmarks/results` as json files.
 1. With `asv publish`, the output json files are 'published' into an html directory (`benchmarks/html`).
