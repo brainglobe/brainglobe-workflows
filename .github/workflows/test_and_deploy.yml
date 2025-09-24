@@ -125,7 +125,7 @@ jobs:
           pip install --upgrade pip
           pip install asv
 
-      - name: Run asv check with BG dependencies from main branch
+      - name: Run asv check with BG dependencies from bg-requirements.txt
         working-directory: ${{ github.workspace }}/benchmarks
         run: |
           asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.bg-requirements.conf.json

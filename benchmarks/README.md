@@ -16,7 +16,7 @@ We include code to benchmark the workflows defined under `brainglobe_workflows`.
     - on [custom data](#running-benchmarks-on-custom-data).
 1. We also run the benchmarks internally on a large dataset, and make the results publicly available.
 
-Additionally, we ship an `asv` configuration file, which defines an environment for `asv` to create and run the benchmarks in (`asv.bg-requirements.conf.json`). The BrainGlobe dependencies in that environment are specified in the `bg-requirements-main.txt` file. By default, they are all set to the GitHub `main` branch, but that can be modified in the file. Note that all `asv` commands will need to specify the configuration file with the `--config` flag.
+Additionally, we ship an `asv` configuration file, which defines an environment for `asv` to create and run the benchmarks in (`asv.bg-requirements.conf.json`). The BrainGlobe dependencies in that environment are specified in the `bg-requirements.txt` file. By default, they are all set to the GitHub `main` branch, but that can be modified in the file. Note that all `asv` commands will need to specify the configuration file with the `--config` flag.
 
 See the `asv` [reference docs](https://asv.readthedocs.io/en/stable/reference.html) for further details on the tool, and on [how to run benchmarks](https://asv.readthedocs.io/en/stable/using.html#running-benchmarks). The first time running benchmarks on a new machine, you will need to run `asv machine --yes` to set up the machine for benchmarking.
 
@@ -41,9 +41,9 @@ To run the benchmarks on the default dataset:
 1. Run `asv` from the `benchmarks` directory:
     ```
     cd brainglobe-workflows/benchmarks
-    asv run --config asv.bg-requirements.conf.json  # brainglobe dependencies are as specified in bg-requirements-main.txt
+    asv run --config asv.bg-requirements.conf.json  # brainglobe dependencies are as specified in bg-requirements.txt
     ```
-    This will benchmark the workflows defined in `brainglobe_workflows/` using a default set of parameters and a default small dataset. The default parameters are defined as config files under `brainglobe_workflows/configs`. The default dataset is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). By default, the brainglobe dependencies are installed from the tip of the `main` branches on GitHub. To use other versions of these dependencies, you can edit the `bg-requirements-main.txt` file.
+    This will benchmark the workflows defined in `brainglobe_workflows/` using a default set of parameters and a default small dataset. The default parameters are defined as config files under `brainglobe_workflows/configs`. The default dataset is downloaded from [GIN](https://gin.g-node.org/G-Node/info/wiki). By default, the brainglobe dependencies are installed from the tip of the `main` branches on GitHub. To use other versions of these dependencies, you can edit the `bg-requirements.txt` file.
 
 ## Running `cellfinder` benchmarks on custom data
 To benchmark the `cellfinder` workflow on a custom local dataset:

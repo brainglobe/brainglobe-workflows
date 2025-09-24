@@ -1,0 +1,11 @@
+brainglobe-atlasapi @ git+https://github.com/brainglobe/brainglobe-atlasapi@main
+brainglobe-heatmap @ git+https://github.com/brainglobe/brainglobe-heatmap@main
+brainglobe-napari-io @ git+https://github.com/brainglobe/brainglobe-napari-io@main
+brainglobe-segmentation @ git+https://github.com/brainglobe/brainglobe-segmentation@main
+brainglobe-space @ git+https://github.com/brainglobe/brainglobe-space@main
+brainglobe-utils @ git+https://github.com/brainglobe/brainglobe-utils@main
+brainreg[napari] @ git+https://github.com/brainglobe/brainreg@main
+brainrender @ git+https://github.com/brainglobe/brainrender@main
+brainrender-napari @ git+https://github.com/brainglobe/brainrender-napari@main
+cellfinder[napari] @ git+https://github.com/brainglobe/cellfinder@main
+morphapi @ git+https://github.com/brainglobe/morphapi@main
