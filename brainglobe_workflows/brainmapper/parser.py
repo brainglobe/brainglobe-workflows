@@ -350,6 +350,17 @@ def cell_detect_parse(parser):
         "maximize memory usage without running out. Check your GPU/CPU memory"
         " to verify it's not full.",
     )
+    cell_detect_parser.add_argument(
+        "--detect-coi",
+        dest="detect_centre_of_intensity",
+        action="store_true",
+        help="If False, a candidate cell's center is just the mean of the "
+        "positions of all voxels marked as above background, or bright, in "
+        "that candidate. The voxel intensity is not taken into account. If "
+        "True, the center is calculated similar to the center of mass, but "
+        "using the intensity. So the center gets pulled towards the brighter "
+        "voxels in the volume.",
+    )
 
     return parser
 
@@ -394,6 +405,31 @@ def classification_parse(parser):
         "models. For performance-critical applications, tune to maximize "
         "memory usage without running out. Check your GPU/CPU memory to "
         "verify it's not full.",
+    )
+    classification_parser.add_argument(
+        "--norm-channels",
+        dest="normalize_channels",
+        action="store_true",
+        help="For classification only - whether to normalize the cubes to the "
+        "mean/std of the image channels before classification. If the model "
+        "used for classification was trained on normalized data, this should "
+        "be enabled.",
+    )
+    classification_parser.add_argument(
+        "--norm-sampling",
+        dest="normalization_down_sampling",
+        type=check_positive_int,
+        default=32,
+        help="If normalizing the cubes is enabled, the input channels will be "
+        "down-sampled in z by this value before calculating their mean/std. "
+        "E.g. a value of 2 means every second z plane will be used.",
+    )
+    classification_parser.add_argument(
+        "--classification-max-workers",
+        dest="classification_max_workers",
+        type=check_positive_int,
+        default=6,
+        help="The max number of sub-processes to use for data loading / processing during classification.",
     )
     return parser
 

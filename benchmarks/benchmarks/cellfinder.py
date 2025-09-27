@@ -232,6 +232,10 @@ class TimeDetectAndClassifyCells(TimeBenchmark):
             detection_batch_size=self.cfg.detection_batch_size,
             torch_device=self.cfg.torch_device,
             pin_memory=self.cfg.pin_memory,
+            normalize_channels=self.cfg.normalize_channels,
+            normalization_down_sampling=self.cfg.normalization_down_sampling,
+            detect_centre_of_intensity=self.cfg.detect_centre_of_intensity,
+            classification_max_workers=self.cfg.classification_max_workers,
         )
 
 
@@ -277,6 +281,10 @@ class TimeSaveCells(TimeBenchmark):
             detection_batch_size=self.cfg.detection_batch_size,
             torch_device=self.cfg.torch_device,
             pin_memory=self.cfg.pin_memory,
+            normalize_channels=self.cfg.normalize_channels,
+            normalization_down_sampling=self.cfg.normalization_down_sampling,
+            detect_centre_of_intensity=self.cfg.detect_centre_of_intensity,
+            classification_max_workers=self.cfg.classification_max_workers,
         )
 
     def time_save_cells(self):

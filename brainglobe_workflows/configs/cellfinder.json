@@ -34,5 +34,9 @@
   "network_depth": "50",
   "detection_batch_size": null,
   "torch_device": null,
-  "pin_memory": false
+  "pin_memory": false,
+  "normalize_channels": false,
+  "normalization_down_sampling": 32,
+  "detect_centre_of_intensity": false,
+  "classification_max_workers": 6
 }

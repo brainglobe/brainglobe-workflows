@@ -140,6 +140,7 @@ def run_all(args, what_to_run, atlas):
             batch_size=args.detection_batch_size,
             torch_device=args.torch_device,
             pin_memory=args.pin_memory,
+            detect_centre_of_intensity=args.detect_centre_of_intensity,
         )
         ensure_directory_exists(args.paths.points_directory)
 
@@ -185,6 +186,9 @@ def run_all(args, what_to_run, atlas):
                 model_weights=model_weights,
                 network_depth=args.network_depth,
                 pin_memory=args.pin_memory,
+                normalize_channels=args.normalize_channels,
+                normalization_down_sampling=args.normalization_down_sampling,
+                max_workers=args.classification_max_workers,
             )
             save_cells(
                 points,

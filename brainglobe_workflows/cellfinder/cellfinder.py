@@ -76,6 +76,10 @@ class CellfinderConfig:
     detection_batch_size: Optional[int]
     torch_device: Optional[str]
     pin_memory: bool
+    normalize_channels: bool = False
+    normalization_down_sampling: int = 32
+    detect_centre_of_intensity: bool = False
+    classification_max_workers: int = 6
 
     # Optional parameters
 
@@ -402,6 +406,10 @@ def run_workflow_from_cellfinder_run(cfg: CellfinderConfig):
         detection_batch_size=cfg.detection_batch_size,
         torch_device=cfg.torch_device,
         pin_memory=cfg.pin_memory,
+        normalize_channels=cfg.normalize_channels,
+        normalization_down_sampling=cfg.normalization_down_sampling,
+        detect_centre_of_intensity=cfg.detect_centre_of_intensity,
+        classification_max_workers=cfg.classification_max_workers,
     )
 
     # Save results to xml file
