@@ -20,7 +20,7 @@ from brainglobe_utils.general.system import (
 from brainreg.core.paths import Paths as BrainRegPaths
 from fancylog import fancylog
 
-import brainglobe_workflows as program_for_log
+import brainglobe_workflows as package_for_log
 import brainglobe_workflows.brainmapper.parser as parser
 from brainglobe_workflows.brainmapper.parser import (
     brainmapper_parser,
@@ -121,7 +121,7 @@ def prep_brainmapper_general():
 
     fancylog.start_logging(
         args.output_dir,
-        program_for_log,
+        package=package_for_log,
         variables=[args, args.paths],
         verbose=args.debug,
         log_header="BRAINMAPPER LOG",
