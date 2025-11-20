@@ -48,6 +48,16 @@ jobs:
           - os: windows-latest
             python-version: "3.13"
     steps:
+      # Free up disk space on ubuntu runners
+      - name: Free Disk Space
+        if: matrix.os == 'ubuntu-latest'
+        uses: endersonmenezes/free-disk-space@v3
+        with:
+          remove_android: true
+          remove_dotnet: true
+          rm_cmd: 'rmz'
+          rmz_version: '3.1.1'
+
       # Cache brainglobe directory to avoid re-downloading atlases
       - name: Cache brainglobe directory
         uses: actions/cache@v3
