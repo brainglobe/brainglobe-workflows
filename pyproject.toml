@@ -146,4 +146,8 @@ description =
 passenv =
     CI
     GITHUB_*
+    LOGNAME
+    USER
+    LNAME
+    USERNAME
 """
