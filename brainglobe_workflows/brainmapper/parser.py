@@ -10,11 +10,13 @@ from argparse import (
     ArgumentParser,
     ArgumentTypeError,
 )
+from functools import partial
 
 from brainglobe_utils.general.numerical import (
     check_positive_float,
     check_positive_int,
 )
+from brainglobe_utils.general.string import check_str
 from brainreg.core.cli import atlas_parse, geometry_parser, niftyreg_parse
 from brainreg.core.cli import backend_parse as brainreg_backend_parse
 from cellfinder.core.download.cli import download_parser
@@ -85,7 +87,7 @@ def main_parse(parser):
         nargs="+",
         required=True,
         help="Path to the directory of the signal files. Can also be a text"
-        "file pointing to the files.",
+        "file pointing to the files. For a 3d tiff, data is in z, y, x order",
     )
     main_parser.add_argument(
         "-b",
@@ -95,7 +97,8 @@ def main_parse(parser):
         nargs=1,
         required=True,
         help="Path to the directory of the background files. Can also be a "
-        "text file pointing to the files.",
+        "text file pointing to the files. For a 3d tiff, data is in z, y, x "
+        "order",
     )
     main_parser.add_argument(
         "-o",
@@ -138,14 +141,16 @@ def pixel_parser(parser):
         "--voxel-sizes",
         dest="voxel_sizes",
         required=True,
-        nargs="+",
-        help="Voxel sizes in microns, in the order of data orientation. "
-        "e.g. '5 2 2'",
+        nargs=3,
+        type=partial(check_positive_float, none_allowed=False),
+        help="Voxel sizes in microns, in the order of data orientation "
+        "(z, y, x). E.g. '5 2 2'",
     )
     pixel_opt_parser.add_argument(
         "--network-voxel-sizes",
         dest="network_voxel_sizes",
-        nargs="+",
+        nargs=3,
+        type=partial(check_positive_float, none_allowed=False),
         default=[5, 1, 1],
         help="Voxel sizes in microns that the machine learning network was "
         "trained on, in the order of data orientation. e.g. '5 2 2'."
@@ -200,14 +205,16 @@ def io_parse(parser):
         dest="start_plane",
         type=check_positive_int,
         default=0,
-        help="The first plane to process in the Z dimension.",
+        help="The first plane index to process in the Z dimension (inclusive, "
+        "to process a subset of the data).",
     )
     io_parser.add_argument(
         "--end-plane",
         dest="end_plane",
         type=int,
         default=-1,
-        help="The last plane to process in the Z dimension.",
+        help="The last plane to process in the Z dimension (exclusive, to "
+        "process a subset of the data).",
     )
     return parser
 
@@ -244,8 +251,9 @@ def cell_detect_parse(parser):
         dest="max_cluster_size",
         type=check_positive_int,
         default=100000,
-        help="Largest putative cell cluster (in cubic um) where "
-        "splitting should be attempted",
+        help="Largest detected cell cluster (in cubic um) where splitting "
+        "should be attempted. Clusters above this size will be labeled as "
+        "artifacts.",
     )
 
     cell_detect_parser.add_argument(
@@ -253,7 +261,7 @@ def cell_detect_parse(parser):
         dest="soma_diameter",
         type=check_positive_float,
         default=16,
-        help="The expected soma size in um in the x/y dimensions",
+        help="The expected in-plane (xy) soma diameter (microns).",
     )
 
     cell_detect_parser.add_argument(
@@ -261,24 +269,22 @@ def cell_detect_parse(parser):
         dest="ball_xy_size",
         type=check_positive_int,
         default=6,
-        help="The size in um of the ball used "
-        "for the morphological filter in the x/y dimensions",
+        help="3d filter's in-plane (xy) filter ball size (microns).",
     )
     cell_detect_parser.add_argument(
         "--ball-z-size",
         dest="ball_z_size",
         type=check_positive_int,
         default=15,
-        help="The size in um of the ball used "
-        "for the morphological filter in the z dimension",
+        help="3d filter's axial (z) filter ball size (microns).",
     )
     cell_detect_parser.add_argument(
         "--ball-overlap-fraction",
         dest="ball_overlap_fraction",
         type=check_positive_float,
         default=0.6,
-        help="The fraction of the ball that has to cover thresholded pixels "
-        "for the centre pixel to be considered a nucleus pixel",
+        help="3d filter's fraction of the ball filter needed to be filled by "
+        "foreground voxels, centered on a voxel, to retain the voxel.",
     )
 
     cell_detect_parser.add_argument(
@@ -286,24 +292,63 @@ def cell_detect_parse(parser):
         dest="log_sigma_size",
         type=check_positive_float,
         default=0.2,
-        help="The filter size used in the Laplacian of Gaussian filter to "
-        "enhance the cell intensities. Given as a fraction of the "
-        "soma-diameter.",
+        help="Gaussian filter width (as a fraction of soma diameter) used "
+        "during 2d in-plane Laplacian of Gaussian filtering.",
     )
     cell_detect_parser.add_argument(
         "--threshold",
         dest="n_sds_above_mean_thresh",
-        type=check_positive_float,
+        type=float,
         default=10,
-        help="The cell threshold, in multiples of the standard deviation"
-        "above the mean",
+        help="Per-plane intensity threshold (the number of standard "
+        "deviations above the mean) of the filtered 2d planes used to mark "
+        "pixels as foreground or background.",
+    )
+    cell_detect_parser.add_argument(
+        "--tiled-threshold",
+        dest="n_sds_above_mean_tiled_thresh",
+        type=float,
+        default=10,
+        help="Per-plane, per-tile intensity threshold (the number of standard"
+        " deviations above the mean) for the filtered 2d planes used to mark "
+        "pixels as foreground or background. When used, (tile size is not "
+        "zero) a pixel is marked as foreground if its intensity is above both"
+        " the per-plane and per-tile threshold. I.e. it's above the set "
+        "number of standard deviations of the per-plane average and of the "
+        "per-plane per-tile average for the tile that contains it.",
+    )
+    cell_detect_parser.add_argument(
+        "--tiled-threshold-tile-size",
+        dest="tiled_thresh_tile_size",
+        type=check_positive_float,
+        default=None,
+        help="The tile size used to tile the x, y plane to calculate the "
+        "local average intensity for the tiled threshold. The value is "
+        "multiplied by soma diameter (i.e. 1 means one soma diameter). If "
+        "zero or None, the tiled threshold is disabled and only the per-plane"
+        " threshold is used. Tiling is done with 50%% overlap when striding.",
     )
     cell_detect_parser.add_argument(
         "--soma-spread-factor",
         dest="soma_spread_factor",
         type=check_positive_float,
         default=1.4,
-        help="Soma size spread factor (for splitting up cell clusters)",
+        help="Cell spread factor for determining the largest cell volume "
+        "before splitting up cell clusters. Structures with spherical volume "
+        "of diameter `soma_spread_factor * soma_diameter` or less will not "
+        "be split.",
+    )
+    cell_detect_parser.add_argument(
+        "--detection-batch-size",
+        dest="detection_batch_size",
+        type=check_positive_int,
+        default=None,
+        help="The number of planes of the original data volume to process at "
+        "once. When None (the default), it defaults to 1 for GPU and 4 for "
+        "CPU. The GPU/CPU memory must be able to contain this many planes "
+        "for all the filters. For performance-critical applications, tune to "
+        "maximize memory usage without running out. Check your GPU/CPU memory"
+        " to verify it's not full.",
     )
 
     return parser
@@ -334,11 +379,21 @@ def classification_parse(parser):
     )
     classification_parser.add_argument(
         "--batch-size",
-        dest="batch_size",
+        dest="classification_batch_size",
         type=check_positive_int,
         default=64,
-        help="Batch size for classification. Can be adjusted depending on "
-        "GPU memory.",
+        help="Deprecated. Use classification-batch-size instead.",
+    )
+    classification_parser.add_argument(
+        "--classification-batch-size",
+        dest="classification_batch_size",
+        type=check_positive_int,
+        default=64,
+        help="How many potential cells to classify at one time. The GPU/CPU "
+        "memory must be able to contain at once this many data cubes for the "
+        "models. For performance-critical applications, tune to maximize "
+        "memory usage without running out. Check your GPU/CPU memory to "
+        "verify it's not full.",
     )
     return parser
 
@@ -350,21 +405,24 @@ def cube_extract_parse(parser):
         dest="cube_width",
         type=check_positive_int,
         default=50,
-        help="The width of the cubes to extract (must be even)",
+        help="The width of the data cube centered on the cell, used for "
+        "classification",
     )
     cube_extract_parser.add_argument(
         "--cube-height",
         dest="cube_height",
         type=check_positive_int,
         default=50,
-        help="The height of the cubes to extract (must be even)",
+        help="The height of the data cube centered on the cell, used "
+        "for classification",
     )
     cube_extract_parser.add_argument(
         "--cube-depth",
         dest="cube_depth",
         type=check_positive_int,
         default=20,
-        help="The depth (z) of the cubes to extract",
+        help="The depth of the data cube centered on the cell, used for "
+        "classification",
     )
     cube_extract_parser.add_argument(
         "--save-empty-cubes",
@@ -420,6 +478,25 @@ def misc_parse(parser):
         default=2,
         help="The number of CPU cores on the machine to leave "
         "unused by the program to spare resources.",
+    )
+    misc_parser.add_argument(
+        "--torch-device",
+        dest="torch_device",
+        type=check_str,
+        default=None,
+        help="The device on which to run the computation. If not specified "
+        "(None), cuda will be used if a GPU is available, otherwise cpu. You "
+        "can also manually specify cuda or cpu.",
+    )
+    misc_parser.add_argument(
+        "--pin-memory",
+        dest="pin_memory",
+        action="store_true",
+        help="Pins data to be sent to the GPU to the CPU memory. This allows "
+        "faster GPU data speeds, but can only be used if the data used by the"
+        " GPU can stay in the CPU RAM while the GPU uses it. I.e. there's "
+        "enough RAM. Otherwise, if there's a risk of the RAM being paged, it "
+        "shouldn't be used. Defaults to False.",
     )
     misc_parser.add_argument(
         "--max-ram",
