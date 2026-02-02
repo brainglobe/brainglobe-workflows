@@ -69,8 +69,7 @@ def config_parser(
 
     # initialise argument parser
     parser = argparse.ArgumentParser(
-        description=(
-            """
+        description=("""
             To launch the cellfinder workflow with default parameters, run:
                 `cellfinder-workflow`.
             The default parameters are those specifed in brainglobe_workflows/
@@ -82,8 +81,7 @@ def config_parser(
                 `cellfinder-workflow --config path/to/config.json`,
             where `path/to/input/config.json` is the json file with the
             desired parameters.
-            """
-        ),
+            """),
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
