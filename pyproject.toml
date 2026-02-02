@@ -28,7 +28,7 @@ classifiers = [
 # Below the dependencies for brainmapper (the cellfinder CLI tool) only
 # (i.e., only what users will need for brainmapper)
 dependencies = [
-    "brainglobe>=1.4.0",
+    "brainglobe>=1.5.0",
     "brainglobe-utils>=0.11.0",
     "configobj",
     "fancylog>=0.6.0",
