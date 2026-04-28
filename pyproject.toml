@@ -47,6 +47,7 @@ dependencies = [
 # Below, everything developers need to contribute
 # to the workflows (i.e., run tests, run benchmarks, etc)
 dev = [
+    "brainglobe-workflows[napari]",
     "black",
     "pytest-cov",
     "pytest",
@@ -58,7 +59,7 @@ dev = [
 ]
 
 
-napari = ["napari[pyqt5]", "brainglobe-napari-io", "cellfinder[napari]>=1.0.0"]
+napari = ["brainglobe-napari-io", "cellfinder[napari]>=1.0.0"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/brainglobe/brainglobe-workflows/issues"
