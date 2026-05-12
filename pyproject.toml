@@ -131,7 +131,6 @@ omit = benchmarks/*
 [testenv]
 extras =
     dev
-    napari
 deps =
     coredev: git+https://github.com/brainglobe/cellfinder.git
     napari-dev: git+https://github.com/napari/napari
