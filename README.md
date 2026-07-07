@@ -7,7 +7,7 @@
 [![Python Version](https://img.shields.io/pypi/pyversions/brainglobe-workflows.svg)](https://pypi.org/project/brainglobe-workflows)
 [![PyPI](https://img.shields.io/pypi/v/brainglobe-workflows.svg)](https://pypi.org/project/brainglobe-workflows)
 [![Downloads](https://static.pepy.tech/badge/brainglobe-workflows)](https://pepy.tech/project/brainglobe-workflows)
-[![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/format.json)](https://github.com/astral-sh/ruff)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-green?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-green.svg)](https://brainglobe.info/community/developers/index.html)
 
