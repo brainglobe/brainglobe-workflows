@@ -1,17 +1,15 @@
+[![Docs](https://img.shields.io/badge/Docs-brainglobe--workflows-blue)](https://brainglobe.info/documentation/brainglobe-workflows)
+[![Get in Touch](https://img.shields.io/badge/Get%20in%20Touch-BrainGlobe-blue)](https://brainglobe.info/contact.html)
+[![DOI](https://img.shields.io/badge/DOI-10.1371%2Fjournal.pcbi.1009074-green)](https://doi.org/10.1371/journal.pcbi.1009074)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Tests](https://github.com/brainglobe/brainglobe-workflows/actions/workflows/test_and_deploy.yml/badge.svg)](https://github.com/brainglobe/brainglobe-workflows/actions/workflows/test_and_deploy.yml)
+[![Codecov](https://codecov.io/gh/brainglobe/brainglobe-workflows/graph/badge.svg?token=s3MweEFPhl)](https://codecov.io/gh/brainglobe/brainglobe-workflows)
 [![Python Version](https://img.shields.io/pypi/pyversions/brainglobe-workflows.svg)](https://pypi.org/project/brainglobe-workflows)
 [![PyPI](https://img.shields.io/pypi/v/brainglobe-workflows.svg)](https://pypi.org/project/brainglobe-workflows)
-[![Downloads](https://pepy.tech/badge/brainglobe-workflows)](https://pepy.tech/project/brainglobe-workflows)
-[![Wheel](https://img.shields.io/pypi/wheel/brainglobe-workflows.svg)](https://pypi.org/project/brainglobe-workflows)
-[![Development Status](https://img.shields.io/pypi/status/brainglobe-workflows.svg)](https://github.com/brainglobe/brainglobe-workflows)
-[![Tests](https://img.shields.io/github/actions/workflow/status/brainglobe/brainglobe-workflows/test_and_deploy.yml?branch=main)](https://github.com/brainglobe/brainglobe-workflows/actions)
-[![codecov](https://codecov.io/gh/brainglobe/brainglobe-workflows/branch/master/graph/badge.svg?token=s3MweEFPhl)](https://codecov.io/gh/brainglobe/brainglobe-workflows)
+[![Downloads](https://static.pepy.tech/badge/brainglobe-workflows)](https://pepy.tech/project/brainglobe-workflows)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
-[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-[![Contributions](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg)](https://brainglobe.info/developers/index.html)
-[![Website](https://img.shields.io/website?up_message=online&url=https%3A%2F%2Fbrainglobe.info)](https://brainglobe.info/documentation/brainglobe-workflows/index.html)
-[![Bluesky](https://img.shields.io/badge/Bluesky-0285FF?logo=bluesky&logoColor=fff)](https://bsky.app/profile/brainglobe.info)
-[![Mastodon](https://img.shields.io/badge/Mastodon-6364FF?logo=mastodon&logoColor=fff)](https://mastodon.online/@brainglobe)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-green?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-green.svg)](https://brainglobe.info/community/developers/index.html)
 
 # BrainGlobe Workflows
 
@@ -78,7 +76,6 @@ There are three main ways in which these benchmarks can be useful to developers:
 1. We also plan to run the benchmarks on an internal runner using a larger dataset, of the scale we expect users to be handling. The result of these benchmarks will be made publicly available.
 
 For further details on how to run the benchmarks, see the [benchmarks README](benchmarks/README.md).
-
 
 ## Seeking help or contributing
 We are always happy to help users of our tools, and welcome any contributions. If you would like to get in contact with us for any reason, please see the [contact page of our website](https://brainglobe.info/contact.html).
