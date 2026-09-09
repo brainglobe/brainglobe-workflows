@@ -7,6 +7,36 @@ import pooch
 import pytest
 
 
+def _retrieve_with_http_fallback(retrieve_fn, url, *args, **kwargs):
+    """Call ``retrieve_fn``; on ``OSError`` retry with https:// -> http://.
+
+    ``known_hash`` still verifies the downloaded payload, so the HTTP
+    retry does not weaken integrity checking.
+    """
+    try:
+        return retrieve_fn(url, *args, **kwargs)
+    except OSError:
+        return retrieve_fn(url.replace("https://", "http://"), *args, **kwargs)
+
+
+@pytest.fixture(autouse=True)
+def pooch_retrieve_http_fallback(monkeypatch: pytest.MonkeyPatch):
+    """Retry GIN downloads over HTTP when HTTPS fails (test suite only).
+
+    Locally, verifying GIN's TLS certificate can fail with an ``OSError``.
+    On CI HTTPS succeeds, so the fallback branch never runs and behaviour
+    is unchanged. Production code (``brainglobe_workflows``) is untouched.
+    """
+    original_retrieve = pooch.retrieve
+    monkeypatch.setattr(
+        pooch,
+        "retrieve",
+        lambda url, *args, **kwargs: _retrieve_with_http_fallback(
+            original_retrieve, url, *args, **kwargs
+        ),
+    )
+
+
 @pytest.fixture(autouse=True)
 def mock_home_directory(monkeypatch: pytest.MonkeyPatch):
     """
@@ -135,22 +165,15 @@ def config_GIN_dict(
     # download GIN data to default location for GIN
     # if the file exists in the given path and the hash matches,
     # it will not be downloaded and the absolute path to the file is returned.
-    try:
-        pooch.retrieve(
-            url=cellfinder_GIN_data["url"],
-            known_hash=cellfinder_GIN_data["hash"],
-            path=GIN_default_location.parent,  # path to download zip to
-            progressbar=True,
-            processor=pooch.Unzip(extract_dir=GIN_default_location.stem),
-        )
-    except OSError:
-        pooch.retrieve(
-            url=cellfinder_GIN_data["url"].replace("https://", "http://"),
-            known_hash=cellfinder_GIN_data["hash"],
-            path=GIN_default_location.parent,  # path to download zip to
-            progressbar=True,
-            processor=pooch.Unzip(extract_dir=GIN_default_location.stem),
-        )
+    # HTTPS -> HTTP fallback is handled by the pooch_retrieve_http_fallback
+    # autouse fixture.
+    pooch.retrieve(
+        url=cellfinder_GIN_data["url"],
+        known_hash=cellfinder_GIN_data["hash"],
+        path=GIN_default_location.parent,  # path to download zip to
+        progressbar=True,
+        processor=pooch.Unzip(extract_dir=GIN_default_location.stem),
+    )
 
     return config_dict
 
