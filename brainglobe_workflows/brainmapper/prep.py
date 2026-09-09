@@ -126,6 +126,7 @@ def prep_brainmapper_general():
         verbose=args.debug,
         log_header="BRAINMAPPER LOG",
         multiprocessing_aware=True,
+        third_party_loggers=["botocore", "aiobotocore", "s3fs", "urllib3"],
     )
 
     log_metadata(args.paths.metadata_path, args)
