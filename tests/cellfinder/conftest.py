@@ -94,7 +94,7 @@ def cellfinder_GIN_data() -> dict:
         URL and hash of the GIN repository with the cellfinder test data
     """
     return {
-        "url": "https://gin.swc.ucl.ac.uk/BrainGlobe/test-data/raw/main/cellfinder/cellfinder-test-data.zip",
+        "url": "https://gin.swc.ucl.ac.uk/brainglobe/test-data/raw/main/cellfinder/cellfinder-test-data.zip",
         "hash": "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914",  # noqa
     }
 
