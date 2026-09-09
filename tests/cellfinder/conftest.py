@@ -64,7 +64,7 @@ def cellfinder_GIN_data() -> dict:
         URL and hash of the GIN repository with the cellfinder test data
     """
     return {
-        "url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
+        "url": "https://gin.swc.ucl.ac.uk/BrainGlobe/test-data/raw/main/cellfinder/cellfinder-test-data.zip",
         "hash": "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914",  # noqa
     }
 
@@ -135,13 +135,22 @@ def config_GIN_dict(
     # download GIN data to default location for GIN
     # if the file exists in the given path and the hash matches,
     # it will not be downloaded and the absolute path to the file is returned.
-    pooch.retrieve(
-        url=cellfinder_GIN_data["url"],
-        known_hash=cellfinder_GIN_data["hash"],
-        path=GIN_default_location.parent,  # path to download zip to
-        progressbar=True,
-        processor=pooch.Unzip(extract_dir=GIN_default_location.stem),
-    )
+    try:
+        pooch.retrieve(
+            url=cellfinder_GIN_data["url"],
+            known_hash=cellfinder_GIN_data["hash"],
+            path=GIN_default_location.parent,  # path to download zip to
+            progressbar=True,
+            processor=pooch.Unzip(extract_dir=GIN_default_location.stem),
+        )
+    except OSError:
+        pooch.retrieve(
+            url=cellfinder_GIN_data["url"].replace("https://", "http://"),
+            known_hash=cellfinder_GIN_data["hash"],
+            path=GIN_default_location.parent,  # path to download zip to
+            progressbar=True,
+            processor=pooch.Unzip(extract_dir=GIN_default_location.stem),
+        )
 
     return config_dict
 
