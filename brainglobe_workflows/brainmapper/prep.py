@@ -6,6 +6,7 @@ Functions to prepare files and directories needed for other functions
 
 import json
 import logging
+import multiprocessing
 import os
 from argparse import Namespace
 from pathlib import PurePath
@@ -125,7 +126,8 @@ def prep_brainmapper_general():
         variables=[args, args.paths],
         verbose=args.debug,
         log_header="BRAINMAPPER LOG",
-        multiprocessing_aware=True,
+        multiprocessing_aware=(multiprocessing.get_start_method() == "fork"),
+        third_party_loggers=["botocore", "aiobotocore", "s3fs", "urllib3"],
     )
 
     log_metadata(args.paths.metadata_path, args)

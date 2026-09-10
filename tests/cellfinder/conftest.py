@@ -7,6 +7,36 @@ import pooch
 import pytest
 
 
+def _retrieve_with_http_fallback(retrieve_fn, url, *args, **kwargs):
+    """Call ``retrieve_fn``; on ``OSError`` retry with https:// -> http://.
+
+    ``known_hash`` still verifies the downloaded payload, so the HTTP
+    retry does not weaken integrity checking.
+    """
+    try:
+        return retrieve_fn(url, *args, **kwargs)
+    except OSError:
+        return retrieve_fn(url.replace("https://", "http://"), *args, **kwargs)
+
+
+@pytest.fixture(autouse=True)
+def pooch_retrieve_http_fallback(monkeypatch: pytest.MonkeyPatch):
+    """Retry GIN downloads over HTTP when HTTPS fails (test suite only).
+
+    Locally, verifying GIN's TLS certificate can fail with an ``OSError``.
+    On CI HTTPS succeeds, so the fallback branch never runs and behaviour
+    is unchanged. Production code (``brainglobe_workflows``) is untouched.
+    """
+    original_retrieve = pooch.retrieve
+    monkeypatch.setattr(
+        pooch,
+        "retrieve",
+        lambda url, *args, **kwargs: _retrieve_with_http_fallback(
+            original_retrieve, url, *args, **kwargs
+        ),
+    )
+
+
 @pytest.fixture(autouse=True)
 def mock_home_directory(monkeypatch: pytest.MonkeyPatch):
     """
@@ -64,7 +94,7 @@ def cellfinder_GIN_data() -> dict:
         URL and hash of the GIN repository with the cellfinder test data
     """
     return {
-        "url": "https://gin.g-node.org/BrainGlobe/test-data/raw/master/cellfinder/cellfinder-test-data.zip",
+        "url": "https://gin.swc.ucl.ac.uk/brainglobe/test-data/raw/main/cellfinder/cellfinder-test-data.zip",
         "hash": "b0ef53b1530e4fa3128fcc0a752d0751909eab129d701f384fc0ea5f138c5914",  # noqa
     }
 
@@ -135,6 +165,8 @@ def config_GIN_dict(
     # download GIN data to default location for GIN
     # if the file exists in the given path and the hash matches,
     # it will not be downloaded and the absolute path to the file is returned.
+    # HTTPS -> HTTP fallback is handled by the pooch_retrieve_http_fallback
+    # autouse fixture.
     pooch.retrieve(
         url=cellfinder_GIN_data["url"],
         known_hash=cellfinder_GIN_data["hash"],
