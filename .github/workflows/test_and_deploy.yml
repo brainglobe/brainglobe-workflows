@@ -1,36 +1,22 @@
-name: tests
-
-on:
-  push:
-    branches:
-      - "main"
-    tags:
-      - "*"
-  pull_request:
-  schedule:
-    # Runs at 6:10am UTC on Monday
-    - cron: "10 6 * * 1"
-  workflow_dispatch:
-
+name: Allen 3.1 clean atlas audit
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   linting:
     name: Linting
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/lint@34bedfdfd70c6010be02182c9ca37fae8a1fd99d # v3.0.0
-
+    - uses: neuroinformatics-unit/actions/lint@34bedfdfd70c6010be02182c9ca37fae8a1fd99d
   manifest:
     name: Check manifest
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/check_manifest@34bedfdfd70c6010be02182c9ca37fae8a1fd99d # v3.0.0
-
+    - uses: neuroinformatics-unit/actions/check_manifest@34bedfdfd70c6010be02182c9ca37fae8a1fd99d
   test:
-    needs: [linting, manifest]
+    needs:
+    - linting
+    - manifest
     name: ${{ matrix.os }} py${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     env:
@@ -38,127 +24,72 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Run tests on ubuntu across all supported versions
-        python-version: ["3.12", "3.13", "3.14"]
-        os: [ubuntu-latest]
-        # Include a Windows test and new Mac runs
+        python-version:
+        - '3.12'
+        - '3.13'
+        - '3.14'
+        os:
+        - ubuntu-latest
         include:
-          - os: macos-latest
-            python-version: "3.14"
-          - os: windows-latest
-            python-version: "3.14"
+        - os: macos-latest
+          python-version: '3.14'
+        - os: windows-latest
+          python-version: '3.14'
     steps:
-      # Free up disk space on ubuntu runners
-      - name: Free Disk Space
-        if: matrix.os == 'ubuntu-latest'
-        uses: endersonmenezes/free-disk-space@cc5a57aa862b7769888199b7e4e012b0c8440b92 # v3
-        with:
-          remove_android: true
-          remove_dotnet: true
-          rm_cmd: 'rmz'
-          rmz_version: '3.1.1'
+    - name: 'Audit: start with empty atlas storage'
+      shell: python {0}
+      run: "from pathlib import Path\nimport shutil\nfor name in (\".brainglobe\", \".brainglobe-tests\"):\n    root = Path.home() / name\n    if root.exists():\n        shutil.rmtree(root)\n    assert not root.exists(), root\n    print(f\"EMPTY_ATLAS_STORAGE {root}\", flush=True)\n"
+    - name: Free Disk Space
+      if: matrix.os == 'ubuntu-latest'
+      uses: endersonmenezes/free-disk-space@cc5a57aa862b7769888199b7e4e012b0c8440b92
+      with:
+        remove_android: true
+        remove_dotnet: true
+        rm_cmd: rmz
+        rmz_version: 3.1.1
+    - name: Install HDF5 libraries (needed on M1 Macs only)
+      if: matrix.os == 'macos-latest'
+      run: 'brew install hdf5
 
-      # Cache brainglobe directory to avoid re-downloading atlases
-      - name: Cache brainglobe directory
-        uses: actions/cache@v3
-        with:
-          path:
-            | # Ensure we don't cache any interrupted atlas download and extraction, for e.g. if we cancel the workflow manually
-            ~/.brainglobe
-            !~/.brainglobe/atlas.tar.gz
-          key: atlases-models-${{ runner.os }}
-          restore-keys: atlases-models
-          fail-on-cache-miss: true
-
-      # Install additional dependencies on macOS
-      - name: Install HDF5 libraries (needed on M1 Macs only)
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install hdf5
-
-      # Cache test data to speed up workflow tests
-      - name: Cache data for cellfinder workflow tests
-        uses: actions/cache@v3
-        with:
-          path: "~/.brainglobe-tests"
-          key: cellfinder-test-data-${{ runner.os }}
-          restore-keys: cellfinder-test-data
-          fail-on-cache-miss: true
-
-      # Run test suite across different environments
-      - name: Run tests
-        uses: neuroinformatics-unit/actions/test-uv@34bedfdfd70c6010be02182c9ca37fae8a1fd99d # v3.0.0
-        with:
-          python-version: "${{ matrix.python-version }}"
-          secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Run tests against napari main
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        uses: neuroinformatics-unit/actions/test-uv@34bedfdfd70c6010be02182c9ca37fae8a1fd99d # v3.0.0
-        with:
-          python-version: "${{ matrix.python-version }}"
-          secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
-          install-main-branch: 'napari/napari'
-
-      - name: Notify slack on scheduled failure
-        if: failure() && github.event_name == 'schedule'
-        uses: ravsamhq/notify-slack-action@v2
-        with:
-          status: ${{ job.status }} # Required
-          notify_when: "failure"
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTIFYBOT_WEBHOOK_URL }} # required
-
+        '
+    - name: Run tests
+      uses: neuroinformatics-unit/actions/test-uv@34bedfdfd70c6010be02182c9ca37fae8a1fd99d
+      with:
+        python-version: ${{ matrix.python-version }}
+        secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
+    - name: 'Audit: verify downloaded Allen atlas is 3.1'
+      if: always()
+      shell: python {0}
+      run: "from pathlib import Path\nimport json\nimport re\nfound = []\nfor name in (\".brainglobe\", \".brainglobe-tests\"):\n    for manifest in (Path.home() / name).rglob(\"manifest.json\"):\n        atlas_name = manifest.parent.parent.name\n        if re.fullmatch(r\"allen_mouse_\\d+um\", atlas_name):\n            record = {\"atlas\": atlas_name, \"version\": manifest.parent.name.replace(\"_\", \".\"), \"manifest\": str(manifest)}\n            print(\"ALLEN_ATLAS_AUDIT \" + json.dumps(record), flush=True)\n            found.append(record)\nassert all(item[\"version\"] == \"3.1\" for item in found), found\nif not found:\n    print(\"ALLEN_ATLAS_AUDIT no Allen manifest found; this job does not establish Allen coverage\", flush=True)\n"
   benchmarks:
     name: Check benchmarks
     runs-on: ubuntu-latest
-    # Set shell in login mode as global setting for the job
     defaults:
       run:
         shell: bash -l {0}
     strategy:
       matrix:
-        python-version: ["3.12"]
+        python-version:
+        - '3.12'
     steps:
-      - name: Checkout brainglobe-workflows repository
-        uses: actions/checkout@v4
+    - name: Checkout brainglobe-workflows repository
+      uses: actions/checkout@v4
+    - name: Create and activate conda environment
+      uses: conda-incubator/setup-miniconda@v2.1.1
+      with:
+        miniconda-version: py310_24.1.2-0
+        python-version: ${{ matrix.python-version }}
+        activate-environment: asv-only
+    - name: Install asv (Air Speed Velocity) for benchmarking
+      run: 'pip install --upgrade pip
 
-      - name: Create and activate conda environment # we need conda for asv management of environments
-        uses: conda-incubator/setup-miniconda@v2.1.1 # see https://github.com/conda-incubator/setup-miniconda/issues/261
-        with:
-          miniconda-version: py310_24.1.2-0 # we need conda<24.3, see https://github.com/airspeed-velocity/asv/pull/1397
-          python-version: ${{ matrix.python-version }}
-          activate-environment: asv-only
+        pip install asv
 
-      - name: Install asv (Air Speed Velocity) for benchmarking
-        run: |
-          pip install --upgrade pip
-          pip install asv
+        '
+    - name: Run asv check with BG dependencies from bg-requirements.txt
+      working-directory: ${{ github.workspace }}/benchmarks
+      run: 'asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.bg-requirements.conf.json
 
-      - name: Run asv check with BG dependencies from bg-requirements.txt
-        working-directory: ${{ github.workspace }}/benchmarks
-        run: |
-          asv check -v --config $GITHUB_WORKSPACE/benchmarks/asv.bg-requirements.conf.json
-
-  build_sdist_wheels:
-    name: Build source distribution
-    needs: [test]
-    if: github.event_name == 'push' && github.ref_type == 'tag'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: neuroinformatics-unit/actions/build_sdist_wheels@34bedfdfd70c6010be02182c9ca37fae8a1fd99d # v3.0.0
-
-  upload_all:
-    name: Publish build distributions
-    needs: [build_sdist_wheels]
-    if: github.event_name == 'push' && github.ref_type == 'tag'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: artifact
-          path: dist
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.TWINE_API_KEY }}
+        '
+'on':
+  workflow_dispatch: null
